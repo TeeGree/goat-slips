@@ -1,6 +1,11 @@
 .suo
 
+**\.vs
+
+*.Development.json
+
 **\obj
+**\bin
 
 *.sqlproj.user
 DeploymentReport.txt
@@ -8,3 +13,5 @@ DeploymentReport.txt
 *.dll
 *.pdb
 *.publish.sql
+*.dbmdl
+*.jfm
