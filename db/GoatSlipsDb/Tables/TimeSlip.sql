@@ -15,4 +15,5 @@
     CONSTRAINT [FK_TimeSlip_Project] FOREIGN KEY ([ProjectId]) REFERENCES [Project]([Id]),
     CONSTRAINT [FK_TimeSlip_Task] FOREIGN KEY ([TaskId]) REFERENCES [Task]([Id]),
     CONSTRAINT [FK_TimeSlip_LaborCode] FOREIGN KEY ([LaborCodeId]) REFERENCES [LaborCode]([Id]),
+    CONSTRAINT [UC_TimeSlip] UNIQUE ([UserId], [ProjectId], [TaskId], [LaborCodeId], [Date])
 )
