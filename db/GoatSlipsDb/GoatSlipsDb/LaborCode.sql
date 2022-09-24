@@ -1,0 +1,5 @@
+﻿CREATE TABLE [dbo].[LaborCode]
+(
+	[Id] INT NOT NULL PRIMARY KEY, 
+    [Code] VARCHAR(100) NOT NULL
+)
