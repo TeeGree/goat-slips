@@ -3,3 +3,8 @@
 **\obj
 
 *.sqlproj.user
+DeploymentReport.txt
+*.dacpac
+*.dll
+*.pdb
+*.publish.sql
