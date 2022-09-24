@@ -56,16 +56,19 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="Tables" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Project.sql" />
-    <Build Include="Task.sql" />
-    <Build Include="LaborCode.sql" />
-    <Build Include="ProjectTask.sql" />
-    <Build Include="User.sql" />
-    <Build Include="TimeSlip.sql" />
+    <Build Include="Tables\LaborCode.sql" />
+    <Build Include="Tables\Project.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="GoatSlipsDb.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Tables\ProjectTask.sql" />
+    <Build Include="Tables\Task.sql" />
+    <Build Include="Tables\TimeSlip.sql" />
+    <Build Include="Tables\User.sql" />
   </ItemGroup>
 </Project>
