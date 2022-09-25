@@ -1,8 +1,9 @@
 using GoatSlipsApi.Helpers;
+using GoatSlipsApi.Services;
 
 namespace GoatSlipsTest
 {
-    public sealed class PasswordHasherTest
+    public sealed class SecretServiceTest
     {
         [Theory]
         [InlineData("")]
@@ -11,9 +12,10 @@ namespace GoatSlipsTest
         [InlineData("aBc123!.")]
         public void HashShouldNotMatchForSamePassword(string password)
         {
-            string hash = PasswordHasher.Hash(password);
+            var secretService = new SecretService();
+            string hash = secretService.Hash(password);
 
-            string newHash = PasswordHasher.Hash(password);
+            string newHash = secretService.Hash(password);
 
             Assert.NotEqual(hash, newHash);
         }
@@ -25,9 +27,10 @@ namespace GoatSlipsTest
         [InlineData("aBc123!.")]
         public void VerifyShouldBeTrueForSamePassword(string password)
         {
-            string hash = PasswordHasher.Hash(password);
+            var secretService = new SecretService();
+            string hash = secretService.Hash(password);
 
-            Assert.True(PasswordHasher.Verify(password, hash));
+            Assert.True(secretService.Verify(password, hash));
         }
 
         [Theory]
@@ -37,9 +40,10 @@ namespace GoatSlipsTest
         [InlineData("aBc123!.")]
         public void VerifyShouldBeFalseForDifferentPassword(string password)
         {
-            string hash = PasswordHasher.Hash(password);
+            var secretService = new SecretService();
+            string hash = secretService.Hash(password);
 
-            Assert.False(PasswordHasher.Verify($"{password} ", hash));
+            Assert.False(secretService.Verify($"{password} ", hash));
         }
     }
 }
