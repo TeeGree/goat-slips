@@ -13,7 +13,7 @@ namespace GoatSlipsApi.Services
         public string GenerateToken(User user);
         public int? ValidateToken(string token);
     }
-    public class JwtUtils : IJwtUtils
+    public sealed class JwtUtils : IJwtUtils
     {
         private readonly IAppSettings _appSettings;
 

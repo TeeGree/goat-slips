@@ -7,7 +7,7 @@ namespace GoatSlipsApi.Services
     {
         User? GetById(int id);
     }
-    public class UserService : IUserService
+    public sealed class UserService : IUserService
     {
         private readonly IGoatSlipsContext _goatSlipsContext;
         public UserService(IGoatSlipsContext goatSlipsContext)

@@ -1,6 +1,6 @@
 ﻿namespace GoatSlipsApi.Helpers
 {
-    public class JwtAuthenticationDefaults
+    public sealed class JwtAuthenticationDefaults
     {
         public const string AuthenticationScheme = "JWT";
         public const string HeaderName = "Authorization";

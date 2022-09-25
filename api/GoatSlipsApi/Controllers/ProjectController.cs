@@ -9,7 +9,7 @@ namespace GoatSlipsApi.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class ProjectController : ControllerBase
+    public sealed class ProjectController : ControllerBase
     {
 
         private readonly ILogger<ProjectController> _logger;

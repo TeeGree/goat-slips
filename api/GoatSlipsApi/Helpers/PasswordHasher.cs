@@ -2,7 +2,7 @@
 
 namespace GoatSlipsApi.Helpers
 {
-    public class PasswordHasher
+    public sealed class PasswordHasher
     {
         private const int _saltSize = 16; // 128 bits
         private const int _keySize = 32; // 256 bits

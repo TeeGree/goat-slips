@@ -1,6 +1,6 @@
 ﻿namespace GoatSlipsApi.Models.Database
 {
-    public class TimeSlip
+    public sealed class TimeSlip
     {
         public int Id { get; set; }
         public byte Hours { get; set; }

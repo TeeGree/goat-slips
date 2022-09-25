@@ -8,7 +8,7 @@ namespace GoatSlipsApi.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class TaskController : ControllerBase
+    public sealed class TaskController : ControllerBase
     {
 
         private readonly ILogger<TaskController> _logger;

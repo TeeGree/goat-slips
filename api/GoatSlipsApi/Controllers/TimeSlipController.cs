@@ -9,7 +9,7 @@ namespace GoatSlipsApi.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class TimeSlipController : ControllerBase
+    public sealed class TimeSlipController : ControllerBase
     {
 
         private readonly ILogger<TimeSlipController> _logger;

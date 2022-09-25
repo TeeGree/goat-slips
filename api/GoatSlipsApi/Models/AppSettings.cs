@@ -5,7 +5,7 @@
         string ConnectionString { get; }
         string Secret { get; }
     }
-    public class AppSettings : IAppSettings
+    public sealed class AppSettings : IAppSettings
     {
         public string ConnectionString { get; }
         public string Secret { get; }

@@ -2,7 +2,7 @@
 
 namespace GoatSlipsApi.Helpers
 {
-    public class JwtMiddleware
+    public sealed class JwtMiddleware
     {
         private readonly RequestDelegate _next;
 

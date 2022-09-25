@@ -14,7 +14,7 @@ namespace GoatSlipsApi.DAL
         DbSet<TimeSlip>? TimeSlips { get; set; }
         DbSet<User>? Users { get; set; }
     }
-    public class GoatSlipsContext : DbContext, IGoatSlipsContext
+    public sealed class GoatSlipsContext : DbContext, IGoatSlipsContext
     {
         public GoatSlipsContext(IAppSettings appSettings): base(appSettings.ConnectionString) { }
 

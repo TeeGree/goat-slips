@@ -2,7 +2,7 @@ using GoatSlipsApi.Helpers;
 
 namespace GoatSlipsTest
 {
-    public class PasswordHasherTest
+    public sealed class PasswordHasherTest
     {
         [Theory]
         [InlineData("")]

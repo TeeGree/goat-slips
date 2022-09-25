@@ -1,7 +1,7 @@
 ﻿namespace GoatSlipsApi.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class AllowAnonymousAttribute : Attribute
+    public sealed class AllowAnonymousAttribute : Attribute
     {
     }
 }
