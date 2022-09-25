@@ -1,3 +1,4 @@
+using GoatSlipsApi.Attributes;
 using GoatSlipsApi.DAL;
 using GoatSlipsApi.Models.Database;
 using Microsoft.AspNetCore.Mvc;
@@ -5,6 +6,7 @@ using System.Data.Entity;
 
 namespace GoatSlipsApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class ProjectController : ControllerBase

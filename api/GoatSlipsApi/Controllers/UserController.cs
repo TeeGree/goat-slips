@@ -1,10 +1,13 @@
-﻿using GoatSlipsApi.DAL;
+﻿using GoatSlipsApi.Attributes;
+using GoatSlipsApi.DAL;
 using GoatSlipsApi.Models.Database;
+using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.Entity;
 
 namespace GoatSlipsApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class UserController : ControllerBase
@@ -12,11 +15,19 @@ namespace GoatSlipsApi.Controllers
 
         private readonly ILogger<UserController> _logger;
         private readonly IGoatSlipsContext _goatSlipsContext;
+        private readonly IUserService _userService;
+        private readonly IJwtUtils _jwtUtils;
 
-        public UserController(ILogger<UserController> logger, IGoatSlipsContext goatSlipsContext)
+        public UserController(
+            ILogger<UserController> logger,
+            IGoatSlipsContext goatSlipsContext,
+            IUserService userService,
+            IJwtUtils jwtUtils)
         {
             _logger = logger;
             _goatSlipsContext = goatSlipsContext;
+            _userService = userService;
+            _jwtUtils = jwtUtils;
         }
 
         [HttpGet(Name = "GetUsers")]
@@ -30,6 +41,20 @@ namespace GoatSlipsApi.Controllers
                 throw new Exception(message);
             }
             return users;
+        }
+
+        // TODO: Remove once login is created
+        [AllowAnonymous]
+        [HttpGet("GenerateJwtToken/{userId}", Name = "GenerateJwtToken")]
+        public string GenerateJwtToken(int userId)
+        {
+            User? user = _userService.GetById(userId);
+            if (user == null)
+            {
+                throw new Exception("Invalid user ID!");
+            }
+
+            return _jwtUtils.GenerateToken(user);
         }
     }
 }
