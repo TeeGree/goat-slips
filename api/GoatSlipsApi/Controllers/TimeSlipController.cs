@@ -22,14 +22,14 @@ namespace GoatSlipsApi.Controllers
         }
 
         [HttpGet(Name = "GetTimeSlips")]
-        public IEnumerable<TimeSlip> Get()
+        public ActionResult<IEnumerable<TimeSlip>> Get()
         {
             DbSet<TimeSlip>? timeSlips = _goatSlipsContext.TimeSlips;
             if (timeSlips == null)
             {
                 var message = "No time slips found!";
                 _logger.LogError(message);
-                throw new Exception(message);
+                return Problem(message);
             }
             return timeSlips;
         }

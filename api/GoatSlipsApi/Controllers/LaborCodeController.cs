@@ -22,14 +22,14 @@ namespace GoatSlipsApi.Controllers
         }
 
         [HttpGet(Name = "GetLaborCodes")]
-        public IEnumerable<LaborCode> Get()
+        public ActionResult<IEnumerable<LaborCode>> Get()
         {
             DbSet<LaborCode>? laborCodes = _goatSlipsContext.LaborCodes;
             if (laborCodes == null)
             {
                 var message = "No labor codes found!";
                 _logger.LogError(message);
-                throw new Exception(message);
+                return Problem(message);
             }
             return laborCodes;
         }

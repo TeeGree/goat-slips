@@ -21,14 +21,14 @@ namespace GoatSlipsApi.Controllers
         }
 
         [HttpGet(Name = "GetTasks")]
-        public IEnumerable<Models.Database.Task> Get()
+        public ActionResult<IEnumerable<Models.Database.Task>> Get()
         {
             DbSet<Models.Database.Task>? tasks = _goatSlipsContext.Tasks;
             if (tasks == null)
             {
                 var message = "No tasks found!";
                 _logger.LogError(message);
-                throw new Exception(message);
+                return Problem(message);
             }
             return tasks;
         }

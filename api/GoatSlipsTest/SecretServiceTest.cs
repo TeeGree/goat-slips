@@ -1,4 +1,3 @@
-using GoatSlipsApi.Helpers;
 using GoatSlipsApi.Services;
 
 namespace GoatSlipsTest

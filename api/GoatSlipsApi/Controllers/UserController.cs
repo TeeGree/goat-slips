@@ -33,32 +33,32 @@ namespace GoatSlipsApi.Controllers
         }
 
         [HttpGet(Name = "GetUsers")]
-        public IEnumerable<User> Get()
+        public ActionResult<IEnumerable<User>> Get()
         {
             DbSet<User>? users = _goatSlipsContext.Users;
             if (users == null)
             {
                 var message = "No users found!";
                 _logger.LogError(message);
-                throw new Exception(message);
+                return Problem(message);
             }
             return users;
         }
 
         [AllowAnonymous]
         [HttpPost("Authenticate", Name = "Authenticate")]
-        public void Authenticate(string username, string password)
+        public IActionResult Authenticate(string username, string password)
         {
             User? user = _userService.GetByUsername(username);
             if (user?.Password == null)
             {
-                throw new Exception("Invalid username!");
+                return BadRequest("Invalid username!");
             }
 
             bool authenticated = _secretService.Verify(password, user.Password);
             if (!authenticated)
             {
-                throw new Exception("Incorrect password!");
+                return BadRequest("Incorrect password!");
             }
 
             string token = _jwtUtils.GenerateToken(user);
@@ -70,6 +70,8 @@ namespace GoatSlipsApi.Controllers
                     SameSite = SameSiteMode.Strict,
                     Secure = true
                 });
+
+            return Ok();
         }
     }
 }
