@@ -12,21 +12,23 @@ namespace GoatSlipsApi.Controllers
     [Route("[controller]")]
     public sealed class UserController : ControllerBase
     {
-
         private readonly ILogger<UserController> _logger;
         private readonly IGoatSlipsContext _goatSlipsContext;
         private readonly IUserService _userService;
+        private readonly ISecretService _secretService;
         private readonly IJwtUtils _jwtUtils;
 
         public UserController(
             ILogger<UserController> logger,
             IGoatSlipsContext goatSlipsContext,
             IUserService userService,
+            ISecretService secretService,
             IJwtUtils jwtUtils)
         {
             _logger = logger;
             _goatSlipsContext = goatSlipsContext;
             _userService = userService;
+            _secretService = secretService;
             _jwtUtils = jwtUtils;
         }
 
@@ -43,18 +45,31 @@ namespace GoatSlipsApi.Controllers
             return users;
         }
 
-        // TODO: Remove once login is created
         [AllowAnonymous]
-        [HttpGet("GenerateJwtToken/{userId}", Name = "GenerateJwtToken")]
-        public string GenerateJwtToken(int userId)
+        [HttpPost("Authenticate", Name = "Authenticate")]
+        public void Authenticate(string username, string password)
         {
-            User? user = _userService.GetById(userId);
-            if (user == null)
+            User? user = _userService.GetByUsername(username);
+            if (user?.Password == null)
             {
-                throw new Exception("Invalid user ID!");
+                throw new Exception("Invalid username!");
             }
 
-            return _jwtUtils.GenerateToken(user);
+            bool authenticated = _secretService.Verify(password, user.Password);
+            if (!authenticated)
+            {
+                throw new Exception("Incorrect password!");
+            }
+
+            string token = _jwtUtils.GenerateToken(user);
+            HttpContext.Response.Cookies.Append(
+                "Authorization",
+                token,
+                new CookieOptions {
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.Strict,
+                    Secure = true
+                });
         }
     }
 }

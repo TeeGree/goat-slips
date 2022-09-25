@@ -1,8 +1,13 @@
 ﻿using System.Security.Cryptography;
 
-namespace GoatSlipsApi.Helpers
+namespace GoatSlipsApi.Services
 {
-    public sealed class PasswordHasher
+    public interface ISecretService
+    {
+        string Hash(string password);
+        bool Verify(string password, string hash);
+    }
+    public class SecretService : ISecretService
     {
         private const int _saltSize = 16; // 128 bits
         private const int _keySize = 32; // 256 bits
@@ -11,11 +16,11 @@ namespace GoatSlipsApi.Helpers
 
         private const char segmentDelimiter = ':';
 
-        public static string Hash(string password)
+        public string Hash(string secret)
         {
             byte[] salt = RandomNumberGenerator.GetBytes(_saltSize);
             byte[] key = Rfc2898DeriveBytes.Pbkdf2(
-                password,
+                secret,
                 salt,
                 _iterations,
                 _algorithm,
@@ -30,7 +35,7 @@ namespace GoatSlipsApi.Helpers
             );
         }
 
-        public static bool Verify(string password, string hash)
+        public bool Verify(string secret, string hash)
         {
             string[] segments = hash.Split(segmentDelimiter);
             byte[] key = Convert.FromHexString(segments[0]);
@@ -38,7 +43,7 @@ namespace GoatSlipsApi.Helpers
             int iterations = int.Parse(segments[2]);
             var algorithm = new HashAlgorithmName(segments[3]);
             byte[] inputSecretKey = Rfc2898DeriveBytes.Pbkdf2(
-                password,
+                secret,
                 salt,
                 iterations,
                 algorithm,

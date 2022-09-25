@@ -6,6 +6,7 @@ namespace GoatSlipsApi.Services
     public interface IUserService
     {
         User? GetById(int id);
+        User? GetByUsername(string username);
     }
     public sealed class UserService : IUserService
     {
@@ -18,6 +19,11 @@ namespace GoatSlipsApi.Services
         public User? GetById(int id)
         {
             return _goatSlipsContext.Users?.FirstOrDefault(u => u.Id == id);
+        }
+
+        public User? GetByUsername(string username)
+        {
+            return _goatSlipsContext.Users?.FirstOrDefault(u => u.Username == username);
         }
     }
 }

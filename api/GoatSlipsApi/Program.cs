@@ -21,6 +21,7 @@ builder.Services.AddSingleton<IAppSettings>(new AppSettings(connectionString, co
 builder.Services.AddScoped<IGoatSlipsContext, GoatSlipsContext>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
+builder.Services.AddSingleton<ISecretService, SecretService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
