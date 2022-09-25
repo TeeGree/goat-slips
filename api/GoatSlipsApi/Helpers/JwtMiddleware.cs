@@ -13,8 +13,7 @@ namespace GoatSlipsApi.Helpers
 
         public async Task Invoke(HttpContext context, IUserService userService, IJwtUtils jwtUtils)
         {
-            var token = context.Request.Cookies["Authorization"]?.Split(" ").Last();
-            var userId = jwtUtils.ValidateToken(token ?? "");
+            int? userId = jwtUtils.ValidateTokenFromContext(context);
             if (userId != null)
             {
                 // attach user to context on successful jwt validation

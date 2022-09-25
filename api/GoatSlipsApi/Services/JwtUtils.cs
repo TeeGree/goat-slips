@@ -1,6 +1,5 @@
 ﻿using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,7 +10,8 @@ namespace GoatSlipsApi.Services
     public interface IJwtUtils
     {
         public string GenerateToken(User user);
-        public int? ValidateToken(string token);
+        public int? ValidateToken(string? token);
+        int? ValidateTokenFromContext(HttpContext context);
     }
     public sealed class JwtUtils : IJwtUtils
     {
@@ -38,9 +38,9 @@ namespace GoatSlipsApi.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public int? ValidateToken(string token)
+        public int? ValidateToken(string? token)
         {
-            if (token == null)
+            if (string.IsNullOrEmpty(token))
                 return null;
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -69,6 +69,12 @@ namespace GoatSlipsApi.Services
                 // return null if validation fails
                 return null;
             }
+        }
+
+        public int? ValidateTokenFromContext(HttpContext context)
+        {
+            var token = context.Request.Cookies["Authorization"]?.Split(" ").Last();
+            return ValidateToken(token);
         }
     }
 }

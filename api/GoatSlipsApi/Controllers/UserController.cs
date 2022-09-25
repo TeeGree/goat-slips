@@ -73,5 +73,14 @@ namespace GoatSlipsApi.Controllers
 
             return Ok();
         }
+
+        [AllowAnonymous]
+        [HttpGet("IsAuthenticated", Name = "IsAuthenticated")]
+        public ActionResult<bool> IsAuthenticated()
+        {
+            int? userId = _jwtUtils.ValidateTokenFromContext(HttpContext);
+
+            return Ok(userId != null);
+        }
     }
 }

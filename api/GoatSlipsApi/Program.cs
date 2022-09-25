@@ -56,6 +56,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddCors(p => {
+    p.AddPolicy("corsapp", builder =>
+    {
+        builder
+            .WithOrigins("http://localhost:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -70,6 +80,8 @@ app.UseMiddleware<JwtMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors("corsapp");
 
 app.MapControllers();
 
