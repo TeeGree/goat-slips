@@ -1,14 +1,10 @@
 import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
 
 export const Home: React.FC<{}> = () => {
   return (
     <div className="Home">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      Welcome to G.O.A.T. Slips!
+      So glad you made it. Welcome to the Greatest Of All Time Slips
+      Applications!
     </div>
   );
 };

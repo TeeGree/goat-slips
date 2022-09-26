@@ -1,0 +1,16 @@
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  .loginForm {
+    margin-top: 2em;
+    width: 223px;
+
+    .loginInput {
+      margin-top: 0.4em;
+      margin-bottom: 0.4em;
+    }
+  }
+}

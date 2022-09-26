@@ -1,5 +1,6 @@
 ﻿using GoatSlipsApi.Attributes;
 using GoatSlipsApi.DAL;
+using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -47,14 +48,16 @@ namespace GoatSlipsApi.Controllers
 
         [AllowAnonymous]
         [HttpPost("Authenticate", Name = "Authenticate")]
-        public IActionResult Authenticate(string username, string password)
+        public IActionResult Authenticate([FromBody] AuthenticateBody authenticateBody)
         {
+            string username = authenticateBody.Username ?? "";
             User? user = _userService.GetByUsername(username);
             if (user?.Password == null)
             {
                 return BadRequest("Invalid username!");
             }
 
+            string password = authenticateBody.Password ?? "";
             bool authenticated = _secretService.Verify(password, user.Password);
             if (!authenticated)
             {
