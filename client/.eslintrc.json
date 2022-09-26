@@ -1,0 +1,53 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true,
+        "node": true,
+        "jest": true
+    },
+    "extends": [
+        "airbnb",
+        "airbnb-typescript",
+        "plugin:import/typescript",
+        "plugin:prettier/recommended"
+    ],
+    "overrides": [],
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": "latest",
+        "project": "./tsconfig.json"
+    },
+    "plugins": ["react", "jsx-a11y", "prettier"],
+    "rules": {
+        "indent": "off",
+        "@typescript-eslint/indent": "off",
+        "quotes": ["error", "single", { "avoidEscape": true }],
+        "@typescript-eslint/quotes": ["error", "single", { "avoidEscape": true }],
+        "react/react-in-jsx-scope": ["off"],
+        "react/function-component-definition": ["off"],
+        "import/prefer-default-export": ["off"],
+        "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-use-before-define": ["off"],
+        "react/jsx-no-useless-fragment": ["off"],
+        "prettier/prettier": [
+            "error",
+            {
+                "endOfLine": "auto"
+            }
+        ],
+        "no-plusplus": "off",
+        "import/order": "off",
+        "prefer-destructuring": "off",
+        "react/jsx-props-no-spreading": "off"
+    },
+    "ignorePatterns": ["build/*"],
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    }
+}
