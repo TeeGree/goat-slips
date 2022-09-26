@@ -32,6 +32,7 @@ export const Login: React.FC<ILogin> = (props: ILogin) => {
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify({
                 username,
                 password,

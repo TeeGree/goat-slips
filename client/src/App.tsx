@@ -15,7 +15,7 @@ export const App: React.FC<{}> = () => {
             throw Error('No REACT_APP_API_ENDPOINT has been set!');
         }
         const url = path.join(apiEndpoint, 'User/IsAuthenticated');
-        const result = await fetch(url);
+        const result = await fetch(url, { credentials: 'include' });
 
         const authenticationResult = await result.json();
 

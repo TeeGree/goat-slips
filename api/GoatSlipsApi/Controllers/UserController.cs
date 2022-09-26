@@ -70,7 +70,7 @@ namespace GoatSlipsApi.Controllers
                 token,
                 new CookieOptions {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None, // TODO: This should be able to be Strict in prod.
                     Secure = true
                 });
 
