@@ -18,6 +18,14 @@ export const Login: React.FC<ILogin> = (props: ILogin) => {
         setUsername(event.target.value);
     };
 
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+
+            login();
+        }
+    };
+
     const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(event.target.value);
     };
@@ -54,6 +62,7 @@ export const Login: React.FC<ILogin> = (props: ILogin) => {
                         variant="outlined"
                         value={username}
                         onChange={handleUsernameChange}
+                        onKeyPress={handleKeyPress}
                     />
                 </div>
                 <div className={classes.loginInput}>
@@ -63,6 +72,7 @@ export const Login: React.FC<ILogin> = (props: ILogin) => {
                         type="password"
                         value={password}
                         onChange={handlePasswordChange}
+                        onKeyPress={handleKeyPress}
                     />
                 </div>
                 <Button className={classes.loginInput} variant="contained" onClick={login}>
