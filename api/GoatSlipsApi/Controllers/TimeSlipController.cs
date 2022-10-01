@@ -35,6 +35,27 @@ namespace GoatSlipsApi.Controllers
             return timeSlips;
         }
 
+        [HttpGet("TimeSlipsForCurrentUser", Name = "GetTimeSlipsForCurrentUser")]
+        public ActionResult<TimeSlip[]> GetTimeSlipsForCurrentUser()
+        {
+            User? user = HttpContext.Items["User"] as User;
+            if (user == null)
+            {
+                var message = "No user logged in!";
+                _logger.LogError(message);
+                return Problem(message);
+            }
+
+            DbSet<TimeSlip>? timeSlips = _goatSlipsContext.TimeSlips;
+            if (timeSlips == null)
+            {
+                var message = "No time slips found!";
+                _logger.LogError(message);
+                return Problem(message);
+            }
+            return timeSlips.Where(ts => ts.UserId == user.Id).ToArray();
+        }
+
         [HttpPost("AddTimeSlip", Name = "AddTimeSlip")]
         public IActionResult AddTimeSlip(AddTimeSlipBody timeSlip)
         {

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import classes from './DayColumn.module.scss';
 import { Day } from '../types/Day';
-import { Button } from '@mui/material';
+import { Button, Card, CardContent } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { EditableTimeSlip } from './EditableTimeSlip';
 import { DropdownOption } from '../types/DropdownOption';
+import { TimeSlip } from '../types/TimeSlip';
 
 interface DayColumnProps {
     date: Date;
@@ -21,6 +22,7 @@ interface DayColumnProps {
         minutes: number,
         date: Date,
     ) => Promise<Response>;
+    timeSlips: TimeSlip[];
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
@@ -34,6 +36,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         laborCodeOptions,
         getTaskOptionsForProject,
         saveTimeSlip,
+        timeSlips,
     } = props;
 
     const getDateString = () => {
@@ -74,6 +77,22 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         );
     };
 
+    const getExistingTimeSlipCards = (): JSX.Element[] => {
+        return timeSlips?.map((ts: TimeSlip) => {
+            return (
+                <Card key={ts.id} className={classes.timeSlipCard}>
+                    <CardContent>
+                        <div>Project: {ts.projectId}</div>
+                        <div>Task: {ts.taskId}</div>
+                        <div>Labor Code: {ts.laborCodeId}</div>
+                        <div>Hours: {ts.hours}</div>
+                        <div>Minutes: {ts.minutes}</div>
+                    </CardContent>
+                </Card>
+            );
+        });
+    };
+
     const className = isCurrentDay ? 'current-day ' : '';
     return (
         <div className={`${className} ${classes.dayColumn}`}>
@@ -82,7 +101,10 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                 <div>{getDateString()}</div>
                 <hr />
             </div>
-            <div className={classes.dayBody}>{getAddTimeSlipButtonElements()}</div>
+            <div className={classes.dayBody}>
+                {getAddTimeSlipButtonElements()}
+                {getExistingTimeSlipCards()}
+            </div>
         </div>
     );
 };

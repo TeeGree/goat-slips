@@ -4,6 +4,7 @@ import { DayColumn } from './DayColumn';
 import { Day } from '../types/Day';
 import { DropdownOption } from '../types/DropdownOption';
 import path from 'path-browserify';
+import { TimeSlip } from '../types/TimeSlip';
 
 const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
 
@@ -30,6 +31,10 @@ export const Home: React.FC<{}> = () => {
 
     const [tasksAllowedForProjects, setTasksAllowedForProjects] = useState<Map<number, number[]>>(
         new Map<number, number[]>([]),
+    );
+
+    const [timeSlipsPerDay, setTimeSlipsPerDay] = useState<Map<string, TimeSlip[]>>(
+        new Map<string, TimeSlip[]>([]),
     );
 
     const [laborCodes, setLaborCodes] = useState<DropdownOption[]>([]);
@@ -86,6 +91,30 @@ export const Home: React.FC<{}> = () => {
         setLaborCodes(laborCodesFromApi);
     };
 
+    const getTimeSlips = async () => {
+        if (apiEndpoint === undefined) {
+            throw Error('No REACT_APP_API_ENDPOINT has been set!');
+        }
+        const url = path.join(apiEndpoint, 'TimeSlip/TimeSlipsForCurrentUser');
+        const result = await fetch(url, { credentials: 'include' });
+
+        const timeSlipsFromApi: TimeSlip[] = await result.json();
+
+        const timeSlipMap = new Map<string, TimeSlip[]>([]);
+        timeSlipsFromApi.forEach((timeSlip: TimeSlip) => {
+            const dateOftimeSlip = new Date(timeSlip.date).toLocaleDateString('en');
+            if (timeSlipMap.has(dateOftimeSlip)) {
+                const timeSlips = timeSlipMap.get(dateOftimeSlip) ?? [];
+                timeSlips?.push(timeSlip);
+                timeSlipMap.set(dateOftimeSlip, timeSlips);
+            } else {
+                timeSlipMap.set(dateOftimeSlip, [timeSlip]);
+            }
+        });
+
+        setTimeSlipsPerDay(timeSlipMap);
+    };
+
     const saveTimeSlip = async (
         projectId: number,
         taskId: number | null,
@@ -122,6 +151,7 @@ export const Home: React.FC<{}> = () => {
         getTasks();
         getTasksAllowedForProjects();
         getLaborCodes();
+        getTimeSlips();
     }, []);
 
     const getTaskOptionsForProject = (projectId: number): DropdownOption[] => {
@@ -152,8 +182,11 @@ export const Home: React.FC<{}> = () => {
         const dayDate = new Date();
         dayDate.setDate(dayDate.getDate() + (day - currentDay));
 
+        const timeSlips = timeSlipsPerDay.get(dayDate.toLocaleDateString('en')) ?? [];
+
         return (
             <DayColumn
+                timeSlips={timeSlips}
                 projectOptions={projects}
                 laborCodeOptions={laborCodes}
                 getTaskOptionsForProject={getTaskOptionsForProject}
