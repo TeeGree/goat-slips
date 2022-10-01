@@ -13,6 +13,7 @@ namespace GoatSlipsApi.DAL
         DbSet<Models.Database.Task>? Tasks { get; set; }
         DbSet<TimeSlip>? TimeSlips { get; set; }
         DbSet<User>? Users { get; set; }
+        int SaveChanges();
     }
     public sealed class GoatSlipsContext : DbContext, IGoatSlipsContext
     {
