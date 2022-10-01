@@ -143,6 +143,10 @@ export const Home: React.FC<{}> = () => {
             }),
         });
 
+        if (response.ok) {
+            getTimeSlips();
+        }
+
         return response;
     };
 
