@@ -25,7 +25,7 @@ interface EditableTimeSlipProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-    ) => void;
+    ) => Promise<void>;
 }
 
 export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: EditableTimeSlipProps) => {
