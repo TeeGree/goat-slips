@@ -3,12 +3,10 @@ import classes from './WeekView.module.scss';
 import { DayColumn } from './DayColumn';
 import { Day } from '../types/Day';
 import { DropdownOption } from '../types/DropdownOption';
-import path from 'path-browserify';
 import { TimeSlip } from '../types/TimeSlip';
 import { Button } from '@mui/material';
 import { ArrowLeft, ArrowRight } from '@mui/icons-material';
-
-const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
+import { fetchGet, fetchPostResponse } from '../helpers/fetchFunctions';
 
 interface TaskMap {
     projectId: number;
@@ -54,13 +52,7 @@ export const WeekView: React.FC<{}> = () => {
     );
 
     const getProjects = async () => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-        const url = path.join(apiEndpoint, 'Project');
-        const result = await fetch(url, { credentials: 'include' });
-
-        const projectsFromApi: DropdownOption[] = await result.json();
+        const projectsFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('Project');
 
         const map = new Map<number, string>([]);
         projectsFromApi.forEach((project: DropdownOption) => map.set(project.id, project.name));
@@ -69,13 +61,7 @@ export const WeekView: React.FC<{}> = () => {
     };
 
     const getTasks = async () => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-        const url = path.join(apiEndpoint, 'Task');
-        const result = await fetch(url, { credentials: 'include' });
-
-        const tasksFromApi: DropdownOption[] = await result.json();
+        const tasksFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('Task');
 
         const taskMap = new Map<number, string>([]);
         tasksFromApi.forEach((task) => taskMap.set(task.id, task.name));
@@ -83,13 +69,7 @@ export const WeekView: React.FC<{}> = () => {
     };
 
     const getTasksAllowedForProjects = async () => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-        const url = path.join(apiEndpoint, 'Task/ProjectsAllowedTasks');
-        const result = await fetch(url, { credentials: 'include' });
-
-        const taskMapsFromApi: TaskMap[] = await result.json();
+        const taskMapsFromApi: TaskMap[] = await fetchGet<TaskMap[]>('Task/ProjectsAllowedTasks');
 
         const taskProjectMap = new Map<number, number[]>([]);
         taskMapsFromApi.forEach((taskMap) =>
@@ -99,13 +79,7 @@ export const WeekView: React.FC<{}> = () => {
     };
 
     const getLaborCodes = async () => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-        const url = path.join(apiEndpoint, 'LaborCode');
-        const result = await fetch(url, { credentials: 'include' });
-
-        const laborCodesFromApi: DropdownOption[] = await result.json();
+        const laborCodesFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('LaborCode');
 
         const map = new Map<number, string>([]);
         laborCodesFromApi.forEach((laborCode: DropdownOption) =>
@@ -116,13 +90,9 @@ export const WeekView: React.FC<{}> = () => {
     };
 
     const getTimeSlips = async () => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-        const url = path.join(apiEndpoint, 'TimeSlip/TimeSlipsForCurrentUser');
-        const result = await fetch(url, { credentials: 'include' });
-
-        const timeSlipsFromApi: TimeSlip[] = await result.json();
+        const timeSlipsFromApi: TimeSlip[] = await fetchGet<TimeSlip[]>(
+            'TimeSlip/TimeSlipsForCurrentUser',
+        );
 
         const timeSlipMap = new Map<string, TimeSlip[]>([]);
         timeSlipsFromApi.forEach((timeSlip: TimeSlip) => {
@@ -147,25 +117,13 @@ export const WeekView: React.FC<{}> = () => {
         minutes: number,
         date: Date,
     ): Promise<Response> => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-
-        const url = path.join(apiEndpoint, 'TimeSlip/AddTimeSlip');
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                projectId,
-                taskId,
-                laborCodeId,
-                hours,
-                minutes,
-                date: new Date(date.getTime() - date.getTimezoneOffset() * 60000),
-            }),
+        const response = await fetchPostResponse('TimeSlip/AddTimeSlip', {
+            projectId,
+            taskId,
+            laborCodeId,
+            hours,
+            minutes,
+            date: new Date(date.getTime() - date.getTimezoneOffset() * 60000),
         });
 
         if (response.ok) {
@@ -183,24 +141,13 @@ export const WeekView: React.FC<{}> = () => {
         hours: number,
         minutes: number,
     ): Promise<Response> => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-        const url = path.join(apiEndpoint, 'TimeSlip/UpdateTimeSlip');
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                timeSlipId,
-                projectId,
-                taskId,
-                laborCodeId,
-                hours,
-                minutes,
-            }),
+        const response = await fetchPostResponse('TimeSlip/UpdateTimeSlip', {
+            timeSlipId,
+            projectId,
+            taskId,
+            laborCodeId,
+            hours,
+            minutes,
         });
 
         if (response.ok) {
@@ -211,17 +158,7 @@ export const WeekView: React.FC<{}> = () => {
     };
 
     const deleteTimeSlip = async (timeSlipId: number): Promise<void> => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-        const url = path.join(apiEndpoint, `TimeSlip/DeleteTimeSlip/${timeSlipId}`);
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-        });
+        const response = await fetchPostResponse(`TimeSlip/DeleteTimeSlip/${timeSlipId}`);
 
         if (response.ok) {
             getTimeSlips();
