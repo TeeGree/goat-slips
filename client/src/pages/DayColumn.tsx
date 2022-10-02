@@ -23,6 +23,9 @@ interface DayColumnProps {
         date: Date,
     ) => Promise<Response>;
     timeSlips: TimeSlip[];
+    getProjectName: (projectId: number) => string;
+    getTaskName: (taskId: number) => string;
+    getLaborCodeName: (laborCodeId: number) => string;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
@@ -37,6 +40,9 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         getTaskOptionsForProject,
         saveTimeSlip,
         timeSlips,
+        getProjectName,
+        getTaskName,
+        getLaborCodeName,
     } = props;
 
     const getDateString = () => {
@@ -79,12 +85,14 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
 
     const getExistingTimeSlipCards = (): JSX.Element[] => {
         return timeSlips?.map((ts: TimeSlip) => {
+            const task = ts.taskId === null ? 'N/A' : getTaskName(ts.taskId);
+            const laborCode = ts.laborCodeId === null ? 'N/A' : getLaborCodeName(ts.laborCodeId);
             return (
                 <Card key={ts.id} className={classes.timeSlipCard}>
                     <CardContent>
-                        <div>Project: {ts.projectId}</div>
-                        <div>Task: {ts.taskId}</div>
-                        <div>Labor Code: {ts.laborCodeId}</div>
+                        <div>Project: {getProjectName(ts.projectId)}</div>
+                        <div>Task: {task}</div>
+                        <div>Labor Code: {laborCode}</div>
                         <div>Hours: {ts.hours}</div>
                         <div>Minutes: {ts.minutes}</div>
                     </CardContent>

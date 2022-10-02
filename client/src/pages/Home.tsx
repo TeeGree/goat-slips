@@ -27,6 +27,7 @@ export const Home: React.FC<{}> = () => {
     const currentDate = new Date();
 
     const [projects, setProjects] = useState<DropdownOption[]>([]);
+    const [projectMap, setProjectMap] = useState<Map<number, string>>(new Map<number, string>([]));
     const [tasks, setTasks] = useState<Map<number, string>>(new Map<number, string>([]));
 
     const [tasksAllowedForProjects, setTasksAllowedForProjects] = useState<Map<number, number[]>>(
@@ -38,6 +39,9 @@ export const Home: React.FC<{}> = () => {
     );
 
     const [laborCodes, setLaborCodes] = useState<DropdownOption[]>([]);
+    const [laborCodeMap, setLaborCodeMap] = useState<Map<number, string>>(
+        new Map<number, string>([]),
+    );
 
     const getProjects = async () => {
         if (apiEndpoint === undefined) {
@@ -47,6 +51,10 @@ export const Home: React.FC<{}> = () => {
         const result = await fetch(url, { credentials: 'include' });
 
         const projectsFromApi: DropdownOption[] = await result.json();
+
+        const map = new Map<number, string>([]);
+        projectsFromApi.forEach((project: DropdownOption) => map.set(project.id, project.name));
+        setProjectMap(map);
         setProjects(projectsFromApi);
     };
 
@@ -88,6 +96,12 @@ export const Home: React.FC<{}> = () => {
         const result = await fetch(url, { credentials: 'include' });
 
         const laborCodesFromApi: DropdownOption[] = await result.json();
+
+        const map = new Map<number, string>([]);
+        laborCodesFromApi.forEach((laborCode: DropdownOption) =>
+            map.set(laborCode.id, laborCode.name),
+        );
+        setLaborCodeMap(map);
         setLaborCodes(laborCodesFromApi);
     };
 
@@ -174,6 +188,18 @@ export const Home: React.FC<{}> = () => {
         });
     };
 
+    const getProjectName = (projectId: number) => {
+        return projectMap.get(projectId) ?? '';
+    };
+
+    const getTaskName = (taskId: number) => {
+        return tasks.get(taskId) ?? '';
+    };
+
+    const getLaborCodeName = (laborCodeId: number) => {
+        return laborCodeMap.get(laborCodeId) ?? '';
+    };
+
     const getDayColumn = (day: 0 | 1 | 2 | 3 | 4 | 5 | 6) => {
         const currentDay = currentDate.getDay();
         const isCurrentDay = day === currentDay;
@@ -190,6 +216,9 @@ export const Home: React.FC<{}> = () => {
 
         return (
             <DayColumn
+                getProjectName={getProjectName}
+                getTaskName={getTaskName}
+                getLaborCodeName={getLaborCodeName}
                 timeSlips={timeSlips}
                 projectOptions={projects}
                 laborCodeOptions={laborCodes}
