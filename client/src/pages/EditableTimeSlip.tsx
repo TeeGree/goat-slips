@@ -26,6 +26,11 @@ interface EditableTimeSlipProps {
         hours: number,
         minutes: number,
     ) => Promise<void>;
+    projectId?: number;
+    taskId?: number;
+    laborCodeId?: number;
+    hours?: number;
+    minutes?: number;
 }
 
 export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: EditableTimeSlipProps) => {
@@ -35,13 +40,18 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         projectOptions,
         saveTimeSlip,
         stopAddingTimeslip,
+        projectId,
+        taskId,
+        laborCodeId,
+        hours,
+        minutes,
     } = props;
 
-    const [projectId, setProjectId] = useState<number | ''>('');
-    const [taskId, setTaskId] = useState<number | ''>('');
-    const [laborCodeId, setLaborCodeId] = useState<number | ''>('');
-    const [hours, setHours] = useState<number>(0);
-    const [minutes, setMinutes] = useState<number>(0);
+    const [selectedProjectId, setSelectedProjectId] = useState<number | ''>(projectId ?? '');
+    const [selectedTaskId, setSelectedTaskId] = useState<number | ''>(taskId ?? '');
+    const [selectedLaborCodeId, setSelectedLaborCodeId] = useState<number | ''>(laborCodeId ?? '');
+    const [selectedHours, setSelectedHours] = useState<number>(hours ?? 0);
+    const [selectedMinutes, setSelectedMinutes] = useState<number>(minutes ?? 0);
 
     const getProjectOptions = (): JSX.Element[] => {
         return projectOptions.map((project: DropdownOption) => {
@@ -55,10 +65,10 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     };
 
     const getTaskOptions = (): JSX.Element[] => {
-        if (projectId === '') {
+        if (selectedProjectId === '') {
             return [];
         }
-        const tasks = getTaskOptionsForProject(projectId);
+        const tasks = getTaskOptionsForProject(selectedProjectId);
         return tasks.map((task: DropdownOption) => {
             const { id, name } = task;
             return (
@@ -81,37 +91,43 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     };
 
     const handleProjectChange = (event: SelectChangeEvent<number>) => {
-        setProjectId(Number(event.target.value));
+        setSelectedProjectId(Number(event.target.value));
     };
 
     const handleTaskChange = (event: SelectChangeEvent<number>) => {
-        setTaskId(Number(event.target.value));
+        setSelectedTaskId(Number(event.target.value));
     };
 
     const handleLaborCodeChange = (event: SelectChangeEvent<number>) => {
-        setLaborCodeId(Number(event.target.value));
+        setSelectedLaborCodeId(Number(event.target.value));
     };
 
     const handleHoursChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setHours(Number(event.target.value));
+        setSelectedHours(Number(event.target.value));
     };
 
     const handleMinutesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setMinutes(Number(event.target.value));
+        setSelectedMinutes(Number(event.target.value));
     };
 
     const submitTimeSlip = () => {
-        if (!isSaveAllowed(projectId)) {
+        if (!isSaveAllowed(selectedProjectId)) {
             return;
         }
 
-        const taskIdForSubmit = taskId === '' ? null : taskId;
-        const laborCodeIdForSubmit = laborCodeId === '' ? null : laborCodeId;
-        saveTimeSlip(projectId, taskIdForSubmit, laborCodeIdForSubmit, hours, minutes);
+        const taskIdForSubmit = selectedTaskId === '' ? null : selectedTaskId;
+        const laborCodeIdForSubmit = selectedLaborCodeId === '' ? null : selectedLaborCodeId;
+        saveTimeSlip(
+            selectedProjectId,
+            taskIdForSubmit,
+            laborCodeIdForSubmit,
+            selectedHours,
+            selectedMinutes,
+        );
     };
 
     const isSaveAllowed = (p: number | ''): p is number => {
-        return p !== '' && (hours > 0 || minutes > 0);
+        return p !== '' && (selectedHours > 0 || selectedMinutes > 0);
     };
 
     return (
@@ -119,14 +135,14 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
             <CardContent>
                 <FormControl fullWidth>
                     <InputLabel>Project</InputLabel>
-                    <Select value={projectId} onChange={handleProjectChange}>
+                    <Select value={selectedProjectId} onChange={handleProjectChange}>
                         {getProjectOptions()}
                     </Select>
                 </FormControl>
 
                 <FormControl fullWidth className={classes.cardInput}>
                     <InputLabel>Task</InputLabel>
-                    <Select value={taskId} onChange={handleTaskChange}>
+                    <Select value={selectedTaskId} onChange={handleTaskChange}>
                         {getTaskOptions()}
                     </Select>
                 </FormControl>
@@ -134,8 +150,8 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                 <FormControl fullWidth className={classes.cardInput}>
                     <InputLabel>Labor Code</InputLabel>
                     <Select
-                        disabled={projectId === undefined}
-                        value={laborCodeId}
+                        disabled={selectedProjectId === undefined}
+                        value={selectedLaborCodeId}
                         onChange={handleLaborCodeChange}
                     >
                         {getLaborCodeOptions()}
@@ -148,7 +164,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                         label="Hours"
                         variant="outlined"
                         type="number"
-                        value={hours}
+                        value={selectedHours}
                         onChange={handleHoursChange}
                     />
                     <TextField
@@ -156,14 +172,14 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                         label="Minutes"
                         variant="outlined"
                         type="number"
-                        value={minutes}
+                        value={selectedMinutes}
                         onChange={handleMinutesChange}
                     />
                 </div>
             </CardContent>
             <CardActions className={classes.cardActions}>
                 <Button
-                    disabled={!isSaveAllowed(projectId)}
+                    disabled={!isSaveAllowed(selectedProjectId)}
                     variant="contained"
                     onClick={submitTimeSlip}
                 >

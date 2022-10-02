@@ -81,5 +81,25 @@ namespace GoatSlipsApi.Controllers
             _goatSlipsContext.SaveChanges();
             return Ok();
         }
+
+        [HttpPost("UpdateTimeSlip", Name = "UpdateTimeSlip")]
+        public IActionResult UpdateTimeSlip(UpdateTimeSlipBody timeSlip)
+        {
+            TimeSlip? timeSlipFromDb = _goatSlipsContext.TimeSlips?.First(ts => ts.Id == timeSlip.TimeSlipId);
+            if (timeSlipFromDb == null)
+            {
+                var message = "Time slip not found!";
+                _logger.LogError(message);
+                return Problem(message);
+            }
+
+            timeSlipFromDb.Hours = timeSlip.Hours;
+            timeSlipFromDb.Minutes = timeSlip.Minutes;
+            timeSlipFromDb.ProjectId = timeSlip.ProjectId;
+            timeSlipFromDb.TaskId = timeSlip.TaskId;
+            timeSlipFromDb.LaborCodeId = timeSlip.LaborCodeId;
+            _goatSlipsContext.SaveChanges();
+            return Ok();
+        }
     }
 }

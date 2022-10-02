@@ -129,7 +129,7 @@ export const Home: React.FC<{}> = () => {
         setTimeSlipsPerDay(timeSlipMap);
     };
 
-    const saveTimeSlip = async (
+    const saveNewTimeSlip = async (
         projectId: number,
         taskId: number | null,
         laborCodeId: number | null,
@@ -154,6 +154,41 @@ export const Home: React.FC<{}> = () => {
                 hours,
                 minutes,
                 date,
+            }),
+        });
+
+        if (response.ok) {
+            getTimeSlips();
+        }
+
+        return response;
+    };
+
+    const updateTimeSlip = async (
+        timeSlipId: number,
+        projectId: number,
+        taskId: number | null,
+        laborCodeId: number | null,
+        hours: number,
+        minutes: number,
+    ): Promise<Response> => {
+        if (apiEndpoint === undefined) {
+            throw Error('No REACT_APP_API_ENDPOINT has been set!');
+        }
+        const url = path.join(apiEndpoint, 'TimeSlip/UpdateTimeSlip');
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                timeSlipId,
+                projectId,
+                taskId,
+                laborCodeId,
+                hours,
+                minutes,
             }),
         });
 
@@ -223,7 +258,8 @@ export const Home: React.FC<{}> = () => {
                 projectOptions={projects}
                 laborCodeOptions={laborCodes}
                 getTaskOptionsForProject={getTaskOptionsForProject}
-                saveTimeSlip={saveTimeSlip}
+                saveTimeSlip={saveNewTimeSlip}
+                updateTimeSlip={updateTimeSlip}
                 day={dayString}
                 isCurrentDay={isCurrentDay}
                 date={dayDate}

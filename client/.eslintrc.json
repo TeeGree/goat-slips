@@ -42,7 +42,8 @@
         "no-plusplus": "off",
         "import/order": "off",
         "prefer-destructuring": "off",
-        "react/jsx-props-no-spreading": "off"
+        "react/jsx-props-no-spreading": "off",
+        "react/require-default-props": "off"
     },
     "ignorePatterns": ["build/*"],
     "settings": {

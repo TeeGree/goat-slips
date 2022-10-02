@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import classes from './DayColumn.module.scss';
 import { Day } from '../types/Day';
-import { Button, Card, CardContent } from '@mui/material';
+import { Button } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { EditableTimeSlip } from './EditableTimeSlip';
 import { DropdownOption } from '../types/DropdownOption';
 import { TimeSlip } from '../types/TimeSlip';
+import { ExistingTimeSlip } from './ExistingTimeSlip';
 
 interface DayColumnProps {
     date: Date;
@@ -21,6 +22,14 @@ interface DayColumnProps {
         hours: number,
         minutes: number,
         date: Date,
+    ) => Promise<Response>;
+    updateTimeSlip: (
+        timeSlipId: number,
+        projectId: number,
+        taskId: number | null,
+        laborCodeId: number | null,
+        hours: number,
+        minutes: number,
     ) => Promise<Response>;
     timeSlips: TimeSlip[];
     getProjectName: (projectId: number) => string;
@@ -39,6 +48,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         laborCodeOptions,
         getTaskOptionsForProject,
         saveTimeSlip,
+        updateTimeSlip,
         timeSlips,
         getProjectName,
         getTaskName,
@@ -85,18 +95,18 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
 
     const getExistingTimeSlipCards = (): JSX.Element[] => {
         return timeSlips?.map((ts: TimeSlip) => {
-            const task = ts.taskId === null ? 'N/A' : getTaskName(ts.taskId);
-            const laborCode = ts.laborCodeId === null ? 'N/A' : getLaborCodeName(ts.laborCodeId);
             return (
-                <Card key={ts.id} className={classes.timeSlipCard}>
-                    <CardContent>
-                        <div>Project: {getProjectName(ts.projectId)}</div>
-                        <div>Task: {task}</div>
-                        <div>Labor Code: {laborCode}</div>
-                        <div>Hours: {ts.hours}</div>
-                        <div>Minutes: {ts.minutes}</div>
-                    </CardContent>
-                </Card>
+                <ExistingTimeSlip
+                    key={ts.id}
+                    timeSlip={ts}
+                    getProjectName={getProjectName}
+                    getTaskName={getTaskName}
+                    getLaborCodeName={getLaborCodeName}
+                    projectOptions={projectOptions}
+                    laborCodeOptions={laborCodeOptions}
+                    getTaskOptionsForProject={getTaskOptionsForProject}
+                    saveTimeSlip={updateTimeSlip}
+                />
             );
         });
     };
