@@ -140,6 +140,7 @@ export const Home: React.FC<{}> = () => {
         if (apiEndpoint === undefined) {
             throw Error('No REACT_APP_API_ENDPOINT has been set!');
         }
+
         const url = path.join(apiEndpoint, 'TimeSlip/AddTimeSlip');
         const response = await fetch(url, {
             method: 'POST',
@@ -153,7 +154,7 @@ export const Home: React.FC<{}> = () => {
                 laborCodeId,
                 hours,
                 minutes,
-                date,
+                date: new Date(date.getTime() - date.getTimezoneOffset() * 60000),
             }),
         });
 

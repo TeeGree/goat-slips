@@ -11,4 +11,6 @@
     flex-grow: 1;
     margin-top: 0.2em;
     margin-bottom: 0.2em;
+    overflow-y: clip;
+    max-height: 100%;
 }

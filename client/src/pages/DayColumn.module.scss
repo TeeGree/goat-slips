@@ -11,9 +11,12 @@
     background-color: #3b7195;
     border-top-left-radius: 0.2em;
     border-top-right-radius: 0.2em;
+    height: 116px;
 }
 
 .dayBody {
     text-align: left;
     padding: 0.4em;
+    height: calc(100% - 150px);
+    overflow-y: auto;
 }
