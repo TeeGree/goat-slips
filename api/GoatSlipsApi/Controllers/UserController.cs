@@ -1,10 +1,9 @@
 ﻿using GoatSlipsApi.Attributes;
-using GoatSlipsApi.DAL;
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.Entity;
+using System.Security.Authentication;
 
 namespace GoatSlipsApi.Controllers
 {
@@ -14,76 +13,68 @@ namespace GoatSlipsApi.Controllers
     public sealed class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly IGoatSlipsContext _goatSlipsContext;
-        private readonly IUserService _userService;
-        private readonly ISecretService _secretService;
         private readonly IJwtUtils _jwtUtils;
+        private readonly IUserService _userService;
 
         public UserController(
             ILogger<UserController> logger,
-            IGoatSlipsContext goatSlipsContext,
-            IUserService userService,
-            ISecretService secretService,
-            IJwtUtils jwtUtils)
+            IJwtUtils jwtUtils,
+            IUserService userService)
         {
             _logger = logger;
-            _goatSlipsContext = goatSlipsContext;
-            _userService = userService;
-            _secretService = secretService;
             _jwtUtils = jwtUtils;
+            _userService = userService;
         }
 
         [HttpGet(Name = "GetUsers")]
         public ActionResult<IEnumerable<User>> Get()
         {
-            DbSet<User>? users = _goatSlipsContext.Users;
-            if (users == null)
+            try
             {
-                var message = "No users found!";
-                _logger.LogError(message);
-                return Problem(message);
+                IEnumerable<User> users = _userService.GetAllUsers();
+                return Ok(users);
             }
-            return users;
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
         }
 
         [AllowAnonymous]
         [HttpPost("Authenticate", Name = "Authenticate")]
         public IActionResult Authenticate([FromBody] AuthenticateBody authenticateBody)
         {
-            string username = authenticateBody.Username ?? "";
-            User? user = _userService.GetByUsername(username);
-            if (user?.Password == null)
+            try
             {
-                return BadRequest("Invalid username!");
+                _userService.Authenticate(authenticateBody, HttpContext);
+                return Ok();
             }
-
-            string password = authenticateBody.Password ?? "";
-            bool authenticated = _secretService.Verify(password, user.Password);
-            if (!authenticated)
+            catch (InvalidCredentialException e)
             {
-                return BadRequest("Incorrect password!");
+                return BadRequest(e.Message);
             }
-
-            string token = _jwtUtils.GenerateToken(user);
-            HttpContext.Response.Cookies.Append(
-                "Authorization",
-                token,
-                new CookieOptions {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.None, // TODO: This should be able to be Strict in prod.
-                    Secure = true
-                });
-
-            return Ok();
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
         }
 
         [AllowAnonymous]
         [HttpGet("IsAuthenticated", Name = "IsAuthenticated")]
         public ActionResult<bool> IsAuthenticated()
         {
-            int? userId = _jwtUtils.ValidateTokenFromContext(HttpContext);
-
-            return Ok(userId != null);
+            try
+            {
+                bool isAuthenticated = _userService.IsAuthenticated(HttpContext);
+                return Ok(isAuthenticated);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
         }
     }
 }

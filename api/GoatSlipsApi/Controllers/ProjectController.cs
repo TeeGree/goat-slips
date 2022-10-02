@@ -1,8 +1,8 @@
 using GoatSlipsApi.Attributes;
 using GoatSlipsApi.DAL;
 using GoatSlipsApi.Models.Database;
+using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.Entity;
 
 namespace GoatSlipsApi.Controllers
 {
@@ -14,51 +14,46 @@ namespace GoatSlipsApi.Controllers
 
         private readonly ILogger<ProjectController> _logger;
         private readonly IGoatSlipsContext _goatSlipsContext;
+        private readonly IProjectService _projectService;
 
-        public ProjectController(ILogger<ProjectController> logger, IGoatSlipsContext goatSlipsContext)
+        public ProjectController(
+            ILogger<ProjectController> logger,
+            IGoatSlipsContext goatSlipsContext,
+            IProjectService projectService
+        )
         {
             _logger = logger;
             _goatSlipsContext = goatSlipsContext;
+            _projectService = projectService;
         }
 
         [HttpGet(Name = "GetProjects")]
         public ActionResult<IEnumerable<Project>> Get()
         {
-            DbSet<Project>? projects = _goatSlipsContext.Projects;
-            if (projects == null)
+            try
             {
-                var message = "No projects found!";
-                _logger.LogError(message);
-                return Problem(message);
+                IEnumerable<Project> tasks = _projectService.GetAllProjects();
+                return Ok(tasks);
             }
-            return projects;
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
         }
 
         [HttpGet("Tasks/{projectId}", Name = "GetTasksForProject")]
         public ActionResult<IEnumerable<Models.Database.Task>> GetTasksForProject(int projectId)
         {
-            DbSet<ProjectTask>? projectTasks = _goatSlipsContext.ProjectTasks;
-            if (projectTasks == null)
+            try
             {
-                var message = "No project tasks found!";
-                _logger.LogError(message);
-                return Problem(message);
-            }
-
-            DbSet<Models.Database.Task>? tasks = _goatSlipsContext.Tasks;
-            if (tasks == null)
+                IEnumerable<Models.Database.Task> tasks = _projectService.GetTasksForProject(projectId);
+                return Ok(tasks);
+            } catch (Exception e)
             {
-                var message = "No tasks found!";
-                _logger.LogError(message);
-                return Problem(message);
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
             }
-
-            IEnumerable<Models.Database.Task> tasksForProject = from projectTask in projectTasks
-                                                                join task in tasks
-                                                                    on projectTask.TaskId equals task.Id
-                                                                where projectTask.ProjectId == projectId
-                                                                select task;
-            return Ok(tasksForProject);
         }
     }
 }

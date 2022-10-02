@@ -20,6 +20,9 @@ string connectionString = config.GetConnectionString("ConnectionString");
 builder.Services.AddSingleton<IAppSettings>(new AppSettings(connectionString, config["Secret"]));
 builder.Services.AddScoped<IGoatSlipsContext, GoatSlipsContext>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITimeSlipService, TimeSlipService>();
 builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
 builder.Services.AddSingleton<ISecretService, SecretService>();
 
