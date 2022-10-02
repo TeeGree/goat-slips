@@ -120,7 +120,6 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
             <div className={classes.dayHeader}>
                 <div>{day}</div>
                 <div>{getDateString()}</div>
-                <hr />
             </div>
             <div className={classes.dayBody}>
                 {getAddTimeSlipButtonElements()}

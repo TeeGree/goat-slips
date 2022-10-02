@@ -11,7 +11,11 @@
     background-color: #3b7195;
     border-top-left-radius: 0.2em;
     border-top-right-radius: 0.2em;
-    height: 116px;
+    height: 2.7em;
+    font-size: 0.8em;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 2px solid white;
 }
 
 .dayBody {
