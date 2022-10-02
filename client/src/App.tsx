@@ -1,8 +1,8 @@
 import path from 'path-browserify';
 import React, { useEffect, useState } from 'react';
 import './App.scss';
-import { Home } from './pages/Home';
-import { Login } from './pages/Login';
+import { WeekView } from './components/WeekView';
+import { Login } from './components/Login';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
 
@@ -37,7 +37,7 @@ export const App: React.FC<{}> = () => {
         if (!isAuthenticated) {
             return <Login onSuccessfulLogin={() => setIsAuthenticated(true)} />;
         }
-        return <Home />;
+        return <WeekView />;
     };
 
     return (

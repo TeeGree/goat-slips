@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { TimeSlip } from '../types/TimeSlip';
-import { DropdownOption } from '../types/DropdownOption';
+import { TimeSlip } from '../../types/TimeSlip';
+import { DropdownOption } from '../../types/DropdownOption';
 import { ReadOnlyTimeSlip } from './ReadOnlyTimeSlip';
 import { EditableTimeSlip } from './EditableTimeSlip';
 import classes from './ExistingTimeSlip.module.scss';

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import classes from './Home.module.scss';
+import classes from './WeekView.module.scss';
 import { DayColumn } from './DayColumn';
 import { Day } from '../types/Day';
 import { DropdownOption } from '../types/DropdownOption';
@@ -25,7 +25,7 @@ const dayMap = new Map<number, Day>([
     [6, 'Saturday'],
 ]);
 
-export const Home: React.FC<{}> = () => {
+export const WeekView: React.FC<{}> = () => {
     const currentDate = new Date();
 
     const getSundayDateForDate = (date: Date) => {

@@ -3,10 +3,10 @@ import classes from './DayColumn.module.scss';
 import { Day } from '../types/Day';
 import { Button } from '@mui/material';
 import { Add } from '@mui/icons-material';
-import { EditableTimeSlip } from './EditableTimeSlip';
+import { EditableTimeSlip } from './TimeSlip/EditableTimeSlip';
 import { DropdownOption } from '../types/DropdownOption';
 import { TimeSlip } from '../types/TimeSlip';
-import { ExistingTimeSlip } from './ExistingTimeSlip';
+import { ExistingTimeSlip } from './TimeSlip/ExistingTimeSlip';
 
 interface DayColumnProps {
     date: Date;

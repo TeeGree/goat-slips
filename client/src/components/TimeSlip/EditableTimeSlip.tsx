@@ -12,7 +12,7 @@ import {
     SelectChangeEvent,
     TextField,
 } from '@mui/material';
-import { DropdownOption } from '../types/DropdownOption';
+import { DropdownOption } from '../../types/DropdownOption';
 
 interface EditableTimeSlipProps {
     projectOptions: DropdownOption[];

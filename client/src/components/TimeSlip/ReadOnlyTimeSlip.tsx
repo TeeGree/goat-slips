@@ -1,7 +1,7 @@
 import React from 'react';
 import classes from './ReadOnlyTimeSlip.module.scss';
 import { Button, Card, CardActions, CardContent } from '@mui/material';
-import { TimeSlip } from '../types/TimeSlip';
+import { TimeSlip } from '../../types/TimeSlip';
 
 interface ReadOnlyTimeSlipProps {
     timeSlip: TimeSlip;
