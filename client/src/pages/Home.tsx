@@ -199,6 +199,24 @@ export const Home: React.FC<{}> = () => {
         return response;
     };
 
+    const deleteTimeSlip = async (timeSlipId: number): Promise<void> => {
+        if (apiEndpoint === undefined) {
+            throw Error('No REACT_APP_API_ENDPOINT has been set!');
+        }
+        const url = path.join(apiEndpoint, `TimeSlip/DeleteTimeSlip/${timeSlipId}`);
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
+
+        if (response.ok) {
+            getTimeSlips();
+        }
+    };
+
     useEffect(() => {
         getProjects();
         getTasks();
@@ -260,6 +278,7 @@ export const Home: React.FC<{}> = () => {
                 getTaskOptionsForProject={getTaskOptionsForProject}
                 saveTimeSlip={saveNewTimeSlip}
                 updateTimeSlip={updateTimeSlip}
+                deleteTimeSlip={deleteTimeSlip}
                 day={dayString}
                 isCurrentDay={isCurrentDay}
                 date={dayDate}

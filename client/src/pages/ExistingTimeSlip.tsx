@@ -21,6 +21,7 @@ interface ExistingTimeSlipProps {
         hours: number,
         minutes: number,
     ) => Promise<Response>;
+    deleteTimeSlip: (timeSlipId: number) => Promise<void>;
 }
 
 export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: ExistingTimeSlipProps) => {
@@ -33,6 +34,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         laborCodeOptions,
         projectOptions,
         saveTimeSlip,
+        deleteTimeSlip,
     } = props;
 
     const [isEditing, setIsEditing] = useState(false);
@@ -82,6 +84,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
                 getTaskName={getTaskName}
                 getLaborCodeName={getLaborCodeName}
                 handleEdit={() => setIsEditing(true)}
+                deleteTimeSlip={deleteTimeSlip}
             />
         );
     };

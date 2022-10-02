@@ -31,6 +31,7 @@ interface DayColumnProps {
         hours: number,
         minutes: number,
     ) => Promise<Response>;
+    deleteTimeSlip: (timeSlipId: number) => Promise<void>;
     timeSlips: TimeSlip[];
     getProjectName: (projectId: number) => string;
     getTaskName: (taskId: number) => string;
@@ -53,6 +54,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         getProjectName,
         getTaskName,
         getLaborCodeName,
+        deleteTimeSlip,
     } = props;
 
     const getDateString = () => {
@@ -106,6 +108,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     laborCodeOptions={laborCodeOptions}
                     getTaskOptionsForProject={getTaskOptionsForProject}
                     saveTimeSlip={updateTimeSlip}
+                    deleteTimeSlip={deleteTimeSlip}
                 />
             );
         });

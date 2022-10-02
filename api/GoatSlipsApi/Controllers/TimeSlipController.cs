@@ -101,5 +101,21 @@ namespace GoatSlipsApi.Controllers
             _goatSlipsContext.SaveChanges();
             return Ok();
         }
+
+        [HttpPost("DeleteTimeSlip/{id}", Name = "DeleteTimeSlip")]
+        public IActionResult DeleteTimeSlip(int id)
+        {
+            TimeSlip? timeSlip = _goatSlipsContext.TimeSlips?.First(ts => ts.Id == id);
+            if (timeSlip == null)
+            {
+                var message = "Time slip not found!";
+                _logger.LogError(message);
+                return Problem(message);
+            }
+
+            _goatSlipsContext.TimeSlips?.Remove(timeSlip);
+            _goatSlipsContext.SaveChanges();
+            return Ok();
+        }
     }
 }

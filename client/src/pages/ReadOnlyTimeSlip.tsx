@@ -9,10 +9,12 @@ interface ReadOnlyTimeSlipProps {
     getTaskName: (taskId: number) => string;
     getLaborCodeName: (laborCodeId: number) => string;
     handleEdit: () => void;
+    deleteTimeSlip: (timeSlipId: number) => Promise<void>;
 }
 
 export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnlyTimeSlipProps) => {
-    const { timeSlip, getProjectName, getTaskName, getLaborCodeName, handleEdit } = props;
+    const { timeSlip, getProjectName, getTaskName, getLaborCodeName, handleEdit, deleteTimeSlip } =
+        props;
 
     const task = timeSlip.taskId === null ? 'N/A' : getTaskName(timeSlip.taskId);
     const laborCode =
@@ -30,6 +32,13 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
             <CardActions className={classes.cardActions}>
                 <Button variant="contained" onClick={handleEdit}>
                     Edit
+                </Button>
+                <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => deleteTimeSlip(timeSlip.id)}
+                >
+                    Delete
                 </Button>
             </CardActions>
         </Card>
