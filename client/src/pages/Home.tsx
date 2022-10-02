@@ -5,6 +5,8 @@ import { Day } from '../types/Day';
 import { DropdownOption } from '../types/DropdownOption';
 import path from 'path-browserify';
 import { TimeSlip } from '../types/TimeSlip';
+import { Button } from '@mui/material';
+import { ArrowLeft, ArrowRight } from '@mui/icons-material';
 
 const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
 
@@ -26,6 +28,14 @@ const dayMap = new Map<number, Day>([
 export const Home: React.FC<{}> = () => {
     const currentDate = new Date();
 
+    const getSundayDateForDate = (date: Date) => {
+        const currentDay = date.getDay();
+        const calculatedSundayDate = new Date();
+        calculatedSundayDate.setDate(calculatedSundayDate.getDate() - currentDay);
+        return calculatedSundayDate;
+    };
+
+    const [sundayDate, setSundayDate] = useState<Date>(getSundayDateForDate(currentDate));
     const [projects, setProjects] = useState<DropdownOption[]>([]);
     const [projectMap, setProjectMap] = useState<Map<number, string>>(new Map<number, string>([]));
     const [tasks, setTasks] = useState<Map<number, string>>(new Map<number, string>([]));
@@ -254,6 +264,11 @@ export const Home: React.FC<{}> = () => {
         return laborCodeMap.get(laborCodeId) ?? '';
     };
 
+    const getDateOfDay = (day: 0 | 1 | 2 | 3 | 4 | 5 | 6) => {
+        const dayDate = new Date(sundayDate.getTime() + day * 24 * 60 * 60 * 1000);
+        return dayDate;
+    };
+
     const getDayColumn = (day: 0 | 1 | 2 | 3 | 4 | 5 | 6) => {
         const currentDay = currentDate.getDay();
         const isCurrentDay = day === currentDay;
@@ -263,8 +278,7 @@ export const Home: React.FC<{}> = () => {
             throw Error('Invalid day!');
         }
 
-        const dayDate = new Date();
-        dayDate.setDate(dayDate.getDate() + (day - currentDay));
+        const dayDate = getDateOfDay(day);
 
         const timeSlips = timeSlipsPerDay.get(dayDate.toLocaleDateString('en')) ?? [];
 
@@ -287,9 +301,25 @@ export const Home: React.FC<{}> = () => {
         );
     };
 
+    const changeWeek = (forward: boolean) => {
+        const modifier = forward ? 1 : -1;
+        const newSundayDate = new Date(sundayDate.getTime() + 7 * modifier * 24 * 60 * 60 * 1000);
+        setSundayDate(newSundayDate);
+    };
+
+    const sundayDateString = sundayDate.toLocaleDateString('en');
+
     return (
         <div className={classes.homeContainer}>
-            So glad you made it. Welcome to the Greatest Of All Time Slips Applications!
+            <div className={classes.weekChanger}>
+                <Button variant="contained" onClick={() => changeWeek(false)}>
+                    <ArrowLeft />
+                </Button>
+                Week of {sundayDateString}
+                <Button variant="contained" onClick={() => changeWeek(true)}>
+                    <ArrowRight />
+                </Button>
+            </div>
             <div className={classes.weekContainer}>
                 {getDayColumn(0)}
                 {getDayColumn(1)}

@@ -3,6 +3,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .weekContainer {
@@ -13,4 +14,11 @@
     margin-bottom: 0.2em;
     overflow-y: clip;
     max-height: 100%;
+}
+
+.weekChanger {
+    width: 30%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.2em;
 }
