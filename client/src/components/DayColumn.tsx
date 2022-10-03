@@ -36,6 +36,8 @@ interface DayColumnProps {
     getProjectName: (projectId: number) => string;
     getTaskName: (taskId: number) => string;
     getLaborCodeName: (laborCodeId: number) => string;
+    totalHours: number;
+    totalMinutes: number;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
@@ -55,6 +57,8 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         getTaskName,
         getLaborCodeName,
         deleteTimeSlip,
+        totalHours,
+        totalMinutes,
     } = props;
 
     const getDateString = () => {
@@ -121,6 +125,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                 <div>{day}</div>
                 <div>{getDateString()}</div>
             </div>
+            <div className={classes.dayTotal}>{`${totalHours} hr ${totalMinutes} min`}</div>
             <div className={classes.dayBody}>
                 {getAddTimeSlipButtonElements()}
                 {getExistingTimeSlipCards()}

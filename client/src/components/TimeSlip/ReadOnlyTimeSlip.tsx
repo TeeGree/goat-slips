@@ -42,8 +42,9 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
                     <div>Project: {getProjectName(timeSlip.projectId)}</div>
                     <div>Task: {task}</div>
                     <div>Labor Code: {laborCode}</div>
-                    <div>Hours: {timeSlip.hours}</div>
-                    <div>Minutes: {timeSlip.minutes}</div>
+                    <div
+                        className={classes.time}
+                    >{`${timeSlip.hours} hr ${timeSlip.minutes} min`}</div>
                 </CardContent>
                 <CardActions className={classes.cardActions}>
                     <Button variant="contained" onClick={handleEdit}>

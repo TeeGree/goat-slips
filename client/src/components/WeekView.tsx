@@ -13,6 +13,12 @@ interface TaskMap {
     allowedTaskIds: number[];
 }
 
+interface TimeSlipDaySummary {
+    timeSlips: TimeSlip[];
+    totalHours: number;
+    totalMinutes: number;
+}
+
 const dayMap = new Map<number, Day>([
     [0, 'Sunday'],
     [1, 'Monday'],
@@ -25,6 +31,12 @@ const dayMap = new Map<number, Day>([
 
 export const WeekView: React.FC<{}> = () => {
     const currentDate = new Date();
+
+    const defaultTimeSlipDaySummary: TimeSlipDaySummary = {
+        timeSlips: [],
+        totalHours: 0,
+        totalMinutes: 0,
+    };
 
     const getSundayDateForDate = (date: Date) => {
         const currentDay = date.getDay();
@@ -42,8 +54,8 @@ export const WeekView: React.FC<{}> = () => {
         new Map<number, number[]>([]),
     );
 
-    const [timeSlipsPerDay, setTimeSlipsPerDay] = useState<Map<string, TimeSlip[]>>(
-        new Map<string, TimeSlip[]>([]),
+    const [timeSlipsPerDay, setTimeSlipsPerDay] = useState<Map<string, TimeSlipDaySummary>>(
+        new Map<string, TimeSlipDaySummary>([]),
     );
 
     const [laborCodes, setLaborCodes] = useState<DropdownOption[]>([]);
@@ -94,15 +106,33 @@ export const WeekView: React.FC<{}> = () => {
             'TimeSlip/TimeSlipsForCurrentUser',
         );
 
-        const timeSlipMap = new Map<string, TimeSlip[]>([]);
+        const timeSlipMap = new Map<string, TimeSlipDaySummary>([]);
         timeSlipsFromApi.forEach((timeSlip: TimeSlip) => {
             const dateOftimeSlip = new Date(timeSlip.date).toLocaleDateString('en');
             if (timeSlipMap.has(dateOftimeSlip)) {
-                const timeSlips = timeSlipMap.get(dateOftimeSlip) ?? [];
-                timeSlips?.push(timeSlip);
-                timeSlipMap.set(dateOftimeSlip, timeSlips);
+                const timeSlipsDaySummary =
+                    timeSlipMap.get(dateOftimeSlip) ?? defaultTimeSlipDaySummary;
+
+                timeSlipsDaySummary.timeSlips.push(timeSlip);
+
+                const hours = timeSlipsDaySummary.totalHours + timeSlip.hours;
+
+                const totalMinutes =
+                    timeSlipsDaySummary.totalMinutes + timeSlip.minutes + hours * 60;
+
+                timeSlipsDaySummary.totalHours = Math.floor(totalMinutes / 60);
+
+                timeSlipsDaySummary.totalMinutes =
+                    totalMinutes - timeSlipsDaySummary.totalHours * 60;
+
+                timeSlipMap.set(dateOftimeSlip, timeSlipsDaySummary);
             } else {
-                timeSlipMap.set(dateOftimeSlip, [timeSlip]);
+                const timeSlipsDaySummary: TimeSlipDaySummary = {
+                    timeSlips: [timeSlip],
+                    totalHours: timeSlip.hours,
+                    totalMinutes: timeSlip.minutes,
+                };
+                timeSlipMap.set(dateOftimeSlip, timeSlipsDaySummary);
             }
         });
 
@@ -217,14 +247,15 @@ export const WeekView: React.FC<{}> = () => {
 
         const dayDate = getDateOfDay(day);
 
-        const timeSlips = timeSlipsPerDay.get(dayDate.toLocaleDateString('en')) ?? [];
+        const timeSlipsDaySummary =
+            timeSlipsPerDay.get(dayDate.toLocaleDateString('en')) ?? defaultTimeSlipDaySummary;
 
         return (
             <DayColumn
                 getProjectName={getProjectName}
                 getTaskName={getTaskName}
                 getLaborCodeName={getLaborCodeName}
-                timeSlips={timeSlips}
+                timeSlips={timeSlipsDaySummary.timeSlips}
                 projectOptions={projects}
                 laborCodeOptions={laborCodes}
                 getTaskOptionsForProject={getTaskOptionsForProject}
@@ -234,6 +265,8 @@ export const WeekView: React.FC<{}> = () => {
                 day={dayString}
                 isCurrentDay={isCurrentDay}
                 date={dayDate}
+                totalHours={timeSlipsDaySummary.totalHours}
+                totalMinutes={timeSlipsDaySummary.totalMinutes}
             />
         );
     };
