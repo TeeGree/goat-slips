@@ -1,40 +1,44 @@
-import path from 'path-browserify';
 import React, { useEffect, useState } from 'react';
 import './App.scss';
 import { WeekView } from './components/WeekView';
 import { Login } from './components/Login';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
-
-const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
+import { fetchGet } from './helpers/fetchFunctions';
 
 export const App: React.FC<{}> = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isAuthenticationLoading, setIsAuthenticationLoading] = useState(true);
+
+    const [anyUsers, setAnyUsers] = useState(false);
+    const [isAnyUsersLoading, setAnyUsersLoading] = useState(true);
 
     const checkIfAuthenticated = async () => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-        setIsLoading(true);
-        const url = path.join(apiEndpoint, 'User/IsAuthenticated');
-        const result = await fetch(url, { credentials: 'include' });
+        setIsAuthenticationLoading(true);
+        const result = await fetchGet<boolean>('User/IsAuthenticated');
 
-        const authenticationResult = await result.json();
+        setIsAuthenticated(result);
+        setIsAuthenticationLoading(false);
+    };
 
-        setIsAuthenticated(authenticationResult);
-        setIsLoading(false);
+    const checkIfAnyUsers = async () => {
+        setAnyUsersLoading(true);
+        const result = await fetchGet<boolean>('User/AnyUsers');
+
+        setAnyUsers(result);
+        setAnyUsersLoading(false);
     };
 
     useEffect(() => {
         checkIfAuthenticated();
+        checkIfAnyUsers();
     }, []);
 
     const getPage = () => {
-        if (isLoading) {
+        if (isAuthenticationLoading || isAnyUsersLoading) {
             return <CircularProgress />;
         }
-        if (!isAuthenticated) {
+        if (!isAuthenticated && anyUsers) {
             return <Login onSuccessfulLogin={() => setIsAuthenticated(true)} />;
         }
         return <WeekView />;

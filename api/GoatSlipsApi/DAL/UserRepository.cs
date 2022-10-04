@@ -1,4 +1,5 @@
 ﻿using GoatSlipsApi.Models.Database;
+using System.Data.Entity;
 
 namespace GoatSlipsApi.DAL
 {
@@ -6,23 +7,34 @@ namespace GoatSlipsApi.DAL
     {
         User? GetById(int id);
         User? GetByUsername(string username);
+        IEnumerable<User> GetAllUsers();
     }
     public sealed class UserRepository : IUserRepository
     {
-        private readonly IGoatSlipsContext _goatSlipsContext;
-        public UserRepository(IGoatSlipsContext goatSlipsContext)
+        private readonly IGoatSlipsContext _dbContext;
+        public UserRepository(IGoatSlipsContext dbContext)
         {
-            _goatSlipsContext = goatSlipsContext;
+            _dbContext = dbContext;
         }
 
         public User? GetById(int id)
         {
-            return _goatSlipsContext.Users?.FirstOrDefault(u => u.Id == id);
+            return _dbContext.Users?.FirstOrDefault(u => u.Id == id);
         }
 
         public User? GetByUsername(string username)
         {
-            return _goatSlipsContext.Users?.FirstOrDefault(u => u.Username == username);
+            return _dbContext.Users?.FirstOrDefault(u => u.Username == username);
+        }
+
+        public IEnumerable<User> GetAllUsers()
+        {
+            DbSet<User>? users = _dbContext.Users;
+            if (users == null)
+            {
+                throw new Exception("No users found!");
+            }
+            return users;
         }
     }
 }

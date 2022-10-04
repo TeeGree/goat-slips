@@ -76,5 +76,21 @@ namespace GoatSlipsApi.Controllers
                 return Problem(e.Message);
             }
         }
+
+        [AllowAnonymous]
+        [HttpGet("AnyUsers", Name = "AnyUsers")]
+        public ActionResult<bool> AnyUsers()
+        {
+            try
+            {
+                bool anyUsers = _userService.AnyUsers();
+                return Ok(anyUsers);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
     }
 }
