@@ -1,0 +1,17 @@
+@import '../colors';
+@import '../variables';
+
+.header {
+    width: 100%;
+    background-color: $goatPurple !important;
+    border-radius: 0 !important;
+    height: $headerHeight;
+}
+
+.userMenuIcon {
+    height: $headerHeight;
+    width: $headerHeight;
+    position: fixed !important;
+    right: 0;
+    top: 0;
+}

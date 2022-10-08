@@ -116,5 +116,20 @@ namespace GoatSlipsApi.Controllers
                 return Problem(e.Message);
             }
         }
+
+        [HttpGet("Logout", Name = "Logout")]
+        public IActionResult Logout()
+        {
+            try
+            {
+                _userService.Logout(HttpContext);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
     }
 }

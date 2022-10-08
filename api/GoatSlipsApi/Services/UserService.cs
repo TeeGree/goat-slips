@@ -12,6 +12,7 @@ namespace GoatSlipsApi.Services
         void CreateFirstUser(CreateUserBody createUserBody);
         bool IsAuthenticated(HttpContext httpContext);
         bool AnyUsers();
+        void Logout(HttpContext httpContext);
     }
     public sealed class UserService : IUserService
     {
@@ -57,7 +58,8 @@ namespace GoatSlipsApi.Services
                 {
                     HttpOnly = true,
                     SameSite = SameSiteMode.None, // TODO: This should be able to be Strict in prod.
-                    Secure = true
+                    Secure = true,
+                    Expires = DateTime.Now.AddDays(1)
                 });
         }
 
@@ -99,6 +101,20 @@ namespace GoatSlipsApi.Services
         public bool AnyUsers()
         {
             return _userRepository.GetAllUsers().Count() > 0;
+        }
+
+        public void Logout(HttpContext httpContext)
+        {
+            httpContext.Response.Cookies.Append(
+                "Authorization",
+                "",
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    SameSite = SameSiteMode.None, // TODO: This should be able to be Strict in prod.
+                    Secure = true,
+                    Expires = DateTime.Now.AddDays(-1)
+                });
         }
     }
 }

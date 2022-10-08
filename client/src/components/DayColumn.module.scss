@@ -1,7 +1,9 @@
+@import '../colors';
+
 .dayColumn {
     height: 100%;
     flex-basis: calc(100% / 7);
-    background-color: #483d8b;
+    background-color: $goatPurple;
     margin-left: 0.2em;
     margin-right: 0.2em;
     border-radius: 0.2em;
