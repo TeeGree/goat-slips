@@ -9,6 +9,7 @@ namespace GoatSlipsApi.Services
     {
         IEnumerable<User> GetAllUsers();
         void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext);
+        void CreateFirstUser(CreateUserBody createUserBody);
         bool IsAuthenticated(HttpContext httpContext);
         bool AnyUsers();
     }
@@ -34,8 +35,8 @@ namespace GoatSlipsApi.Services
 
         public void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext)
         {
-            string username = authenticateBody.Username ?? "";
-            User? user = _userRepository.GetByUsername(username);
+            string email = authenticateBody.Email ?? "";
+            User? user = _userRepository.GetByEmail(email);
             if (user?.Password == null)
             {
                 throw new InvalidCredentialException("Invalid username!");
@@ -58,6 +59,34 @@ namespace GoatSlipsApi.Services
                     SameSite = SameSiteMode.None, // TODO: This should be able to be Strict in prod.
                     Secure = true
                 });
+        }
+
+        public void CreateFirstUser(CreateUserBody createUserBody)
+        {
+            if (AnyUsers())
+            {
+                throw new InvalidOperationException("There are users already in the system.");
+            }
+
+            if (string.IsNullOrEmpty(createUserBody.Email))
+            {
+                throw new ArgumentNullException("An email must be supplied for a new user.");
+            }
+
+            if (string.IsNullOrEmpty(createUserBody.Password))
+            {
+                throw new ArgumentNullException("An password must be supplied for a new user.");
+            }
+
+            var userToAdd = new User
+            {
+                Email = createUserBody.Email,
+                FirstName = createUserBody.FirstName,
+                LastName = createUserBody.LastName,
+                Password = _secretService.Hash(createUserBody.Password),
+            };
+
+            _userRepository.CreateFirstUser(userToAdd);
         }
 
         public bool IsAuthenticated(HttpContext httpContext)

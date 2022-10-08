@@ -1,8 +1,10 @@
 ﻿namespace GoatSlipsApi.Models
 {
-    public sealed class AuthenticateBody
+    public class CreateUserBody
     {
         public string? Email { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string? Password { get; set; }
     }
 }

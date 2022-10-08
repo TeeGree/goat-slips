@@ -1,0 +1,16 @@
+.inputContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    .inputForm {
+        margin-top: 2em;
+        width: 223px;
+
+        .input {
+            margin-top: 0.4em;
+            margin-bottom: 0.4em;
+        }
+    }
+}

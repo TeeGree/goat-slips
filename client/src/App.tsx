@@ -5,6 +5,7 @@ import { Login } from './components/Login';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
 import { fetchGet } from './helpers/fetchFunctions';
+import { CreateUser } from './components/CreateUser';
 
 export const App: React.FC<{}> = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,6 +41,10 @@ export const App: React.FC<{}> = () => {
         }
         if (!isAuthenticated && anyUsers) {
             return <Login onSuccessfulLogin={() => setIsAuthenticated(true)} />;
+        }
+
+        if (!anyUsers) {
+            return <CreateUser onSuccessfulUserCreation={checkIfAnyUsers} />;
         }
         return <WeekView />;
     };

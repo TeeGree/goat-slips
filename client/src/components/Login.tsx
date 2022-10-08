@@ -1,21 +1,20 @@
-import { Button, TextField } from '@mui/material';
+import { Alert, Button, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import classes from './Login.module.scss';
-import path from 'path-browserify';
+import { fetchPostResponse } from '../helpers/fetchFunctions';
 
-const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
-
-interface ILogin {
+interface LoginProps {
     onSuccessfulLogin: () => void;
 }
 
-export const Login: React.FC<ILogin> = (props: ILogin) => {
+export const Login: React.FC<LoginProps> = (props: LoginProps) => {
     const { onSuccessfulLogin } = props;
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
 
-    const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setUsername(event.target.value);
+    const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(event.target.value);
     };
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -31,37 +30,38 @@ export const Login: React.FC<ILogin> = (props: ILogin) => {
     };
 
     const login = async () => {
-        if (apiEndpoint === undefined) {
-            throw Error('No REACT_APP_API_ENDPOINT has been set!');
-        }
-        const loginUrl = path.join(apiEndpoint, 'User/Authenticate');
-        const result = await fetch(loginUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                username,
-                password,
-            }),
+        const response = await fetchPostResponse('User/Authenticate', {
+            email,
+            password,
         });
 
-        if (result.ok) {
+        if (response.ok) {
             onSuccessfulLogin();
+        } else {
+            const responseText = await response.text();
+            setError(responseText);
         }
+    };
+
+    const getError = () => {
+        if (error !== null) {
+            return <Alert severity="error">{error}</Alert>;
+        }
+
+        return <></>;
     };
 
     return (
         <div className={classes.login}>
             Welcome to G.O.A.T. Slips!
             <div className={classes.loginForm}>
+                {getError()}
                 <div className={classes.loginInput}>
                     <TextField
-                        label="Username"
+                        label="Email"
                         variant="outlined"
-                        value={username}
-                        onChange={handleUsernameChange}
+                        value={email}
+                        onChange={handleEmailChange}
                         onKeyPress={handleKeyPress}
                     />
                 </div>
