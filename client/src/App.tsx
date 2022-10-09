@@ -5,8 +5,9 @@ import { Login } from './components/Login';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
 import { fetchGet } from './helpers/fetchFunctions';
-import { CreateUser } from './components/CreateUser';
+import { CreateFirstUser } from './components/CreateFirstUser';
 import { AppHeader } from './components/AppHeader';
+import { CreateAdditionalUser } from './components/CreateAdditionalUser';
 
 export const App: React.FC<{}> = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,24 +37,22 @@ export const App: React.FC<{}> = () => {
         checkIfAnyUsers();
     }, []);
 
+    const fillScreenWithPage = (page: JSX.Element) => {
+        return <div className={classes.fillScreen}>{page}</div>;
+    };
+
     const getPage = () => {
         if (isAuthenticationLoading || isAnyUsersLoading) {
-            return (
-                <div className={classes.fillScreen}>
-                    <CircularProgress />
-                </div>
-            );
+            return fillScreenWithPage(<CircularProgress />);
         }
         if (!isAuthenticated && anyUsers) {
-            return (
-                <div className={classes.fillScreen}>
-                    <Login onSuccessfulLogin={() => setIsAuthenticated(true)} />
-                </div>
-            );
+            return fillScreenWithPage(<Login onSuccessfulLogin={() => setIsAuthenticated(true)} />);
         }
 
         if (!anyUsers) {
-            return <CreateUser onSuccessfulUserCreation={checkIfAnyUsers} />;
+            return fillScreenWithPage(
+                <CreateFirstUser onSuccessfulUserCreation={checkIfAnyUsers} />,
+            );
         }
         return <WeekView />;
     };
@@ -62,6 +61,7 @@ export const App: React.FC<{}> = () => {
         <div className={classes.app}>
             <AppHeader onLogout={checkIfAuthenticated} isAuthenticated={isAuthenticated} />
             <Routes>
+                <Route path="/create-user" element={fillScreenWithPage(<CreateAdditionalUser />)} />
                 <Route path="/" element={getPage()} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

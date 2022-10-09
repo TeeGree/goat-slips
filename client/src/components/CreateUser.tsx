@@ -1,14 +1,19 @@
 import { Button, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import classes from './CreateUser.module.scss';
-import { fetchPostResponse } from '../helpers/fetchFunctions';
 
 interface CreateUserProps {
-    onSuccessfulUserCreation: () => void;
+    createUser: (
+        email: string,
+        firstName: string,
+        lastName: string,
+        password: string,
+    ) => Promise<boolean>;
+    children: React.ReactNode;
 }
 
 export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
-    const { onSuccessfulUserCreation } = props;
+    const { createUser, children } = props;
     const [email, setEmail] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -30,26 +35,19 @@ export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) =>
         setPassword(event.target.value);
     };
 
-    const createUser = async () => {
-        const response = await fetchPostResponse('User/CreateFirstUser', {
-            email,
-            firstName,
-            lastName,
-            password,
-        });
-
-        if (response.ok) {
-            onSuccessfulUserCreation();
+    const createUserFromInputValues = async () => {
+        const created = await createUser(email, firstName, lastName, password);
+        if (created) {
+            setEmail('');
+            setFirstName('');
+            setLastName('');
+            setPassword('');
         }
     };
 
     return (
         <div className={classes.inputContainer}>
-            Welcome to G.O.A.T. Slips!
-            <p>
-                There are no users in the system. Please enter user information so that you can log
-                in.
-            </p>
+            {children}
             <div className={classes.inputForm}>
                 <div className={classes.input}>
                     <TextField
@@ -84,7 +82,11 @@ export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) =>
                         onChange={handlePasswordChange}
                     />
                 </div>
-                <Button className={classes.input} variant="contained" onClick={createUser}>
+                <Button
+                    className={classes.input}
+                    variant="contained"
+                    onClick={createUserFromInputValues}
+                >
                     Create User
                 </Button>
             </div>

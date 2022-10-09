@@ -9,6 +9,7 @@ namespace GoatSlipsApi.Services
     {
         IEnumerable<User> GetAllUsers();
         void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext);
+        void CreateUser(CreateUserBody createUserBody);
         void CreateFirstUser(CreateUserBody createUserBody);
         bool IsAuthenticated(HttpContext httpContext);
         bool AnyUsers();
@@ -63,13 +64,8 @@ namespace GoatSlipsApi.Services
                 });
         }
 
-        public void CreateFirstUser(CreateUserBody createUserBody)
+        public void CreateUser(CreateUserBody createUserBody)
         {
-            if (AnyUsers())
-            {
-                throw new InvalidOperationException("There are users already in the system.");
-            }
-
             if (string.IsNullOrEmpty(createUserBody.Email))
             {
                 throw new ArgumentNullException("An email must be supplied for a new user.");
@@ -89,6 +85,11 @@ namespace GoatSlipsApi.Services
             };
 
             _userRepository.CreateFirstUser(userToAdd);
+        }
+
+        public void CreateFirstUser(CreateUserBody createUserBody)
+        {
+            CreateUser(createUserBody);
         }
 
         public bool IsAuthenticated(HttpContext httpContext)

@@ -93,6 +93,25 @@ namespace GoatSlipsApi.Controllers
             }
         }
 
+        [HttpPost("CreateUser", Name = "CreateUser")]
+        public IActionResult CreateUser([FromBody] CreateUserBody createUserBody)
+        {
+            try
+            {
+                _userService.CreateFirstUser(createUserBody);
+                return Ok();
+            }
+            catch (ArgumentNullException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
         [AllowAnonymous]
         [HttpPost("CreateFirstUser", Name = "CreateFirstUser")]
         public IActionResult CreateFirstUser([FromBody] CreateUserBody createUserBody)

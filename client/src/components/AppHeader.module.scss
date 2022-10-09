@@ -8,10 +8,23 @@
     height: $headerHeight;
 }
 
+.appMenuIcon {
+    height: $headerHeight;
+    width: $headerHeight;
+    position: fixed !important;
+    left: 0;
+    top: 0;
+}
+
 .userMenuIcon {
     height: $headerHeight;
     width: $headerHeight;
     position: fixed !important;
     right: 0;
     top: 0;
+}
+
+.link {
+    text-decoration: none;
+    color: inherit;
 }

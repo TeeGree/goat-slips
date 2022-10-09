@@ -1,8 +1,10 @@
 import React from 'react';
 import classes from './AppHeader.module.scss';
 import { IconButton, Menu, MenuItem, Paper } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 import { Person } from '@mui/icons-material';
 import { fetchGetResponse } from '../helpers/fetchFunctions';
+import { Link } from 'react-router-dom';
 
 interface AppHeaderProps {
     onLogout: () => void;
@@ -11,19 +13,31 @@ interface AppHeaderProps {
 
 export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
     const { onLogout, isAuthenticated } = props;
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
+    const [appMenuAnchorEl, setAppMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+    const appMenuOpen = Boolean(appMenuAnchorEl);
+
+    const handleAppMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAppMenuAnchorEl(event.currentTarget);
     };
 
-    const handleClose = () => {
-        setAnchorEl(null);
+    const handleAppMenuClose = () => {
+        setAppMenuAnchorEl(null);
+    };
+
+    const [userMenuAnchorEl, setUserMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+    const userMenuOpen = Boolean(userMenuAnchorEl);
+
+    const handleUserMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setUserMenuAnchorEl(event.currentTarget);
+    };
+
+    const handleUserMenuClose = () => {
+        setUserMenuAnchorEl(null);
     };
 
     const handleLogout = async () => {
-        handleClose();
+        handleUserMenuClose();
 
         const response = await fetchGetResponse('User/Logout');
 
@@ -32,17 +46,50 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
         }
     };
 
+    const createLink = (path: string, label: string) => {
+        return (
+            <Link className={classes.link} to={path}>
+                <MenuItem onClick={handleAppMenuClose}>{label}</MenuItem>
+            </Link>
+        );
+    };
+
+    const getAppMenuIcon = () => {
+        if (isAuthenticated) {
+            return (
+                <>
+                    <IconButton className={classes.appMenuIcon} onClick={handleAppMenuClick}>
+                        <MenuIcon />
+                    </IconButton>
+                    <Menu
+                        anchorEl={appMenuAnchorEl}
+                        open={appMenuOpen}
+                        onClose={handleAppMenuClose}
+                        MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                        }}
+                    >
+                        {createLink('/create-user', 'Add User')}
+                        {createLink('/', 'Week View')}
+                    </Menu>
+                </>
+            );
+        }
+
+        return <></>;
+    };
+
     const getUserMenuIcon = () => {
         if (isAuthenticated) {
             return (
                 <>
-                    <IconButton className={classes.userMenuIcon} onClick={handleClick}>
+                    <IconButton className={classes.userMenuIcon} onClick={handleUserMenuClick}>
                         <Person />
                     </IconButton>
                     <Menu
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleClose}
+                        anchorEl={userMenuAnchorEl}
+                        open={userMenuOpen}
+                        onClose={handleUserMenuClose}
                         MenuListProps={{
                             'aria-labelledby': 'basic-button',
                         }}
@@ -58,6 +105,7 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
 
     return (
         <Paper className={classes.header}>
+            {getAppMenuIcon()}
             G.O.A.T. Slips
             {getUserMenuIcon()}
         </Paper>
