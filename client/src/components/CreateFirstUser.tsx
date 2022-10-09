@@ -10,12 +10,14 @@ export const CreateFirstUser: React.FC<CreateFirstUserProps> = (props: CreateFir
     const { onSuccessfulUserCreation } = props;
 
     const createUser = async (
+        username: string,
         email: string,
         firstName: string,
         lastName: string,
         password: string,
     ) => {
         const response = await fetchPostResponse('User/CreateFirstUser', {
+            username,
             email,
             firstName,
             lastName,

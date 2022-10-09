@@ -37,8 +37,8 @@ namespace GoatSlipsApi.Services
 
         public void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext)
         {
-            string email = authenticateBody.Email ?? "";
-            User? user = _userRepository.GetByEmail(email);
+            string username = authenticateBody.Username ?? "";
+            User? user = _userRepository.GetByUsername(username);
             if (user?.Password == null)
             {
                 throw new InvalidCredentialException("Invalid username!");
@@ -66,6 +66,11 @@ namespace GoatSlipsApi.Services
 
         public void CreateUser(CreateUserBody createUserBody)
         {
+            if (string.IsNullOrEmpty(createUserBody.Username))
+            {
+                throw new ArgumentNullException("An username must be supplied for a new user.");
+            }
+
             if (string.IsNullOrEmpty(createUserBody.Email))
             {
                 throw new ArgumentNullException("An email must be supplied for a new user.");
@@ -78,6 +83,7 @@ namespace GoatSlipsApi.Services
 
             var userToAdd = new User
             {
+                Username = createUserBody.Username,
                 Email = createUserBody.Email,
                 FirstName = createUserBody.FirstName,
                 LastName = createUserBody.LastName,

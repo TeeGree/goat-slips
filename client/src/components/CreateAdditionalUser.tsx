@@ -24,12 +24,14 @@ export const CreateAdditionalUser: React.FC<{}> = () => {
     };
 
     const createUser = async (
+        username: string,
         email: string,
         firstName: string,
         lastName: string,
         password: string,
     ) => {
         const response = await fetchPostResponse('User/CreateFirstUser', {
+            username,
             email,
             firstName,
             lastName,
@@ -37,11 +39,11 @@ export const CreateAdditionalUser: React.FC<{}> = () => {
         });
 
         if (response.ok) {
-            setSuccessMessage(`Successfully created user for email ${email}!`);
+            setSuccessMessage(`Successfully created user "${username}"!`);
             return true;
         }
 
-        setErrorMessage(`Failed to create user for email ${email}!`);
+        setErrorMessage(`Failed to create user "${username}"!`);
         return false;
     };
 

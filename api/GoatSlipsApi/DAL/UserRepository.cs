@@ -6,7 +6,7 @@ namespace GoatSlipsApi.DAL
     public interface IUserRepository
     {
         User? GetById(int id);
-        User? GetByEmail(string email);
+        User? GetByUsername(string username);
         IEnumerable<User> GetAllUsers();
         void CreateFirstUser(User userToAdd);
     }
@@ -23,9 +23,9 @@ namespace GoatSlipsApi.DAL
             return _dbContext.Users?.FirstOrDefault(u => u.Id == id);
         }
 
-        public User? GetByEmail(string email)
+        public User? GetByUsername(string username)
         {
-            return _dbContext.Users?.FirstOrDefault(u => u.Email == email);
+            return _dbContext.Users?.FirstOrDefault(u => u.Username == username);
         }
 
         public IEnumerable<User> GetAllUsers()

@@ -9,12 +9,12 @@ interface LoginProps {
 
 export const Login: React.FC<LoginProps> = (props: LoginProps) => {
     const { onSuccessfulLogin } = props;
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
-    const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setEmail(event.target.value);
+    const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUsername(event.target.value);
     };
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -31,7 +31,7 @@ export const Login: React.FC<LoginProps> = (props: LoginProps) => {
 
     const login = async () => {
         const response = await fetchPostResponse('User/Authenticate', {
-            email,
+            username,
             password,
         });
 
@@ -58,10 +58,10 @@ export const Login: React.FC<LoginProps> = (props: LoginProps) => {
                 {getError()}
                 <div className={classes.loginInput}>
                     <TextField
-                        label="Email"
+                        label="Username"
                         variant="outlined"
-                        value={email}
-                        onChange={handleEmailChange}
+                        value={username}
+                        onChange={handleUsernameChange}
                         onKeyPress={handleKeyPress}
                     />
                 </div>

@@ -4,6 +4,7 @@ import classes from './CreateUser.module.scss';
 
 interface CreateUserProps {
     createUser: (
+        username: string,
         email: string,
         firstName: string,
         lastName: string,
@@ -14,10 +15,15 @@ interface CreateUserProps {
 
 export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
     const { createUser, children } = props;
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [password, setPassword] = useState('');
+
+    const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUsername(event.target.value);
+    };
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
@@ -36,8 +42,9 @@ export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) =>
     };
 
     const createUserFromInputValues = async () => {
-        const created = await createUser(email, firstName, lastName, password);
+        const created = await createUser(username, email, firstName, lastName, password);
         if (created) {
+            setUsername('');
             setEmail('');
             setFirstName('');
             setLastName('');
@@ -49,6 +56,14 @@ export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) =>
         <div className={classes.inputContainer}>
             {children}
             <div className={classes.inputForm}>
+                <div className={classes.input}>
+                    <TextField
+                        label="Username"
+                        variant="outlined"
+                        value={username}
+                        onChange={handleUsernameChange}
+                    />
+                </div>
                 <div className={classes.input}>
                     <TextField
                         label="Email"

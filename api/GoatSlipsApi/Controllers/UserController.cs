@@ -13,16 +13,13 @@ namespace GoatSlipsApi.Controllers
     public sealed class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly IJwtUtils _jwtUtils;
         private readonly IUserService _userService;
 
         public UserController(
             ILogger<UserController> logger,
-            IJwtUtils jwtUtils,
             IUserService userService)
         {
             _logger = logger;
-            _jwtUtils = jwtUtils;
             _userService = userService;
         }
 
