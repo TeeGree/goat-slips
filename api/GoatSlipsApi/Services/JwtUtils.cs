@@ -10,8 +10,8 @@ namespace GoatSlipsApi.Services
     public interface IJwtUtils
     {
         public string GenerateToken(User user);
-        public int? ValidateToken(string? token);
-        int? ValidateTokenFromContext(HttpContext context);
+        public int? GetUserIdFromToken(string? token);
+        int? GetUserIdFromContext(HttpContext context);
     }
     public sealed class JwtUtils : IJwtUtils
     {
@@ -38,7 +38,7 @@ namespace GoatSlipsApi.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public int? ValidateToken(string? token)
+        public int? GetUserIdFromToken(string? token)
         {
             if (string.IsNullOrEmpty(token))
                 return null;
@@ -71,7 +71,7 @@ namespace GoatSlipsApi.Services
             }
         }
 
-        public int? ValidateTokenFromContext(HttpContext context)
+        public int? GetUserIdFromContext(HttpContext context)
         {
             var token = context.Request.Cookies["Authorization"]?.Split(" ").Last();
             return ValidateToken(token);

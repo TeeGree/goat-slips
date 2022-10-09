@@ -100,9 +100,16 @@ namespace GoatSlipsApi.Services
 
         public bool IsAuthenticated(HttpContext httpContext)
         {
-            int? userId = _jwtUtils.ValidateTokenFromContext(httpContext);
+            int? userId = _jwtUtils.GetUserIdFromContext(httpContext);
 
-            return userId != null;
+            if (userId == null)
+            {
+                return false;
+            }
+
+            User? user = _userRepository.GetById(userId.Value);
+
+            return user?.Password != null;
         }
 
         public bool AnyUsers()
