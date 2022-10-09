@@ -147,5 +147,24 @@ namespace GoatSlipsApi.Controllers
                 return Problem(e.Message);
             }
         }
+
+        [HttpPost("ChangePassword", Name = "ChangePassword")]
+        public IActionResult ChangePassword([FromBody] ChangePasswordBody changePasswordBody)
+        {
+            try
+            {
+                _userService.ChangePassword(changePasswordBody, HttpContext);
+                return Ok();
+            }
+            catch (InvalidCredentialException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
     }
 }

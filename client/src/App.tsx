@@ -8,6 +8,7 @@ import { fetchGet } from './helpers/fetchFunctions';
 import { CreateFirstUser } from './components/CreateUser/CreateFirstUser';
 import { AppHeader } from './components/AppHeader';
 import { CreateAdditionalUser } from './components/CreateUser/CreateAdditionalUser';
+import { ChangePassword } from './components/ChangePassword';
 
 export const App: React.FC<{}> = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -57,11 +58,25 @@ export const App: React.FC<{}> = () => {
         return <WeekView />;
     };
 
+    const getAuthenticatedRoutes = (): JSX.Element[] => {
+        if (isAuthenticated) {
+            return [
+                <Route path="/change-password" element={fillScreenWithPage(<ChangePassword />)} />,
+                <Route
+                    path="/create-user"
+                    element={fillScreenWithPage(<CreateAdditionalUser />)}
+                />,
+            ];
+        }
+
+        return [];
+    };
+
     return (
         <div className={classes.app}>
             <AppHeader onLogout={checkIfAuthenticated} isAuthenticated={isAuthenticated} />
             <Routes>
-                <Route path="/create-user" element={fillScreenWithPage(<CreateAdditionalUser />)} />
+                {getAuthenticatedRoutes()}
                 <Route path="/" element={getPage()} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

@@ -14,6 +14,7 @@ namespace GoatSlipsApi.Services
         bool IsAuthenticated(HttpContext httpContext);
         bool AnyUsers();
         void Logout(HttpContext httpContext);
+        void ChangePassword(ChangePasswordBody changePasswordBody, HttpContext httpContext);
     }
     public sealed class UserService : IUserService
     {
@@ -52,16 +53,7 @@ namespace GoatSlipsApi.Services
             }
 
             string token = _jwtUtils.GenerateToken(user);
-            httpContext.Response.Cookies.Append(
-                "Authorization",
-                token,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    SameSite = SameSiteMode.None, // TODO: This should be able to be Strict in prod.
-                    Secure = true,
-                    Expires = DateTime.Now.AddDays(1)
-                });
+            SetAuthorizationCookie(token, httpContext);
         }
 
         public void CreateUser(CreateUserBody createUserBody)
@@ -119,15 +111,58 @@ namespace GoatSlipsApi.Services
 
         public void Logout(HttpContext httpContext)
         {
+            SetAuthorizationCookie(string.Empty, httpContext, -1);
+        }
+
+        public void ChangePassword(ChangePasswordBody changePasswordBody, HttpContext httpContext)
+        {
+            int? userId = _jwtUtils.GetUserIdFromContext(httpContext);
+            if (userId == null)
+            {
+                throw new Exception("No user currently logged in!");
+            }
+
+            User? user = GetUserById(userId.Value);
+
+            string oldPassword = changePasswordBody.OldPassword ?? "";
+            bool authenticated = _secretService.Verify(oldPassword, user.Password);
+            if (!authenticated)
+            {
+                throw new InvalidCredentialException("Incorrect password!");
+            }
+
+            string newPassword = changePasswordBody.NewPassword ?? "";
+            string newPasswordHash = _secretService.Hash(newPassword);
+            _userRepository.UpdatePassword(userId.Value, newPasswordHash);
+
+            user = GetUserById(userId.Value);
+
+            string token = _jwtUtils.GenerateToken(user);
+            SetAuthorizationCookie(token, httpContext);
+        }
+
+        private User GetUserById(int userId)
+        {
+            User? user = _userRepository.GetById(userId);
+            if (user?.Password == null)
+            {
+                throw new Exception("Invalid username!");
+            }
+
+            return user;
+        }
+
+        private void SetAuthorizationCookie(string token, HttpContext httpContext, int expirationDays = 1)
+        {
             httpContext.Response.Cookies.Append(
                 "Authorization",
-                "",
+                token,
                 new CookieOptions
                 {
                     HttpOnly = true,
                     SameSite = SameSiteMode.None, // TODO: This should be able to be Strict in prod.
                     Secure = true,
-                    Expires = DateTime.Now.AddDays(-1)
+                    Expires = DateTime.Now.AddDays(expirationDays)
                 });
         }
     }
