@@ -5,9 +5,9 @@ import { Login } from './components/Login';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
 import { fetchGet } from './helpers/fetchFunctions';
-import { CreateFirstUser } from './components/CreateFirstUser';
+import { CreateFirstUser } from './components/CreateUser/CreateFirstUser';
 import { AppHeader } from './components/AppHeader';
-import { CreateAdditionalUser } from './components/CreateAdditionalUser';
+import { CreateAdditionalUser } from './components/CreateUser/CreateAdditionalUser';
 
 export const App: React.FC<{}> = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);

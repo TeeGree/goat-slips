@@ -1,6 +1,6 @@
 import { Alert, Snackbar, Stack } from '@mui/material';
 import React, { useState } from 'react';
-import { fetchPostResponse } from '../helpers/fetchFunctions';
+import { fetchPostResponse } from '../../helpers/fetchFunctions';
 import { CreateUser } from './CreateUser';
 
 export const CreateAdditionalUser: React.FC<{}> = () => {

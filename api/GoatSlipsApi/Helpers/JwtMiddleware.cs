@@ -14,7 +14,7 @@ namespace GoatSlipsApi.Helpers
 
         public async Task Invoke(HttpContext context, IUserRepository userRepository, IJwtUtils jwtUtils)
         {
-            int? userId = jwtUtils.ValidateTokenFromContext(context);
+            int? userId = jwtUtils.GetUserIdFromContext(context);
             if (userId != null)
             {
                 // attach user to context on successful jwt validation

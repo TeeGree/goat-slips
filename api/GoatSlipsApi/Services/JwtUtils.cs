@@ -74,7 +74,7 @@ namespace GoatSlipsApi.Services
         public int? GetUserIdFromContext(HttpContext context)
         {
             var token = context.Request.Cookies["Authorization"]?.Split(" ").Last();
-            return ValidateToken(token);
+            return GetUserIdFromToken(token);
         }
     }
 }
