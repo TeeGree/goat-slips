@@ -4,24 +4,32 @@ import { WeekView } from './components/WeekView';
 import { Login } from './components/Login';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
-import { fetchGet } from './helpers/fetchFunctions';
+import { fetchGet, fetchGetResponse } from './helpers/fetchFunctions';
 import { CreateFirstUser } from './components/CreateUser/CreateFirstUser';
 import { AppHeader } from './components/AppHeader';
 import { CreateAdditionalUser } from './components/CreateUser/CreateAdditionalUser';
 import { ChangePassword } from './components/ChangePassword';
 
 export const App: React.FC<{}> = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [username, setUsername] = useState<string>('');
     const [isAuthenticationLoading, setIsAuthenticationLoading] = useState(true);
 
     const [anyUsers, setAnyUsers] = useState(false);
     const [isAnyUsersLoading, setAnyUsersLoading] = useState(true);
 
+    const isAuthenticated = () => {
+        return username !== '';
+    };
+
     const checkIfAuthenticated = async () => {
         setIsAuthenticationLoading(true);
-        const result = await fetchGet<boolean>('User/IsAuthenticated');
+        const response = await fetchGetResponse('User/GetUsername');
 
-        setIsAuthenticated(result);
+        if (response.ok) {
+            const usernameFromApi = await response.text();
+            setUsername(usernameFromApi);
+        }
+
         setIsAuthenticationLoading(false);
     };
 
@@ -46,8 +54,8 @@ export const App: React.FC<{}> = () => {
         if (isAuthenticationLoading || isAnyUsersLoading) {
             return fillScreenWithPage(<CircularProgress />);
         }
-        if (!isAuthenticated && anyUsers) {
-            return fillScreenWithPage(<Login onSuccessfulLogin={() => setIsAuthenticated(true)} />);
+        if (!isAuthenticated() && anyUsers) {
+            return fillScreenWithPage(<Login onSuccessfulLogin={() => checkIfAuthenticated()} />);
         }
 
         if (!anyUsers) {
@@ -59,10 +67,15 @@ export const App: React.FC<{}> = () => {
     };
 
     const getAuthenticatedRoutes = (): JSX.Element[] => {
-        if (isAuthenticated) {
+        if (isAuthenticated()) {
             return [
-                <Route path="/change-password" element={fillScreenWithPage(<ChangePassword />)} />,
                 <Route
+                    key="/change-password"
+                    path="/change-password"
+                    element={fillScreenWithPage(<ChangePassword />)}
+                />,
+                <Route
+                    key="/create-user"
                     path="/create-user"
                     element={fillScreenWithPage(<CreateAdditionalUser />)}
                 />,
@@ -74,7 +87,7 @@ export const App: React.FC<{}> = () => {
 
     return (
         <div className={classes.app}>
-            <AppHeader onLogout={checkIfAuthenticated} isAuthenticated={isAuthenticated} />
+            <AppHeader onLogout={checkIfAuthenticated} username={username} />
             <Routes>
                 {getAuthenticatedRoutes()}
                 <Route path="/" element={getPage()} />

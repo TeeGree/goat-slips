@@ -18,10 +18,10 @@
 
 .userMenuIcon {
     height: $headerHeight;
-    width: $headerHeight;
     position: fixed !important;
     right: 0;
     top: 0;
+    color: inherit !important;
 }
 
 .link {

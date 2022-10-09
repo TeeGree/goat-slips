@@ -59,13 +59,13 @@ namespace GoatSlipsApi.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("IsAuthenticated", Name = "IsAuthenticated")]
-        public ActionResult<bool> IsAuthenticated()
+        [HttpGet("GetUsername", Name = "GetUsername")]
+        public ActionResult<string?> GetUsername()
         {
             try
             {
-                bool isAuthenticated = _userService.IsAuthenticated(HttpContext);
-                return Ok(isAuthenticated);
+                string? username = _userService.GetUsernameFromContext(HttpContext);
+                return Ok(username);
             }
             catch (Exception e)
             {

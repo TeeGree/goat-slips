@@ -1,6 +1,6 @@
 import React from 'react';
 import classes from './AppHeader.module.scss';
-import { IconButton, Menu, MenuItem, Paper } from '@mui/material';
+import { Button, IconButton, Menu, MenuItem, Paper } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Person } from '@mui/icons-material';
 import { fetchGetResponse } from '../helpers/fetchFunctions';
@@ -8,11 +8,11 @@ import { Link } from 'react-router-dom';
 
 interface AppHeaderProps {
     onLogout: () => void;
-    isAuthenticated: boolean;
+    username: string;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
-    const { onLogout, isAuthenticated } = props;
+    const { onLogout, username } = props;
 
     const [appMenuAnchorEl, setAppMenuAnchorEl] = React.useState<null | HTMLElement>(null);
     const appMenuOpen = Boolean(appMenuAnchorEl);
@@ -54,8 +54,12 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
         );
     };
 
+    const isAuthenticated = () => {
+        return username !== '';
+    };
+
     const getAppMenuIcon = () => {
-        if (isAuthenticated) {
+        if (isAuthenticated()) {
             return (
                 <>
                     <IconButton className={classes.appMenuIcon} onClick={handleAppMenuClick}>
@@ -80,12 +84,13 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
     };
 
     const getUserMenuIcon = () => {
-        if (isAuthenticated) {
+        if (isAuthenticated()) {
             return (
                 <>
-                    <IconButton className={classes.userMenuIcon} onClick={handleUserMenuClick}>
+                    <Button className={classes.userMenuIcon} onClick={handleUserMenuClick}>
                         <Person />
-                    </IconButton>
+                        {username}
+                    </Button>
                     <Menu
                         anchorEl={userMenuAnchorEl}
                         open={userMenuOpen}

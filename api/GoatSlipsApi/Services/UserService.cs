@@ -11,7 +11,7 @@ namespace GoatSlipsApi.Services
         void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext);
         void CreateUser(CreateUserBody createUserBody);
         void CreateFirstUser(CreateUserBody createUserBody);
-        bool IsAuthenticated(HttpContext httpContext);
+        string? GetUsernameFromContext(HttpContext httpContext);
         bool AnyUsers();
         void Logout(HttpContext httpContext);
         void ChangePassword(ChangePasswordBody changePasswordBody, HttpContext httpContext);
@@ -90,18 +90,23 @@ namespace GoatSlipsApi.Services
             CreateUser(createUserBody);
         }
 
-        public bool IsAuthenticated(HttpContext httpContext)
+        public string? GetUsernameFromContext(HttpContext httpContext)
         {
             int? userId = _jwtUtils.GetUserIdFromContext(httpContext);
 
             if (userId == null)
             {
-                return false;
+                return null;
             }
 
             User? user = _userRepository.GetById(userId.Value);
 
-            return user?.Password != null;
+            if (user != null)
+            {
+                return user.Username;
+            }
+
+            return null;
         }
 
         public bool AnyUsers()
