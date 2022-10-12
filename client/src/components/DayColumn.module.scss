@@ -30,4 +30,12 @@
 .dayTotal {
     background-color: #1e7864;
     border-bottom: 2px solid white;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.newTime {
+    color: orange;
 }
