@@ -49,17 +49,17 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         setMinutesDiff,
     } = props;
 
-    const getTotalMinutes = (h: number | undefined, m: number | undefined) => {
-        return (h ?? 0) * 60 + (m ?? 0);
+    const getTotalMinutes = (h: number | '', m: number | '') => {
+        return (h === '' ? 0 : h) * 60 + (m === '' ? 0 : m);
     };
 
     const [selectedProjectId, setSelectedProjectId] = useState<number | ''>(projectId ?? '');
     const [selectedTaskId, setSelectedTaskId] = useState<number | ''>(taskId ?? '');
     const [selectedLaborCodeId, setSelectedLaborCodeId] = useState<number | ''>(laborCodeId ?? '');
-    const [selectedHours, setSelectedHours] = useState<number>(hours ?? 0);
-    const [selectedMinutes, setSelectedMinutes] = useState<number>(minutes ?? 0);
+    const [selectedHours, setSelectedHours] = useState<number | ''>(hours ?? '');
+    const [selectedMinutes, setSelectedMinutes] = useState<number | ''>(minutes ?? '');
 
-    const totalInitialMinutes = getTotalMinutes(hours, minutes);
+    const totalInitialMinutes = getTotalMinutes(hours ?? '', minutes ?? '');
 
     const getProjectOptions = (): JSX.Element[] => {
         return projectOptions.map((project: DropdownOption) => {
@@ -111,13 +111,25 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     };
 
     const handleHoursChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const hrs = Number(event.target.value);
+        const value = event.target.value;
+        const hrs = value === '' ? '' : Number(value);
+
+        if (hrs !== '' && hrs < 0) {
+            return;
+        }
+
         setSelectedHours(hrs);
         setMinutesDiff(getTotalMinutes(hrs, selectedMinutes) - totalInitialMinutes);
     };
 
     const handleMinutesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const mins = Number(event.target.value);
+        const value = event.target.value;
+        const mins = value === '' ? '' : Number(value);
+
+        if (mins !== '' && (mins < 0 || mins >= 60)) {
+            return;
+        }
+
         setSelectedMinutes(mins);
         setMinutesDiff(getTotalMinutes(selectedHours, mins) - totalInitialMinutes);
     };
@@ -133,13 +145,18 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
             selectedProjectId,
             taskIdForSubmit,
             laborCodeIdForSubmit,
-            selectedHours,
-            selectedMinutes,
+            selectedHours === '' ? 0 : selectedHours,
+            selectedMinutes === '' ? 0 : selectedMinutes,
         );
     };
 
     const isSaveAllowed = (p: number | ''): p is number => {
-        return p !== '' && (selectedHours > 0 || selectedMinutes > 0);
+        return (
+            p !== '' &&
+            selectedHours !== '' &&
+            selectedMinutes !== '' &&
+            (selectedHours > 0 || selectedMinutes > 0)
+        );
     };
 
     const handleCancel = () => {
