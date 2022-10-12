@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import classes from './ReadOnlyTimeSlip.module.scss';
-import { Box, Button, Card, CardActions, CardContent, Modal } from '@mui/material';
+import { Box, Button, Card, CardActions, CardContent, Modal, Tooltip } from '@mui/material';
 import { TimeSlip } from '../../types/TimeSlip';
+import { Flag, Task, Work } from '@mui/icons-material';
 
 interface ReadOnlyTimeSlipProps {
     timeSlip: TimeSlip;
@@ -35,13 +36,34 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
 
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const getReadonlyPropText = (text: string, icon: React.ReactNode, tooltip: string) => {
+        return (
+            <div className={classes.readonlyPropText}>
+                <Tooltip title={tooltip} placement="left">
+                    <span className={classes.readonlyPropTextSpan}>
+                        {icon}
+                        {text}
+                    </span>
+                </Tooltip>
+            </div>
+        );
+    };
+
     return (
         <>
             <Card>
-                <CardContent>
-                    <div>Project: {getProjectName(timeSlip.projectId)}</div>
-                    <div>Task: {task}</div>
-                    <div>Labor Code: {laborCode}</div>
+                <CardContent className={classes.content}>
+                    {getReadonlyPropText(
+                        getProjectName(timeSlip.projectId),
+                        <Flag className={classes.icon} />,
+                        'Project',
+                    )}
+                    {getReadonlyPropText(task, <Task className={classes.icon} />, 'Task')}
+                    {getReadonlyPropText(
+                        laborCode,
+                        <Work className={classes.icon} />,
+                        'Labor Code',
+                    )}
                     <div
                         className={classes.time}
                     >{`${timeSlip.hours} hr ${timeSlip.minutes} min`}</div>

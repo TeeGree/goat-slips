@@ -14,3 +14,20 @@
     display: flex;
     justify-content: center;
 }
+
+.content {
+    font-size: 24px;
+}
+
+.readonlyPropText {
+    width: 100%;
+}
+
+.readonlyPropTextSpan {
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    margin-right: 10px;
+}
