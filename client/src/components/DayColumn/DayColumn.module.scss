@@ -1,4 +1,4 @@
-@import '../colors';
+@import '../../colors';
 
 .dayColumn {
     height: 100%;
@@ -25,17 +25,4 @@
     padding: 0.4em;
     height: calc(100% - 4.7em);
     overflow-y: auto;
-}
-
-.dayTotal {
-    background-color: #1e7864;
-    border-bottom: 2px solid white;
-    height: 100px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.newTime {
-    color: orange;
 }

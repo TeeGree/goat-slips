@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import classes from './WeekView.module.scss';
-import { DayColumn } from './DayColumn';
+import { DayColumn } from './DayColumn/DayColumn';
 import { Day } from '../types/Day';
 import { DropdownOption } from '../types/DropdownOption';
 import { TimeSlip } from '../types/TimeSlip';
