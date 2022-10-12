@@ -9,10 +9,11 @@ import { Link } from 'react-router-dom';
 interface AppHeaderProps {
     onLogout: () => void;
     username: string;
+    passwordChangeRequired: boolean;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
-    const { onLogout, username } = props;
+    const { onLogout, username, passwordChangeRequired } = props;
 
     const [appMenuAnchorEl, setAppMenuAnchorEl] = React.useState<null | HTMLElement>(null);
     const appMenuOpen = Boolean(appMenuAnchorEl);
@@ -59,7 +60,7 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
     };
 
     const getAppMenuIcon = () => {
-        if (isAuthenticated()) {
+        if (isAuthenticated() && !passwordChangeRequired) {
             return (
                 <>
                     <IconButton className={classes.appMenuIcon} onClick={handleAppMenuClick}>

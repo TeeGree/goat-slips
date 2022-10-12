@@ -9,9 +9,8 @@ namespace GoatSlipsApi.Services
     {
         IEnumerable<User> GetAllUsers();
         void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext);
-        void CreateUser(CreateUserBody createUserBody);
-        void CreateFirstUser(CreateUserBody createUserBody);
-        string? GetUsernameFromContext(HttpContext httpContext);
+        void CreateUser(CreateUserBody createUserBody, bool requirePasswordChange);
+        UserForUI? GetUserFromContext(HttpContext httpContext);
         bool AnyUsers();
         void Logout(HttpContext httpContext);
         void ChangePassword(ChangePasswordBody changePasswordBody, HttpContext httpContext);
@@ -56,7 +55,7 @@ namespace GoatSlipsApi.Services
             SetAuthorizationCookie(token, httpContext);
         }
 
-        public void CreateUser(CreateUserBody createUserBody)
+        public void CreateUser(CreateUserBody createUserBody, bool requirePasswordChange)
         {
             if (string.IsNullOrEmpty(createUserBody.Username))
             {
@@ -80,33 +79,33 @@ namespace GoatSlipsApi.Services
                 FirstName = createUserBody.FirstName,
                 LastName = createUserBody.LastName,
                 Password = _secretService.Hash(createUserBody.Password),
+                RequirePasswordChange = requirePasswordChange,
             };
 
-            _userRepository.CreateFirstUser(userToAdd);
+            _userRepository.CreateUser(userToAdd);
         }
 
-        public void CreateFirstUser(CreateUserBody createUserBody)
-        {
-            CreateUser(createUserBody);
-        }
-
-        public string? GetUsernameFromContext(HttpContext httpContext)
+        public UserForUI? GetUserFromContext(HttpContext httpContext)
         {
             int? userId = _jwtUtils.GetUserIdFromContext(httpContext);
 
             if (userId == null)
             {
-                return null;
+                throw new Exception("No user in context.");
             }
 
             User? user = _userRepository.GetById(userId.Value);
 
-            if (user != null)
+            if (user == null)
             {
-                return user.Username;
+                throw new Exception("User in context not found in db.");
             }
 
-            return null;
+            return new UserForUI
+            {
+                Username = user.Username,
+                RequiresPasswordChange = user.RequirePasswordChange,
+            };
         }
 
         public bool AnyUsers()

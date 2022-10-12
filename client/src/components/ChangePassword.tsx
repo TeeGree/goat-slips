@@ -8,7 +8,13 @@ interface AlertMessage {
     severity: 'error' | 'success';
 }
 
-export const ChangePassword: React.FC<{}> = () => {
+interface ChangePasswordProps {
+    prompt?: string;
+    onChangePassword?: () => void;
+}
+
+export const ChangePassword: React.FC<ChangePasswordProps> = (props: ChangePasswordProps) => {
+    const { prompt, onChangePassword } = props;
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -40,6 +46,10 @@ export const ChangePassword: React.FC<{}> = () => {
                 message: 'Password successfully changed.',
                 severity: 'success',
             });
+
+            if (onChangePassword) {
+                onChangePassword();
+            }
         } else {
             const responseText = await response.text();
             setAlertMessage({
@@ -59,6 +69,7 @@ export const ChangePassword: React.FC<{}> = () => {
 
     return (
         <div className={classes.inputContainer}>
+            <p>{prompt ?? ''}</p>
             <div className={classes.inputForm}>
                 {getAlert()}
                 <div className={classes.input}>

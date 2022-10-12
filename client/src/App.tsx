@@ -9,9 +9,11 @@ import { CreateFirstUser } from './components/CreateUser/CreateFirstUser';
 import { AppHeader } from './components/AppHeader';
 import { CreateAdditionalUser } from './components/CreateUser/CreateAdditionalUser';
 import { ChangePassword } from './components/ChangePassword';
+import { User } from './types/User';
 
 export const App: React.FC<{}> = () => {
     const [username, setUsername] = useState<string>('');
+    const [passwordChangeRequired, setPasswordChangeRequired] = useState(true);
     const [isAuthenticationLoading, setIsAuthenticationLoading] = useState(true);
 
     const [anyUsers, setAnyUsers] = useState(false);
@@ -23,11 +25,14 @@ export const App: React.FC<{}> = () => {
 
     const checkIfAuthenticated = async () => {
         setIsAuthenticationLoading(true);
-        const response = await fetchGetResponse('User/GetUsername');
+        const userResponse = await fetchGetResponse('User/GetUser');
 
-        if (response.ok) {
-            const usernameFromApi = await response.text();
-            setUsername(usernameFromApi);
+        if (userResponse.ok) {
+            const user: User = await userResponse.json();
+            setPasswordChangeRequired(user.requiresPasswordChange);
+            setUsername(user.username);
+        } else {
+            setUsername('');
         }
 
         setIsAuthenticationLoading(false);
@@ -63,11 +68,21 @@ export const App: React.FC<{}> = () => {
                 <CreateFirstUser onSuccessfulUserCreation={checkIfAnyUsers} />,
             );
         }
+
+        if (passwordChangeRequired) {
+            return fillScreenWithPage(
+                <ChangePassword
+                    onChangePassword={() => checkIfAuthenticated()}
+                    prompt="You must change your password before you can access the application."
+                />,
+            );
+        }
+
         return <WeekView />;
     };
 
     const getAuthenticatedRoutes = (): JSX.Element[] => {
-        if (isAuthenticated()) {
+        if (isAuthenticated() && !passwordChangeRequired) {
             return [
                 <Route
                     key="/change-password"
@@ -87,7 +102,11 @@ export const App: React.FC<{}> = () => {
 
     return (
         <div className={classes.app}>
-            <AppHeader onLogout={checkIfAuthenticated} username={username} />
+            <AppHeader
+                onLogout={checkIfAuthenticated}
+                username={username}
+                passwordChangeRequired={passwordChangeRequired}
+            />
             <Routes>
                 {getAuthenticatedRoutes()}
                 <Route path="/" element={getPage()} />

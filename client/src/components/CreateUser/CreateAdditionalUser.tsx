@@ -49,7 +49,7 @@ export const CreateAdditionalUser: React.FC<{}> = () => {
 
     return (
         <>
-            <CreateUser createUser={createUser}>
+            <CreateUser createUser={createUser} isPasswordTemporary>
                 <p>Create a new user</p>
             </CreateUser>
             <Stack spacing={2} sx={{ width: '100%' }}>

@@ -59,12 +59,12 @@ namespace GoatSlipsApi.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("GetUsername", Name = "GetUsername")]
-        public ActionResult<string?> GetUsername()
+        [HttpGet("GetUser", Name = "GetUser")]
+        public ActionResult<UserForUI?> GetUsername()
         {
             try
             {
-                string? username = _userService.GetUsernameFromContext(HttpContext);
+                UserForUI? username = _userService.GetUserFromContext(HttpContext);
                 return Ok(username);
             }
             catch (Exception e)
@@ -95,7 +95,7 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
-                _userService.CreateFirstUser(createUserBody);
+                _userService.CreateUser(createUserBody, true);
                 return Ok();
             }
             catch (ArgumentNullException e)
@@ -115,7 +115,7 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
-                _userService.CreateFirstUser(createUserBody);
+                _userService.CreateUser(createUserBody, false);
                 return Ok();
             }
             catch(InvalidOperationException e)

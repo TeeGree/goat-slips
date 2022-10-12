@@ -33,7 +33,7 @@ export const CreateFirstUser: React.FC<CreateFirstUserProps> = (props: CreateFir
     };
 
     return (
-        <CreateUser createUser={createUser}>
+        <CreateUser isPasswordTemporary={false} createUser={createUser}>
             Welcome to G.O.A.T. Slips!
             <p>
                 There are no users in the system. Please enter user information so that you can log

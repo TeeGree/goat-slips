@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import classes from './CreateUser.module.scss';
 
 interface CreateUserProps {
+    isPasswordTemporary: boolean;
     createUser: (
         username: string,
         email: string,
@@ -14,7 +15,7 @@ interface CreateUserProps {
 }
 
 export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
-    const { createUser, children } = props;
+    const { isPasswordTemporary, createUser, children } = props;
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [firstName, setFirstName] = useState('');
@@ -50,6 +51,14 @@ export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) =>
             setLastName('');
             setPassword('');
         }
+    };
+
+    const getPasswordLabel = () => {
+        if (isPasswordTemporary) {
+            return 'Temporary Password';
+        }
+
+        return 'Password';
     };
 
     return (
@@ -90,7 +99,7 @@ export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) =>
                 </div>
                 <div className={classes.input}>
                     <TextField
-                        label="Password"
+                        label={getPasswordLabel()}
                         variant="outlined"
                         type="password"
                         value={password}

@@ -6,5 +6,6 @@
 	[Password] VARCHAR(111) NOT NULL,
 	[FirstName] VARCHAR(50) NOT NULL,
 	[LastName] VARCHAR(50) NOT NULL,
+	[RequirePasswordChange] BIT NOT NULL DEFAULT 0,
 	CONSTRAINT [UC_Username] UNIQUE ([Username])
 )

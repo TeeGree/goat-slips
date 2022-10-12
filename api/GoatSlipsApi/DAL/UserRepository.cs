@@ -8,7 +8,7 @@ namespace GoatSlipsApi.DAL
         User? GetById(int id);
         User? GetByUsername(string username);
         IEnumerable<User> GetAllUsers();
-        void CreateFirstUser(User userToAdd);
+        void CreateUser(User userToAdd);
         void UpdatePassword(int userId, string newPassword);
     }
     public sealed class UserRepository : IUserRepository
@@ -39,7 +39,7 @@ namespace GoatSlipsApi.DAL
             return users;
         }
 
-        public void CreateFirstUser(User userToAdd)
+        public void CreateUser(User userToAdd)
         {
             _dbContext.Users?.Add(userToAdd);
             _dbContext.SaveChanges();
@@ -54,6 +54,7 @@ namespace GoatSlipsApi.DAL
             }
 
             userFromDb.Password = newPassword;
+            userFromDb.RequirePasswordChange = false;
 
             _dbContext.SaveChanges();
         }
