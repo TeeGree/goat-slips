@@ -231,14 +231,12 @@ export const WeekView: React.FC<{}> = () => {
         return laborCodeMap.get(laborCodeId) ?? '';
     };
 
-    const getDateOfDay = (day: 0 | 1 | 2 | 3 | 4 | 5 | 6) => {
+    const getDateOfDay = (day: 0 | 1 | 2 | 3 | 4 | 5 | 6): Date => {
         const dayDate = new Date(sundayDate.getTime() + day * 24 * 60 * 60 * 1000);
         return dayDate;
     };
 
     const getDayColumn = (day: 0 | 1 | 2 | 3 | 4 | 5 | 6) => {
-        const currentDay = currentDate.getDay();
-        const isCurrentDay = day === currentDay;
         const dayString = dayMap.get(day);
 
         if (dayString === undefined) {
@@ -246,6 +244,10 @@ export const WeekView: React.FC<{}> = () => {
         }
 
         const dayDate = getDateOfDay(day);
+        const isCurrentDay =
+            dayDate.getFullYear() === currentDate.getFullYear() &&
+            dayDate.getMonth() === currentDate.getMonth() &&
+            dayDate.getDate() === currentDate.getDate();
 
         const timeSlipsDaySummary =
             timeSlipsPerDay.get(dayDate.toLocaleDateString('en')) ?? defaultTimeSlipDaySummary;

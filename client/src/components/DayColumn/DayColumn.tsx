@@ -131,7 +131,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         });
     };
 
-    const className = isCurrentDay ? 'current-day ' : '';
+    const className = isCurrentDay ? `${classes.currentDay} ` : '';
     return (
         <div className={`${className} ${classes.dayColumn}`}>
             <div className={classes.dayHeader}>
