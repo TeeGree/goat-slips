@@ -1,6 +1,5 @@
 ﻿using GoatSlipsApi.Attributes;
 using GoatSlipsApi.Models;
-using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Authentication;
@@ -24,11 +23,11 @@ namespace GoatSlipsApi.Controllers
         }
 
         [HttpGet(Name = "GetUsers")]
-        public ActionResult<IEnumerable<User>> Get()
+        public ActionResult<IEnumerable<UserForDropdown>> Get()
         {
             try
             {
-                IEnumerable<User> users = _userService.GetAllUsers();
+                IEnumerable<UserForDropdown> users = _userService.GetAllUsers();
                 return Ok(users);
             }
             catch (Exception e)

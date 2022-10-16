@@ -8,11 +8,6 @@ import { Button } from '@mui/material';
 import { ArrowLeft, ArrowRight } from '@mui/icons-material';
 import { fetchGet, fetchPostResponse } from '../helpers/fetchFunctions';
 
-interface TaskMap {
-    projectId: number;
-    allowedTaskIds: number[];
-}
-
 interface TimeSlipDaySummary {
     timeSlips: TimeSlip[];
     totalHours: number;
@@ -29,7 +24,19 @@ const dayMap = new Map<number, Day>([
     [6, 'Saturday'],
 ]);
 
-export const WeekView: React.FC<{}> = () => {
+interface WeekViewProps {
+    projects: DropdownOption[];
+    projectMap: Map<number, string>;
+    tasks: Map<number, string>;
+    tasksAllowedForProjects: Map<number, number[]>;
+    laborCodes: DropdownOption[];
+    laborCodeMap: Map<number, string>;
+}
+
+export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
+    const { projects, projectMap, tasks, tasksAllowedForProjects, laborCodes, laborCodeMap } =
+        props;
+
     const currentDate = new Date();
 
     const defaultTimeSlipDaySummary: TimeSlipDaySummary = {
@@ -46,60 +53,10 @@ export const WeekView: React.FC<{}> = () => {
     };
 
     const [sundayDate, setSundayDate] = useState<Date>(getSundayDateForDate(currentDate));
-    const [projects, setProjects] = useState<DropdownOption[]>([]);
-    const [projectMap, setProjectMap] = useState<Map<number, string>>(new Map<number, string>([]));
-    const [tasks, setTasks] = useState<Map<number, string>>(new Map<number, string>([]));
-
-    const [tasksAllowedForProjects, setTasksAllowedForProjects] = useState<Map<number, number[]>>(
-        new Map<number, number[]>([]),
-    );
 
     const [timeSlipsPerDay, setTimeSlipsPerDay] = useState<Map<string, TimeSlipDaySummary>>(
         new Map<string, TimeSlipDaySummary>([]),
     );
-
-    const [laborCodes, setLaborCodes] = useState<DropdownOption[]>([]);
-    const [laborCodeMap, setLaborCodeMap] = useState<Map<number, string>>(
-        new Map<number, string>([]),
-    );
-
-    const getProjects = async () => {
-        const projectsFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('Project');
-
-        const map = new Map<number, string>([]);
-        projectsFromApi.forEach((project: DropdownOption) => map.set(project.id, project.name));
-        setProjectMap(map);
-        setProjects(projectsFromApi);
-    };
-
-    const getTasks = async () => {
-        const tasksFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('Task');
-
-        const taskMap = new Map<number, string>([]);
-        tasksFromApi.forEach((task) => taskMap.set(task.id, task.name));
-        setTasks(taskMap);
-    };
-
-    const getTasksAllowedForProjects = async () => {
-        const taskMapsFromApi: TaskMap[] = await fetchGet<TaskMap[]>('Task/ProjectsAllowedTasks');
-
-        const taskProjectMap = new Map<number, number[]>([]);
-        taskMapsFromApi.forEach((taskMap) =>
-            taskProjectMap.set(taskMap.projectId, taskMap.allowedTaskIds),
-        );
-        setTasksAllowedForProjects(taskProjectMap);
-    };
-
-    const getLaborCodes = async () => {
-        const laborCodesFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('LaborCode');
-
-        const map = new Map<number, string>([]);
-        laborCodesFromApi.forEach((laborCode: DropdownOption) =>
-            map.set(laborCode.id, laborCode.name),
-        );
-        setLaborCodeMap(map);
-        setLaborCodes(laborCodesFromApi);
-    };
 
     const getTimeSlips = async () => {
         const timeSlipsFromApi: TimeSlip[] = await fetchGet<TimeSlip[]>(
@@ -196,10 +153,6 @@ export const WeekView: React.FC<{}> = () => {
     };
 
     useEffect(() => {
-        getProjects();
-        getTasks();
-        getTasksAllowedForProjects();
-        getLaborCodes();
         getTimeSlips();
     }, []);
 

@@ -1,4 +1,5 @@
-﻿using GoatSlipsApi.Models.Database;
+﻿using GoatSlipsApi.Models;
+using GoatSlipsApi.Models.Database;
 using System.Data.Entity;
 
 namespace GoatSlipsApi.DAL
@@ -7,7 +8,7 @@ namespace GoatSlipsApi.DAL
     {
         User? GetById(int id);
         User? GetByUsername(string username);
-        IEnumerable<User> GetAllUsers();
+        IEnumerable<UserForDropdown> GetAllUsers();
         void CreateUser(User userToAdd);
         void UpdatePassword(int userId, string newPassword);
     }
@@ -29,14 +30,18 @@ namespace GoatSlipsApi.DAL
             return _dbContext.Users?.FirstOrDefault(u => u.Username == username);
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public IEnumerable<UserForDropdown> GetAllUsers()
         {
             DbSet<User>? users = _dbContext.Users;
             if (users == null)
             {
                 throw new Exception("No users found!");
             }
-            return users;
+            return users.Select(u => new UserForDropdown
+            {
+                Id = u.Id,
+                Name = u.Username
+            });
         }
 
         public void CreateUser(User userToAdd)

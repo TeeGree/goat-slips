@@ -7,7 +7,7 @@ namespace GoatSlipsApi.Services
 {
     public interface IUserService
     {
-        IEnumerable<User> GetAllUsers();
+        IEnumerable<UserForDropdown> GetAllUsers();
         void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext);
         void CreateUser(CreateUserBody createUserBody, bool requirePasswordChange);
         UserForUI? GetUserFromContext(HttpContext httpContext);
@@ -30,7 +30,7 @@ namespace GoatSlipsApi.Services
             _jwtUtils = jwtUtils;
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public IEnumerable<UserForDropdown> GetAllUsers()
         {
             return _userRepository.GetAllUsers();
         }

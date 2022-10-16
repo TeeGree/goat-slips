@@ -11,6 +11,12 @@ import { CreateAdditionalUser } from './components/CreateUser/CreateAdditionalUs
 import { ChangePassword } from './components/ChangePassword';
 import { User } from './types/User';
 import { QueryTimeSlips } from './components/QueryTimeSlips';
+import { DropdownOption } from './types/DropdownOption';
+
+interface TaskMap {
+    projectId: number;
+    allowedTaskIds: number[];
+}
 
 export const App: React.FC<{}> = () => {
     const [username, setUsername] = useState<string>('');
@@ -19,6 +25,24 @@ export const App: React.FC<{}> = () => {
 
     const [anyUsers, setAnyUsers] = useState(false);
     const [isAnyUsersLoading, setAnyUsersLoading] = useState(true);
+
+    const [users, setUsers] = useState<DropdownOption[]>([]);
+    const [userMap, setUserMap] = useState<Map<number, string>>(new Map<number, string>([]));
+
+    const [projects, setProjects] = useState<DropdownOption[]>([]);
+    const [projectMap, setProjectMap] = useState<Map<number, string>>(new Map<number, string>([]));
+
+    const [tasks, setTasks] = useState<DropdownOption[]>([]);
+    const [taskMap, setTaskMap] = useState<Map<number, string>>(new Map<number, string>([]));
+
+    const [tasksAllowedForProjects, setTasksAllowedForProjects] = useState<Map<number, number[]>>(
+        new Map<number, number[]>([]),
+    );
+
+    const [laborCodes, setLaborCodes] = useState<DropdownOption[]>([]);
+    const [laborCodeMap, setLaborCodeMap] = useState<Map<number, string>>(
+        new Map<number, string>([]),
+    );
 
     const isAuthenticated = () => {
         return username !== '';
@@ -52,6 +76,64 @@ export const App: React.FC<{}> = () => {
         checkIfAnyUsers();
     }, []);
 
+    useEffect(() => {
+        if (isAuthenticated()) {
+            getUsers();
+            getProjects();
+            getTasks();
+            getTasksAllowedForProjects();
+            getLaborCodes();
+        }
+    }, [username]);
+
+    const getUsers = async () => {
+        const usersFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('User');
+
+        const map = new Map<number, string>([]);
+        usersFromApi.forEach((user: DropdownOption) => map.set(user.id, user.name));
+        setUserMap(map);
+        setUsers(usersFromApi);
+    };
+
+    const getProjects = async () => {
+        const projectsFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('Project');
+
+        const map = new Map<number, string>([]);
+        projectsFromApi.forEach((project: DropdownOption) => map.set(project.id, project.name));
+        setProjectMap(map);
+        setProjects(projectsFromApi);
+    };
+
+    const getTasks = async () => {
+        const tasksFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('Task');
+
+        const taskMapFromApi = new Map<number, string>([]);
+        tasksFromApi.forEach((task) => {
+            taskMapFromApi.set(task.id, task.name);
+        });
+        setTaskMap(taskMapFromApi);
+        setTasks(tasksFromApi);
+    };
+
+    const getTasksAllowedForProjects = async () => {
+        const taskMapsFromApi: TaskMap[] = await fetchGet<TaskMap[]>('Task/ProjectsAllowedTasks');
+
+        const taskProjectMap = new Map<number, number[]>([]);
+        taskMapsFromApi.forEach((tm) => taskProjectMap.set(tm.projectId, tm.allowedTaskIds));
+        setTasksAllowedForProjects(taskProjectMap);
+    };
+
+    const getLaborCodes = async () => {
+        const laborCodesFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('LaborCode');
+
+        const map = new Map<number, string>([]);
+        laborCodesFromApi.forEach((laborCode: DropdownOption) =>
+            map.set(laborCode.id, laborCode.name),
+        );
+        setLaborCodeMap(map);
+        setLaborCodes(laborCodesFromApi);
+    };
+
     const fillScreenWithPage = (page: JSX.Element) => {
         return <div className={classes.fillScreen}>{page}</div>;
     };
@@ -79,7 +161,16 @@ export const App: React.FC<{}> = () => {
             );
         }
 
-        return <WeekView />;
+        return (
+            <WeekView
+                projects={projects}
+                projectMap={projectMap}
+                tasks={taskMap}
+                tasksAllowedForProjects={tasksAllowedForProjects}
+                laborCodes={laborCodes}
+                laborCodeMap={laborCodeMap}
+            />
+        );
     };
 
     const getAuthenticatedRoutes = (): JSX.Element[] => {
@@ -98,7 +189,18 @@ export const App: React.FC<{}> = () => {
                 <Route
                     key="/query-time-slips"
                     path="/query-time-slips"
-                    element={fillScreenWithPage(<QueryTimeSlips />)}
+                    element={
+                        <QueryTimeSlips
+                            users={users}
+                            userMap={userMap}
+                            projects={projects}
+                            projectMap={projectMap}
+                            tasks={tasks}
+                            taskMap={taskMap}
+                            laborCodes={laborCodes}
+                            laborCodeMap={laborCodeMap}
+                        />
+                    }
                 />,
             ];
         }

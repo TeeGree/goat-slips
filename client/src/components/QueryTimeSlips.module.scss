@@ -1,0 +1,23 @@
+@import '../variables';
+
+.dropdown {
+    min-width: 150px !important;
+}
+
+.pageContainer {
+    width: 80%;
+    height: calc(100vh - $headerHeight);
+    display: flex;
+    flex-direction: column;
+}
+
+.inputContainer {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.tableContainer {
+    flex-grow: 1;
+}
