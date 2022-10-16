@@ -98,5 +98,26 @@ namespace GoatSlipsApi.Controllers
                 return Problem(e.Message);
             }
         }
+
+        [HttpPost("QueryTimeSlips", Name = "QueryTimeSlips")]
+        public ActionResult<TimeSlip[]> QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody)
+        {
+            try
+            {
+                TimeSlip[] timeSlips = _timeSlipService.GetTimeSlips(
+                    getTimeSlipsBody.UserIds,
+                    getTimeSlipsBody.ProjectIds,
+                    getTimeSlipsBody.TaskIds,
+                    getTimeSlipsBody.LaborCodeIds,
+                    getTimeSlipsBody.FromDate,
+                    getTimeSlipsBody.ToDate);
+                return Ok(timeSlips);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
     }
 }

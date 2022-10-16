@@ -2,6 +2,7 @@
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
 using System.Data.Entity;
+using System.Linq;
 
 namespace GoatSlipsApi.Services
 {
@@ -12,6 +13,14 @@ namespace GoatSlipsApi.Services
         void AddTimeSlip(AddTimeSlipBody timeSlip, HttpContext httpContext);
         void UpdateTimeSlip(UpdateTimeSlipBody timeSlip);
         void DeleteTimeSlip(int id);
+        TimeSlip[] GetTimeSlips(
+            int[]? userIds,
+            int[]? projectIds,
+            int?[]? taskIds,
+            int?[]? laborCodeIds,
+            DateTime? fromDate,
+            DateTime? toDate
+        );
     }
     public class TimeSlipService : ITimeSlipService
     {
@@ -98,6 +107,57 @@ namespace GoatSlipsApi.Services
 
             _dbContext.TimeSlips?.Remove(timeSlip);
             _dbContext.SaveChanges();
+        }
+
+        public TimeSlip[] GetTimeSlips(
+            int[]? userIds,
+            int[]? projectIds,
+            int?[]? taskIds,
+            int?[]? laborCodeIds,
+            DateTime? fromDate,
+            DateTime? toDate
+        )
+        {
+            // TODO: Allow selecting blank
+            DbSet<TimeSlip>? timeSlips = _dbContext?.TimeSlips;
+            if (timeSlips == null)
+            {
+                throw new Exception("No time slips found!");
+            }
+
+            IQueryable<TimeSlip> timeSlipsQueryable = timeSlips.AsQueryable();
+
+            if (userIds != null)
+            {
+                timeSlipsQueryable = timeSlipsQueryable.Where(ts => userIds.Contains(ts.UserId));
+            }
+
+            if (projectIds != null)
+            {
+                timeSlipsQueryable = timeSlipsQueryable.Where(ts => projectIds.Contains(ts.ProjectId));
+            }
+
+            if (taskIds != null)
+            {
+                timeSlipsQueryable = timeSlipsQueryable.Where(ts => taskIds.Contains(ts.TaskId));
+            }
+
+            if (laborCodeIds != null)
+            {
+                timeSlipsQueryable = timeSlipsQueryable.Where(ts => laborCodeIds.Contains(ts.LaborCodeId));
+            }
+
+            if (fromDate.HasValue)
+            {
+                timeSlipsQueryable = timeSlipsQueryable.Where(ts => ts.Date >= fromDate);
+            }
+
+            if (toDate.HasValue)
+            {
+                timeSlipsQueryable = timeSlipsQueryable.Where(ts => ts.Date <= toDate);
+            }
+
+            return timeSlipsQueryable.ToArray();
         }
     }
 }
