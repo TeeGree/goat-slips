@@ -1,7 +1,9 @@
 import {
+    Checkbox,
     CircularProgress,
     FormControl,
     InputLabel,
+    ListItemText,
     MenuItem,
     Paper,
     Select,
@@ -30,39 +32,44 @@ interface QueryTimeSlipsProps {
     laborCodeMap: Map<number, string>;
 }
 
+const emptyDropdownOption: DropdownOption = {
+    id: -1,
+    name: 'N/A',
+};
+
 export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSlipsProps) => {
     const { users, userMap, projects, projectMap, tasks, taskMap, laborCodes, laborCodeMap } =
         props;
     const [loadingResults, setLoadingResults] = useState(true);
     const [timeSlips, setTimeSlips] = useState<TimeSlip[]>([]);
 
-    const [selectedUserId, setSelectedUserId] = useState<number | ''>('');
-    const [selectedProjectId, setSelectedProjectId] = useState<number | ''>('');
-    const [selectedTaskId, setSelectedTaskId] = useState<number | ''>('');
-    const [selectedLaborCodeId, setSelectedLaborCodeId] = useState<number | ''>('');
+    const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+    const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
+    const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([]);
+    const [selectedLaborCodeIds, setSelectedLaborCodeIds] = useState<number[]>([]);
 
     useEffect(() => {
         fetchTimeSlips();
-    }, [selectedUserId, selectedProjectId, selectedTaskId, selectedLaborCodeId]);
+    }, [selectedUserIds, selectedProjectIds, selectedTaskIds, selectedLaborCodeIds]);
 
     const fetchTimeSlips = async () => {
         setLoadingResults(true);
 
         const queryBody: any = {};
-        if (selectedUserId !== '') {
-            queryBody.userIds = [selectedUserId];
+        if (selectedUserIds.length !== 0) {
+            queryBody.userIds = selectedUserIds;
         }
 
-        if (selectedProjectId !== '') {
-            queryBody.projectIds = [selectedProjectId];
+        if (selectedProjectIds.length !== 0) {
+            queryBody.projectIds = selectedProjectIds;
         }
 
-        if (selectedTaskId !== '') {
-            queryBody.taskIds = [selectedTaskId];
+        if (selectedTaskIds.length !== 0) {
+            queryBody.taskIds = selectedTaskIds;
         }
 
-        if (selectedLaborCodeId !== '') {
-            queryBody.laborCodeIds = [selectedLaborCodeId];
+        if (selectedLaborCodeIds.length !== 0) {
+            queryBody.laborCodeIds = selectedLaborCodeIds;
         }
 
         const results = await fetchPost<TimeSlip[]>('TimeSlip/QueryTimeSlips', queryBody);
@@ -113,47 +120,81 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         });
     };
 
-    const getDropdownOptions = (options: DropdownOption[], dropdownName: string): JSX.Element[] => {
+    const getDropdownOptions = (
+        options: DropdownOption[],
+        dropdownName: string,
+        selectedIds: number[],
+    ): JSX.Element[] => {
         return options.map((user: DropdownOption) => {
             const { id, name } = user;
             return (
                 <MenuItem key={`${dropdownName}${id}`} value={id}>
-                    {name}
+                    <Checkbox checked={selectedIds.indexOf(id) > -1} />
+                    <ListItemText primary={name} />
                 </MenuItem>
             );
         });
     };
 
     const getUserOptions = (): JSX.Element[] => {
-        return getDropdownOptions(users, 'user');
+        return getDropdownOptions(users, 'user', selectedUserIds);
     };
 
     const getProjectOptions = (): JSX.Element[] => {
-        return getDropdownOptions(projects, 'project');
+        return getDropdownOptions(projects, 'project', selectedProjectIds);
     };
 
     const getTaskOptions = (): JSX.Element[] => {
-        return getDropdownOptions(tasks, 'task');
+        return getDropdownOptions([emptyDropdownOption, ...tasks], 'task', selectedTaskIds);
     };
 
     const getLaborCodeOptions = (): JSX.Element[] => {
-        return getDropdownOptions(laborCodes, 'laborCode');
+        return getDropdownOptions(
+            [emptyDropdownOption, ...laborCodes],
+            'laborCode',
+            selectedLaborCodeIds,
+        );
     };
 
-    const handleUserChange = (event: SelectChangeEvent<number>) => {
-        setSelectedUserId(Number(event.target.value));
+    const handleSelectChange = (
+        event: SelectChangeEvent<number[]>,
+        setStateAction: React.Dispatch<React.SetStateAction<number[]>>,
+    ) => {
+        const {
+            target: { value },
+        } = event;
+        setStateAction(
+            // On autofill we get a stringified value.
+            typeof value === 'string' ? value.split(',').map((v) => Number(v)) : value,
+        );
     };
 
-    const handleProjectChange = (event: SelectChangeEvent<number>) => {
-        setSelectedProjectId(Number(event.target.value));
+    const handleUserChange = (event: SelectChangeEvent<number[]>) => {
+        handleSelectChange(event, setSelectedUserIds);
     };
 
-    const handleTaskChange = (event: SelectChangeEvent<number>) => {
-        setSelectedTaskId(Number(event.target.value));
+    const handleProjectChange = (event: SelectChangeEvent<number[]>) => {
+        handleSelectChange(event, setSelectedProjectIds);
     };
 
-    const handleLaborCodeChange = (event: SelectChangeEvent<number>) => {
-        setSelectedLaborCodeId(Number(event.target.value));
+    const handleTaskChange = (event: SelectChangeEvent<number[]>) => {
+        handleSelectChange(event, setSelectedTaskIds);
+    };
+
+    const handleLaborCodeChange = (event: SelectChangeEvent<number[]>) => {
+        handleSelectChange(event, setSelectedLaborCodeIds);
+    };
+
+    const renderSelected = (selectedIds: number[], map: Map<number, string>) => {
+        let displayText = '';
+        selectedIds.forEach((id: number, index: number) => {
+            displayText += map.get(id) ?? 'N/A';
+            if (index < selectedIds.length - 1) {
+                displayText += ', ';
+            }
+        });
+
+        return displayText;
     };
 
     const getInputs = () => {
@@ -161,25 +202,45 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
             <div className={classes.inputContainer}>
                 <FormControl className={classes.dropdown}>
                     <InputLabel>User</InputLabel>
-                    <Select value={selectedUserId} onChange={handleUserChange}>
+                    <Select
+                        renderValue={(selected) => renderSelected(selected, userMap)}
+                        multiple
+                        value={selectedUserIds}
+                        onChange={handleUserChange}
+                    >
                         {getUserOptions()}
                     </Select>
                 </FormControl>
                 <FormControl className={classes.dropdown}>
                     <InputLabel>Project</InputLabel>
-                    <Select value={selectedProjectId} onChange={handleProjectChange}>
+                    <Select
+                        renderValue={(selected) => renderSelected(selected, projectMap)}
+                        multiple
+                        value={selectedProjectIds}
+                        onChange={handleProjectChange}
+                    >
                         {getProjectOptions()}
                     </Select>
                 </FormControl>
                 <FormControl className={classes.dropdown}>
                     <InputLabel>Task</InputLabel>
-                    <Select value={selectedTaskId} onChange={handleTaskChange}>
+                    <Select
+                        renderValue={(selected) => renderSelected(selected, taskMap)}
+                        multiple
+                        value={selectedTaskIds}
+                        onChange={handleTaskChange}
+                    >
                         {getTaskOptions()}
                     </Select>
                 </FormControl>
                 <FormControl className={classes.dropdown}>
                     <InputLabel>Labor Code</InputLabel>
-                    <Select value={selectedLaborCodeId} onChange={handleLaborCodeChange}>
+                    <Select
+                        renderValue={(selected) => renderSelected(selected, laborCodeMap)}
+                        multiple
+                        value={selectedLaborCodeIds}
+                        onChange={handleLaborCodeChange}
+                    >
                         {getLaborCodeOptions()}
                     </Select>
                 </FormControl>

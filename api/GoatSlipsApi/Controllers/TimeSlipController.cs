@@ -107,8 +107,8 @@ namespace GoatSlipsApi.Controllers
                 TimeSlip[] timeSlips = _timeSlipService.GetTimeSlips(
                     getTimeSlipsBody.UserIds,
                     getTimeSlipsBody.ProjectIds,
-                    getTimeSlipsBody.TaskIds,
-                    getTimeSlipsBody.LaborCodeIds,
+                    getTimeSlipsBody.TaskIds?.Select(t => t == -1 ? (int?)null : t).ToArray(),
+                    getTimeSlipsBody.LaborCodeIds?.Select(l => l == -1 ? (int?)null : l).ToArray(),
                     getTimeSlipsBody.FromDate,
                     getTimeSlipsBody.ToDate);
                 return Ok(timeSlips);
