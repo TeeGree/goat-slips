@@ -43,3 +43,10 @@ export const fetchPostResponse = async (apiPath: string, body?: any): Promise<Re
 
     return response;
 };
+
+export const fetchPost = async <T>(apiPath: string, body?: any) => {
+    const result = await fetchPostResponse(apiPath, body);
+
+    const deserializedResult: T = await result.json();
+    return deserializedResult;
+};

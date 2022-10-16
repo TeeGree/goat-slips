@@ -10,6 +10,7 @@ import { AppHeader } from './components/AppHeader';
 import { CreateAdditionalUser } from './components/CreateUser/CreateAdditionalUser';
 import { ChangePassword } from './components/ChangePassword';
 import { User } from './types/User';
+import { QueryTimeSlips } from './components/QueryTimeSlips';
 
 export const App: React.FC<{}> = () => {
     const [username, setUsername] = useState<string>('');
@@ -93,6 +94,11 @@ export const App: React.FC<{}> = () => {
                     key="/create-user"
                     path="/create-user"
                     element={fillScreenWithPage(<CreateAdditionalUser />)}
+                />,
+                <Route
+                    key="/query-time-slips"
+                    path="/query-time-slips"
+                    element={fillScreenWithPage(<QueryTimeSlips />)}
                 />,
             ];
         }
