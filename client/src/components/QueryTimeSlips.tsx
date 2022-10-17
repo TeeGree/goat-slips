@@ -14,7 +14,11 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    TextField,
 } from '@mui/material';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { fetchPost } from '../helpers/fetchFunctions';
 import { DropdownOption } from '../types/DropdownOption';
@@ -47,10 +51,19 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
     const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([]);
     const [selectedLaborCodeIds, setSelectedLaborCodeIds] = useState<number[]>([]);
+    const [fromDate, setFromDate] = React.useState<Dayjs | null>(null);
+    const [toDate, setToDate] = React.useState<Dayjs | null>(null);
 
     useEffect(() => {
         fetchTimeSlips();
-    }, [selectedUserIds, selectedProjectIds, selectedTaskIds, selectedLaborCodeIds]);
+    }, [
+        selectedUserIds,
+        selectedProjectIds,
+        selectedTaskIds,
+        selectedLaborCodeIds,
+        fromDate,
+        toDate,
+    ]);
 
     const fetchTimeSlips = async () => {
         setLoadingResults(true);
@@ -70,6 +83,14 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
 
         if (selectedLaborCodeIds.length !== 0) {
             queryBody.laborCodeIds = selectedLaborCodeIds;
+        }
+
+        if (fromDate !== null) {
+            queryBody.fromDate = fromDate.format('YYYY-MM-DD');
+        }
+
+        if (toDate !== null) {
+            queryBody.toDate = toDate.format('YYYY-MM-DD');
         }
 
         const results = await fetchPost<TimeSlip[]>('TimeSlip/QueryTimeSlips', queryBody);
@@ -244,6 +265,26 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                         {getLaborCodeOptions()}
                     </Select>
                 </FormControl>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                        label="From Date"
+                        value={fromDate}
+                        onChange={(newValue) => {
+                            setFromDate(newValue);
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                    />
+                </LocalizationProvider>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                        label="To Date"
+                        value={toDate}
+                        onChange={(newValue) => {
+                            setToDate(newValue);
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                    />
+                </LocalizationProvider>
             </div>
         );
     };
