@@ -72,6 +72,11 @@ namespace GoatSlipsApi.Services
                 throw new ArgumentNullException("An password must be supplied for a new user.");
             }
 
+            if (!_secretService.IsPasswordValid(createUserBody.Password))
+            {
+                throw new InvalidCredentialException("Password must be at least 8 characters long with at least one letter and at least one number.");
+            }
+
             var userToAdd = new User
             {
                 Username = createUserBody.Username,
@@ -136,6 +141,12 @@ namespace GoatSlipsApi.Services
             }
 
             string newPassword = changePasswordBody.NewPassword ?? "";
+
+            if (!_secretService.IsPasswordValid(newPassword))
+            {
+                throw new InvalidCredentialException("New password must be at least 8 characters long with at least one letter and at least one number.");
+            }
+
             string newPasswordHash = _secretService.Hash(newPassword);
             _userRepository.UpdatePassword(userId.Value, newPasswordHash);
 

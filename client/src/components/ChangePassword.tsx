@@ -1,4 +1,4 @@
-import { Alert, Button, TextField } from '@mui/material';
+import { Alert, Button, TextField, Tooltip } from '@mui/material';
 import React, { useState } from 'react';
 import { fetchPostResponse } from '../helpers/fetchFunctions';
 import classes from './ChangePassword.module.scss';
@@ -67,6 +67,11 @@ export const ChangePassword: React.FC<ChangePasswordProps> = (props: ChangePassw
         return <></>;
     };
 
+    const passwordIsValid = () => {
+        const re = /^(?=.*[0-9].*)(?=.*[0-9].*).{8,}$/;
+        return newPassword.match(re) !== null;
+    };
+
     return (
         <div className={classes.inputContainer}>
             <p>{prompt ?? ''}</p>
@@ -82,13 +87,18 @@ export const ChangePassword: React.FC<ChangePasswordProps> = (props: ChangePassw
                     />
                 </div>
                 <div className={classes.input}>
-                    <TextField
-                        label="New Password"
-                        variant="outlined"
-                        type="password"
-                        value={newPassword}
-                        onChange={handleNewPasswordChange}
-                    />
+                    <Tooltip
+                        placement="right"
+                        title="Password must contain at least 1 letter, one number, and be at least 8 characters long."
+                    >
+                        <TextField
+                            label="New Password"
+                            variant="outlined"
+                            type="password"
+                            value={newPassword}
+                            onChange={handleNewPasswordChange}
+                        />
+                    </Tooltip>
                 </div>
                 <div className={classes.input}>
                     <TextField
@@ -99,7 +109,12 @@ export const ChangePassword: React.FC<ChangePasswordProps> = (props: ChangePassw
                         onChange={handleConfirmNewPasswordChange}
                     />
                 </div>
-                <Button className={classes.input} variant="contained" onClick={changePassword}>
+                <Button
+                    disabled={!passwordIsValid()}
+                    className={classes.input}
+                    variant="contained"
+                    onClick={changePassword}
+                >
                     Change Password
                 </Button>
             </div>

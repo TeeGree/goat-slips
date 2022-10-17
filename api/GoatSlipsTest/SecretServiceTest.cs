@@ -44,5 +44,29 @@ namespace GoatSlipsTest
 
             Assert.False(secretService.Verify($"{password} ", hash));
         }
+
+        [Theory]
+        [InlineData("password1")]
+        [InlineData("1password")]
+        [InlineData("555555558888abc")]
+        [InlineData("1a      ")]
+        public void IsPasswordValidIdentifiesValidPassword(string password)
+        {
+            var secretService = new SecretService();
+
+            Assert.True(secretService.IsPasswordValid(password));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("1pass")]
+        [InlineData("1234567890")]
+        [InlineData("a long password with no numbers")]
+        public void IsPasswordValidIdentifiesInvalidPassword(string password)
+        {
+            var secretService = new SecretService();
+
+            Assert.False(secretService.IsPasswordValid(password));
+        }
     }
 }

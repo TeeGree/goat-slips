@@ -101,6 +101,10 @@ namespace GoatSlipsApi.Controllers
             {
                 return BadRequest(e.Message);
             }
+            catch (InvalidCredentialException e)
+            {
+                return BadRequest(e.Message);
+            }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);

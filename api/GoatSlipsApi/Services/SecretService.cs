@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace GoatSlipsApi.Services
 {
@@ -6,6 +7,7 @@ namespace GoatSlipsApi.Services
     {
         string Hash(string password);
         bool Verify(string password, string hash);
+        bool IsPasswordValid(string password);
     }
     public class SecretService : ISecretService
     {
@@ -50,6 +52,13 @@ namespace GoatSlipsApi.Services
                 key.Length
             );
             return key.SequenceEqual(inputSecretKey);
+        }
+
+        public bool IsPasswordValid(string password)
+        {
+            string pattern = @"^(?=.*[0-9].*)(?=.*[a-zA-Z].*).{8,}$";
+            var regex = new Regex(pattern);
+            return regex.IsMatch(password);
         }
     }
 }
