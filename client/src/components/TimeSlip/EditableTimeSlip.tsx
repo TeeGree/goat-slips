@@ -151,12 +151,9 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     };
 
     const isSaveAllowed = (p: number | ''): p is number => {
-        return (
-            p !== '' &&
-            selectedHours !== '' &&
-            selectedMinutes !== '' &&
-            (selectedHours > 0 || selectedMinutes > 0)
-        );
+        const hoursNumber = selectedHours === '' ? 0 : selectedHours;
+        const minutesNumber = selectedMinutes === '' ? 0 : selectedMinutes;
+        return p !== '' && (hoursNumber > 0 || minutesNumber > 0);
     };
 
     const handleCancel = () => {
