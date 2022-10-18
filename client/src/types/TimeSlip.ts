@@ -8,3 +8,13 @@ export interface TimeSlip {
     taskId: number | null;
     laborCodeId: number | null;
 }
+
+export interface ExportableTimeSlip {
+    username: string;
+    project: string;
+    task: string;
+    laborCode: string;
+    date: string;
+    hours: number;
+    minutes: number;
+}

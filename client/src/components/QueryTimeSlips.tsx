@@ -1,4 +1,6 @@
+import { FileDownload } from '@mui/icons-material';
 import {
+    Button,
     Checkbox,
     CircularProgress,
     FormControl,
@@ -15,14 +17,16 @@ import {
     TableHead,
     TableRow,
     TextField,
+    Tooltip,
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
+import { getCsvOfTimeSlips } from '../helpers/csvGeneration';
 import { fetchPost } from '../helpers/fetchFunctions';
 import { DropdownOption } from '../types/DropdownOption';
-import { TimeSlip } from '../types/TimeSlip';
+import { ExportableTimeSlip, TimeSlip } from '../types/TimeSlip';
 import classes from './QueryTimeSlips.module.scss';
 
 interface QueryTimeSlipsProps {
@@ -99,6 +103,22 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         setLoadingResults(false);
     };
 
+    const getTask = (taskId: number | null): string => {
+        if (taskId === null) {
+            return 'N/A';
+        }
+
+        return taskMap.get(taskId) ?? 'Not found';
+    };
+
+    const getLaborCode = (laborCodeId: number | null): string => {
+        if (laborCodeId === null) {
+            return 'N/A';
+        }
+
+        return laborCodeMap.get(laborCodeId) ?? 'Not found';
+    };
+
     const getRows = (): JSX.Element | JSX.Element[] => {
         if (loadingResults) {
             return (
@@ -109,22 +129,6 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                 </TableRow>
             );
         }
-
-        const getTask = (taskId: number | null): string => {
-            if (taskId === null) {
-                return 'N/A';
-            }
-
-            return taskMap.get(taskId) ?? 'Not found';
-        };
-
-        const getLaborCode = (laborCodeId: number | null): string => {
-            if (laborCodeId === null) {
-                return 'N/A';
-            }
-
-            return laborCodeMap.get(laborCodeId) ?? 'Not found';
-        };
 
         return timeSlips.map((ts: TimeSlip) => {
             return (
@@ -218,6 +222,39 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         return displayText;
     };
 
+    const getCsvOfSearchResults = (): string => {
+        const exportableTimeSlips: ExportableTimeSlip[] = timeSlips.map((ts: TimeSlip) => {
+            return {
+                username: userMap.get(ts.userId) ?? 'Unknown',
+                project: projectMap.get(ts.projectId) ?? 'Unknown',
+                task: getTask(ts.taskId),
+                laborCode: getLaborCode(ts.laborCodeId),
+                date: new Date(ts.date).toLocaleDateString('en'),
+                hours: ts.hours,
+                minutes: ts.minutes,
+            };
+        });
+        return getCsvOfTimeSlips(exportableTimeSlips);
+    };
+
+    const download = () => {
+        const data = getCsvOfSearchResults();
+        const file = new File([data], 'TimeSlips.csv', {
+            type: 'text/plain',
+        });
+
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(file);
+
+        link.href = url;
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    };
+
     const getInputs = () => {
         return (
             <div className={classes.inputContainer}>
@@ -285,6 +322,11 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                         renderInput={(params) => <TextField {...params} />}
                     />
                 </LocalizationProvider>
+                <Tooltip title="Export results as csv.">
+                    <Button variant="contained" onClick={download}>
+                        <FileDownload />
+                    </Button>
+                </Tooltip>
             </div>
         );
     };
