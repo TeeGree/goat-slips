@@ -1,3 +1,5 @@
+@import './variables';
+
 .app {
     text-align: center;
     background-color: #282c34;
@@ -9,6 +11,14 @@
     justify-content: center;
     font-size: calc(10px + 2vmin);
     color: white;
+}
+
+.appContent {
+    position: fixed;
+    top: $headerHeight;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - $headerHeight);
 }
 
 .fillScreen {

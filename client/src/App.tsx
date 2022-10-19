@@ -14,6 +14,7 @@ import { QueryTimeSlips } from './components/QueryTimeSlips';
 import { DropdownOption } from './types/DropdownOption';
 import { ManageTimeCodes } from './components/ManageTimeCodes';
 import { TaskMap } from './types/TaskMap';
+import { RequireAuthentication } from './components/RequireAuthentication';
 
 export const App: React.FC<{}> = () => {
     const [username, setUsername] = useState<string>('');
@@ -170,54 +171,7 @@ export const App: React.FC<{}> = () => {
         );
     };
 
-    const getAuthenticatedRoutes = (): JSX.Element[] => {
-        if (isAuthenticated() && !passwordChangeRequired) {
-            return [
-                <Route
-                    key="/change-password"
-                    path="/change-password"
-                    element={fillScreenWithPage(<ChangePassword />)}
-                />,
-                <Route
-                    key="/create-user"
-                    path="/create-user"
-                    element={fillScreenWithPage(<CreateAdditionalUser />)}
-                />,
-                <Route
-                    key="/manage-codes"
-                    path="/manage-codes"
-                    element={fillScreenWithPage(
-                        <ManageTimeCodes
-                            projects={projects}
-                            tasks={tasks}
-                            taskMap={taskMap}
-                            tasksAllowedForProjects={tasksAllowedForProjects}
-                            laborCodes={laborCodes}
-                            fetchProjects={getProjects}
-                        />,
-                    )}
-                />,
-                <Route
-                    key="/query-time-slips"
-                    path="/query-time-slips"
-                    element={
-                        <QueryTimeSlips
-                            users={users}
-                            userMap={userMap}
-                            projects={projects}
-                            projectMap={projectMap}
-                            tasks={tasks}
-                            taskMap={taskMap}
-                            laborCodes={laborCodes}
-                            laborCodeMap={laborCodeMap}
-                        />
-                    }
-                />,
-            ];
-        }
-
-        return [];
-    };
+    const canAccessGuardedRoutes = isAuthenticated() && !passwordChangeRequired;
 
     return (
         <div className={classes.app}>
@@ -226,11 +180,76 @@ export const App: React.FC<{}> = () => {
                 username={username}
                 passwordChangeRequired={passwordChangeRequired}
             />
-            <Routes>
-                {getAuthenticatedRoutes()}
-                <Route path="/" element={getPage()} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <div className={classes.appContent}>
+                <Routes>
+                    <Route
+                        key="/change-password"
+                        path="/change-password"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                            >
+                                <ChangePassword />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/create-user"
+                        path="/create-user"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                            >
+                                <CreateAdditionalUser />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/query-time-slips"
+                        path="/query-time-slips"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                            >
+                                <QueryTimeSlips
+                                    users={users}
+                                    userMap={userMap}
+                                    projects={projects}
+                                    projectMap={projectMap}
+                                    tasks={tasks}
+                                    taskMap={taskMap}
+                                    laborCodes={laborCodes}
+                                    laborCodeMap={laborCodeMap}
+                                />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/manage-codes"
+                        path="/manage-codes"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                            >
+                                <ManageTimeCodes
+                                    projects={projects}
+                                    tasks={tasks}
+                                    taskMap={taskMap}
+                                    tasksAllowedForProjects={tasksAllowedForProjects}
+                                    laborCodes={laborCodes}
+                                    fetchProjects={getProjects}
+                                />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route path="/" element={getPage()} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </div>
         </div>
     );
 };

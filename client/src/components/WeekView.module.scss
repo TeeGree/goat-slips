@@ -1,13 +1,11 @@
 @import '../variables';
 
 .homeContainer {
-    height: calc(100vh - $headerHeight);
+    height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: absolute;
-    top: $headerHeight;
 }
 
 .weekContainer {
