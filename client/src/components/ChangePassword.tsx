@@ -1,6 +1,7 @@
 import { Alert, Button, TextField, Tooltip } from '@mui/material';
 import React, { useState } from 'react';
 import { fetchPostResponse } from '../helpers/fetchFunctions';
+import { passwordIsValid } from '../helpers/passwordValidation';
 import classes from './ChangePassword.module.scss';
 
 interface AlertMessage {
@@ -67,11 +68,6 @@ export const ChangePassword: React.FC<ChangePasswordProps> = (props: ChangePassw
         return <></>;
     };
 
-    const passwordIsValid = () => {
-        const re = /^(?=.*[0-9].*)(?=.*[0-9].*).{8,}$/;
-        return newPassword.match(re) !== null;
-    };
-
     return (
         <div className={classes.inputContainer}>
             <p>{prompt ?? ''}</p>
@@ -110,7 +106,7 @@ export const ChangePassword: React.FC<ChangePasswordProps> = (props: ChangePassw
                     />
                 </div>
                 <Button
-                    disabled={!passwordIsValid()}
+                    disabled={!passwordIsValid(newPassword)}
                     className={classes.input}
                     variant="contained"
                     onClick={changePassword}

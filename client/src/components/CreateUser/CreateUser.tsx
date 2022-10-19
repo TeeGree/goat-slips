@@ -1,5 +1,6 @@
 import { Button, TextField, Tooltip } from '@mui/material';
 import React, { useState } from 'react';
+import { passwordIsValid } from '../../helpers/passwordValidation';
 import classes from './CreateUser.module.scss';
 
 interface CreateUserProps {
@@ -61,11 +62,6 @@ export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) =>
         return 'Password';
     };
 
-    const passwordIsValid = () => {
-        const re = /^(?=.*[0-9].*)(?=.*[0-9].*).{8,}$/;
-        return password.match(re) !== null;
-    };
-
     return (
         <div className={classes.inputContainer}>
             {children}
@@ -117,7 +113,7 @@ export const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) =>
                     </Tooltip>
                 </div>
                 <Button
-                    disabled={!passwordIsValid()}
+                    disabled={!passwordIsValid(password)}
                     className={classes.input}
                     variant="contained"
                     onClick={createUserFromInputValues}
