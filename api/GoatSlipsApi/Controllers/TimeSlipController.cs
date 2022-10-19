@@ -39,12 +39,16 @@ namespace GoatSlipsApi.Controllers
             }
         }
 
-        [HttpGet("TimeSlipsForCurrentUser", Name = "GetTimeSlipsForCurrentUser")]
-        public ActionResult<TimeSlip[]> GetTimeSlipsForCurrentUser()
+        [HttpGet("WeekOfTimeSlipsForCurrentUser/{date}", Name = "GetWeekOfTimeSlipsForCurrentUser")]
+        public ActionResult<TimeSlip[]> GetWeekOfTimeSlipsForCurrentUser(DateTime date)
         {
             try
             {
-                TimeSlip[] timeSlips = _timeSlipService.GetTimeSlipsForCurrentUser(HttpContext);
+                if (date.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    return BadRequest("The date provided must be a Sunday.");
+                }
+                TimeSlip[] timeSlips = _timeSlipService.GetWeekOfTimeSlipsForCurrentUser(date, HttpContext);
                 return Ok(timeSlips);
             }
             catch (Exception e)

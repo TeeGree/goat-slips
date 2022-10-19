@@ -8,7 +8,7 @@ namespace GoatSlipsApi.Services
     public interface ITimeSlipService
     {
         IEnumerable<TimeSlip> GetAllTimeSlips();
-        TimeSlip[] GetTimeSlipsForCurrentUser(HttpContext httpContext);
+        TimeSlip[] GetWeekOfTimeSlipsForCurrentUser(DateTime weekDate, HttpContext httpContext);
         void AddTimeSlip(AddTimeSlipBody timeSlip, HttpContext httpContext);
         void UpdateTimeSlip(UpdateTimeSlipBody timeSlip);
         void DeleteTimeSlip(int id);
@@ -40,7 +40,7 @@ namespace GoatSlipsApi.Services
             return timeSlips;
         }
 
-        public TimeSlip[] GetTimeSlipsForCurrentUser(HttpContext httpContext)
+        public TimeSlip[] GetWeekOfTimeSlipsForCurrentUser(DateTime weekDate, HttpContext httpContext)
         {
             User? user = httpContext.Items["User"] as User;
             if (user == null)
@@ -53,7 +53,13 @@ namespace GoatSlipsApi.Services
             {
                 throw new Exception("No time slips found!");
             }
-            return timeSlips.Where(ts => ts.UserId == user.Id).ToArray();
+
+            var endDate = weekDate.AddDays(7);
+            return timeSlips.Where(ts =>
+                ts.UserId == user.Id &&
+                ts.Date >= weekDate &&
+                ts.Date < endDate
+            ).ToArray();
         }
 
         public void AddTimeSlip(AddTimeSlipBody timeSlip, HttpContext httpContext)

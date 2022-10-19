@@ -6,6 +6,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: absolute;
+    top: $headerHeight;
 }
 
 .weekContainer {
@@ -23,4 +25,17 @@
     display: flex;
     justify-content: space-between;
     padding: 0.2em;
+}
+
+.weekHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+}
+
+.weekHeaderHalf {
+    width: 50%;
+    display: flex;
+    justify-content: center;
 }

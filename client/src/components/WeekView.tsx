@@ -53,19 +53,23 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     };
 
     const [sundayDate, setSundayDate] = useState<Date>(getSundayDateForDate(currentDate));
+    const [weekTotalMinutes, setWeekTotalMinutes] = useState<number>(0);
 
     const [timeSlipsPerDay, setTimeSlipsPerDay] = useState<Map<string, TimeSlipDaySummary>>(
         new Map<string, TimeSlipDaySummary>([]),
     );
 
     const getTimeSlips = async () => {
+        const sundayDateText = sundayDate.toLocaleDateString('en').replaceAll('/', '-');
         const timeSlipsFromApi: TimeSlip[] = await fetchGet<TimeSlip[]>(
-            'TimeSlip/TimeSlipsForCurrentUser',
+            `TimeSlip/WeekOfTimeSlipsForCurrentUser/${sundayDateText}`,
         );
 
         const timeSlipMap = new Map<string, TimeSlipDaySummary>([]);
+        let weekMinutes = 0;
         timeSlipsFromApi.forEach((timeSlip: TimeSlip) => {
             const dateOftimeSlip = new Date(timeSlip.date).toLocaleDateString('en');
+            const totalMinutesForTimeSlip = timeSlip.minutes + timeSlip.hours * 60;
             if (timeSlipMap.has(dateOftimeSlip)) {
                 const timeSlipsDaySummary =
                     timeSlipMap.get(dateOftimeSlip) ?? defaultTimeSlipDaySummary;
@@ -89,10 +93,13 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                     totalHours: timeSlip.hours,
                     totalMinutes: timeSlip.minutes,
                 };
+
                 timeSlipMap.set(dateOftimeSlip, timeSlipsDaySummary);
             }
+            weekMinutes += totalMinutesForTimeSlip;
         });
 
+        setWeekTotalMinutes(weekMinutes);
         setTimeSlipsPerDay(timeSlipMap);
     };
 
@@ -154,7 +161,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
     useEffect(() => {
         getTimeSlips();
-    }, []);
+    }, [sundayDate]);
 
     const getTaskOptionsForProject = (projectId: number): DropdownOption[] => {
         const tasksForProject = tasksAllowedForProjects.get(projectId);
@@ -232,10 +239,8 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         setSundayDate(newSundayDate);
     };
 
-    const sundayDateString = sundayDate.toLocaleDateString('en');
-
-    return (
-        <div className={classes.homeContainer}>
+    const getWeekChanger = () => {
+        return (
             <div className={classes.weekChanger}>
                 <Button variant="contained" onClick={() => changeWeek(false)}>
                     <ArrowLeft />
@@ -244,6 +249,23 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 <Button variant="contained" onClick={() => changeWeek(true)}>
                     <ArrowRight />
                 </Button>
+            </div>
+        );
+    };
+
+    const sundayDateString = sundayDate.toLocaleDateString('en');
+
+    const getWeekTotalText = () => {
+        const hours = Math.floor(weekTotalMinutes / 60);
+        const minutes = weekTotalMinutes - hours * 60;
+        return `${hours} hr ${minutes} min`;
+    };
+
+    return (
+        <div className={classes.homeContainer}>
+            <div className={classes.weekHeader}>
+                <div className={classes.weekHeaderHalf}>{getWeekChanger()}</div>
+                <div className={classes.weekHeaderHalf}>Week Total: {getWeekTotalText()}</div>
             </div>
             <div className={classes.weekContainer}>
                 {getDayColumn(0)}
