@@ -3,6 +3,7 @@ import classes from './ReadOnlyTimeSlip.module.scss';
 import { Box, Button, Card, CardActions, CardContent, Modal, Tooltip } from '@mui/material';
 import { TimeSlip } from '../../types/TimeSlip';
 import { Flag, Task, Work } from '@mui/icons-material';
+import { modalStyle } from '../../constants/modalStyle';
 
 interface ReadOnlyTimeSlipProps {
     timeSlip: TimeSlip;
@@ -12,19 +13,6 @@ interface ReadOnlyTimeSlipProps {
     handleEdit: () => void;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
 }
-
-export const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    color: 'white',
-    p: 4,
-};
 
 export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnlyTimeSlipProps) => {
     const { timeSlip, getProjectName, getTaskName, getLaborCodeName, handleEdit, deleteTimeSlip } =

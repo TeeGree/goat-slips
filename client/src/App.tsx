@@ -12,11 +12,8 @@ import { ChangePassword } from './components/ChangePassword';
 import { User } from './types/User';
 import { QueryTimeSlips } from './components/QueryTimeSlips';
 import { DropdownOption } from './types/DropdownOption';
-
-interface TaskMap {
-    projectId: number;
-    allowedTaskIds: number[];
-}
+import { ManageTimeCodes } from './components/ManageTimeCodes';
+import { TaskMap } from './types/TaskMap';
 
 export const App: React.FC<{}> = () => {
     const [username, setUsername] = useState<string>('');
@@ -185,6 +182,20 @@ export const App: React.FC<{}> = () => {
                     key="/create-user"
                     path="/create-user"
                     element={fillScreenWithPage(<CreateAdditionalUser />)}
+                />,
+                <Route
+                    key="/manage-codes"
+                    path="/manage-codes"
+                    element={fillScreenWithPage(
+                        <ManageTimeCodes
+                            projects={projects}
+                            tasks={tasks}
+                            taskMap={taskMap}
+                            tasksAllowedForProjects={tasksAllowedForProjects}
+                            laborCodes={laborCodes}
+                            fetchProjects={getProjects}
+                        />,
+                    )}
                 />,
                 <Route
                     key="/query-time-slips"

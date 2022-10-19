@@ -1,4 +1,5 @@
 ﻿using GoatSlipsApi.DAL;
+using GoatSlipsApi.Exceptions;
 using GoatSlipsApi.Models.Database;
 using System.Data.Entity;
 
@@ -8,6 +9,8 @@ namespace GoatSlipsApi.Services
     {
         IEnumerable<Project> GetAllProjects();
         IEnumerable<Models.Database.Task> GetTasksForProject(int projectId);
+        void CreateProject(string projectName);
+        void DeleteProject(int projectId);
     }
     public class ProjectService : IProjectService
     {
@@ -46,6 +49,53 @@ namespace GoatSlipsApi.Services
                        on projectTask.TaskId equals task.Id
                    where projectTask.ProjectId == projectId
                    select task;
+        }
+
+        public void CreateProject(string projectName)
+        {
+            DbSet<Project>? projects = _dbContext.Projects;
+            if (projects == null)
+            {
+                throw new Exception("No projects found!");
+            }
+
+            projects.Add(new Project
+            {
+                Name = projectName
+            });
+
+            _dbContext.SaveChanges();
+        }
+
+        public void DeleteProject(int projectId)
+        {
+            DbSet<Project>? projects = _dbContext.Projects;
+            if (projects == null)
+            {
+                throw new Exception("No projects found!");
+            }
+
+            var project = projects.FirstOrDefault(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                throw new Exception("Project does not exist!");
+            }
+
+            DbSet<TimeSlip>? timeSlips = _dbContext.TimeSlips;
+            if (timeSlips == null)
+            {
+                throw new Exception("No time slips found!");
+            }
+
+            if (timeSlips.Any(ts => ts.ProjectId == projectId))
+            {
+                throw new ProjectInUseException("Project is in use!");
+            }
+
+            projects.Remove(project);
+
+            _dbContext.SaveChanges();
         }
     }
 }

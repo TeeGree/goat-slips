@@ -20,6 +20,17 @@ export const fetchGetResponse = async (apiPath: string): Promise<Response> => {
     return response;
 };
 
+export const fetchDeleteResponse = async (apiPath: string): Promise<Response> => {
+    if (apiEndpoint === undefined) {
+        throw Error('No REACT_APP_API_ENDPOINT has been set!');
+    }
+
+    const url = path.join(apiEndpoint, apiPath);
+    const response = await fetch(url, { method: 'DELETE', credentials: 'include' });
+
+    return response;
+};
+
 export const fetchPostResponse = async (apiPath: string, body?: any): Promise<Response> => {
     if (apiEndpoint === undefined) {
         throw Error('No REACT_APP_API_ENDPOINT has been set!');

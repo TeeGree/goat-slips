@@ -1,0 +1,38 @@
+.pageContainer {
+    height: 100%;
+}
+
+.header {
+    padding: 25px;
+}
+
+.projectsContainer {
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.projectContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid grey;
+    border-radius: 5px;
+}
+
+.projectName {
+    width: 250px !important;
+}
+
+.modalButtons {
+    text-align: right;
+}
+
+.cancelButton {
+    margin-left: 1em !important;
+}
