@@ -6,6 +6,11 @@ describe('Password validation tests:', () => {
         expect(isValid).toBe(true);
     });
 
+    it('Numbers before letters passes validation.', () => {
+        const isValid = passwordIsValid('12345test');
+        expect(isValid).toBe(true);
+    });
+
     it('Password under 8 characters fails validation.', () => {
         const isValid = passwordIsValid('test1');
         expect(isValid).toBe(false);
