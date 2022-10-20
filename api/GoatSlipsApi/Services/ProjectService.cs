@@ -93,6 +93,19 @@ namespace GoatSlipsApi.Services
                 throw new ProjectInUseException("Project is in use!");
             }
 
+            DbSet<ProjectTask>? projectTasks = _dbContext.ProjectTasks;
+            if (projectTasks == null)
+            {
+                throw new Exception("No project tasks found!");
+            }
+
+            IEnumerable<ProjectTask> projectTasksToDelete = projectTasks.Where(pt => pt.ProjectId == projectId);
+
+            if (projectTasksToDelete.Any())
+            {
+                projectTasks.RemoveRange(projectTasksToDelete);
+            }
+
             projects.Remove(project);
 
             _dbContext.SaveChanges();
