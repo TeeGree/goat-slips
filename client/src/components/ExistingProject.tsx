@@ -25,13 +25,22 @@ interface ExistingProjectProps {
     tasksAllowed: number[];
     taskMap: Map<number, string>;
     fetchProjects: () => Promise<void>;
-    setError: (error: string) => void;
+    setError: (message: string) => void;
+    setSuccess: (message: string) => void;
     fetchTasksAllowed: () => Promise<void>;
 }
 
 export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingProjectProps) => {
-    const { project, allTasks, tasksAllowed, taskMap, setError, fetchProjects, fetchTasksAllowed } =
-        props;
+    const {
+        project,
+        allTasks,
+        tasksAllowed,
+        taskMap,
+        setError,
+        setSuccess,
+        fetchProjects,
+        fetchTasksAllowed,
+    } = props;
 
     const [isBeingDeleted, setIsBeingDeleted] = useState(false);
     const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>(tasksAllowed);
@@ -79,6 +88,7 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
 
         if (response.ok) {
             await fetchProjects();
+            setSuccess(`Successfully deleted project ${project.name}!`);
         } else if (response.status === projectInUse) {
             const message: ErrorDetails = await response.json();
             setError(message.detail);
@@ -95,6 +105,7 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
 
         if (response.ok) {
             await fetchTasksAllowed();
+            setSuccess(`Successfully updated allowed tasks for project ${project.name}!`);
         } else if (response.status === projectInUse) {
             const message: ErrorDetails = await response.json();
             setError(message.detail);
@@ -137,7 +148,7 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
                         </Button>
                         <Button
                             variant="contained"
-                            className={classes.cancelButton}
+                            className={classes.button}
                             onClick={() => setIsBeingDeleted(false)}
                         >
                             Cancel

@@ -2,12 +2,8 @@ import { Alert, Button, TextField, Tooltip } from '@mui/material';
 import React, { useState } from 'react';
 import { fetchPostResponse } from '../helpers/fetchFunctions';
 import { passwordIsValid } from '../helpers/passwordValidation';
+import { AlertMessage } from '../types/AlertMessage';
 import classes from './ChangePassword.module.scss';
-
-interface AlertMessage {
-    message: string;
-    severity: 'error' | 'success';
-}
 
 interface ChangePasswordProps {
     prompt?: string;

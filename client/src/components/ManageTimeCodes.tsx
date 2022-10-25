@@ -1,6 +1,7 @@
 import { Alert, Button, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import { fetchPostResponse } from '../helpers/fetchFunctions';
+import { AlertMessage } from '../types/AlertMessage';
 import { DropdownOption } from '../types/DropdownOption';
 import { ExistingProject } from './ExistingProject';
 import classes from './ManageTimeCodes.module.scss';
@@ -28,7 +29,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
     } = props;
 
     const [newProjectName, setNewProjectName] = useState('');
-    const [error, setError] = useState('');
+    const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
 
     const handleNewProjectNameChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = event.target.value;
@@ -53,7 +54,10 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
                     project={project}
                     fetchProjects={fetchProjects}
                     fetchTasksAllowed={fetchTasksAllowed}
-                    setError={setError}
+                    setError={(message: string) => setAlertMessage({ message, severity: 'error' })}
+                    setSuccess={(message: string) =>
+                        setAlertMessage({ message, severity: 'success' })
+                    }
                 />
             );
         });
@@ -83,11 +87,11 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
     };
 
     const getAlert = () => {
-        if (error === '') {
+        if (alertMessage === null) {
             return <></>;
         }
 
-        return <Alert severity="error">{error}</Alert>;
+        return <Alert severity={alertMessage.severity}>{alertMessage.message}</Alert>;
     };
 
     return (
