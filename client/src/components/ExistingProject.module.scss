@@ -1,0 +1,23 @@
+.projectContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid grey;
+    border-radius: 5px;
+}
+
+.projectName {
+    width: 250px !important;
+    margin-right: 10px;
+}
+
+.projectAllowedTasks {
+    width: 200px;
+}
+
+.button {
+    margin-left: 10px !important;
+}

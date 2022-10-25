@@ -2,6 +2,8 @@
 using GoatSlipsApi.Exceptions;
 using GoatSlipsApi.Models.Database;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
+using Task = GoatSlipsApi.Models.Database.Task;
 
 namespace GoatSlipsApi.Services
 {
@@ -11,6 +13,7 @@ namespace GoatSlipsApi.Services
         IEnumerable<Models.Database.Task> GetTasksForProject(int projectId);
         void CreateProject(string projectName);
         void DeleteProject(int projectId);
+        void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds);
     }
     public class ProjectService : IProjectService
     {
@@ -107,6 +110,79 @@ namespace GoatSlipsApi.Services
             }
 
             projects.Remove(project);
+
+            _dbContext.SaveChanges();
+        }
+
+        public void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds)
+        {
+            DbSet<Project>? projects = _dbContext.Projects;
+            if (projects == null)
+            {
+                throw new Exception("No projects found!");
+            }
+
+            if (!projects.Any(p => p.Id == projectId))
+            {
+                throw new Exception("Project does not exist!");
+            }
+
+            DbSet<Task>? tasks = _dbContext.Tasks;
+            if (tasks == null)
+            {
+                throw new Exception("No tasks found!");
+            }
+
+            if (allowedTaskIds.Any(at => !tasks.Any(t => t.Id == at)))
+            {
+                throw new Exception("Task does not exist!");
+            }
+
+            DbSet<ProjectTask>? projectTaskMapping = _dbContext.ProjectTasks;
+            if (projectTaskMapping == null)
+            {
+                throw new Exception("No project task mappings found!");
+            }
+
+            ProjectTask[] projectTasksToRemove = (from pr in projectTaskMapping
+                                                  where pr.ProjectId == projectId &&
+                                                  !allowedTaskIds.Contains(pr.TaskId)
+                                                  select pr).ToArray();
+
+            DbSet<TimeSlip>? timeSlips = _dbContext.TimeSlips;
+            if (timeSlips == null)
+            {
+                throw new Exception("No time slips found!");
+            }
+
+            TimeSlip[] projectTimeSlips = timeSlips.Where(ts => ts.ProjectId == projectId).ToArray();
+
+            TimeSlip[] timeSlipsToClearTaskIds = projectTimeSlips.Where(ts =>
+                projectTasksToRemove.Any(pt => pt.TaskId == ts.TaskId)
+            ).ToArray();
+
+            foreach (TimeSlip timeSlip in timeSlipsToClearTaskIds)
+            {
+                timeSlip.TaskId = null;
+                timeSlips.AddOrUpdate(timeSlip);
+            }
+
+            projectTaskMapping.RemoveRange(projectTasksToRemove);
+
+            int[] taskIdsToAdd = allowedTaskIds.Where(taskId =>
+                !projectTaskMapping.Any(
+                    pt => pt.ProjectId == projectId &&
+                    pt.TaskId == taskId
+                )
+            ).ToArray();
+
+            ProjectTask[] tasksToAdd = taskIdsToAdd.Select(taskId => new ProjectTask
+            {
+                TaskId = taskId,
+                ProjectId = projectId
+            }).ToArray();
+
+            projectTaskMapping.AddRange(tasksToAdd);
 
             _dbContext.SaveChanges();
         }

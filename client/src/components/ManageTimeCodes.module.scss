@@ -12,7 +12,7 @@
 }
 
 .projectsContainer {
-    width: 350px;
+    width: 500px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -36,8 +36,4 @@
 
 .modalButtons {
     text-align: right;
-}
-
-.cancelButton {
-    margin-left: 1em !important;
 }

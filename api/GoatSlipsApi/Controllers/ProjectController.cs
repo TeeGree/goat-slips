@@ -1,5 +1,4 @@
 using GoatSlipsApi.Attributes;
-using GoatSlipsApi.DAL;
 using GoatSlipsApi.Exceptions;
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
@@ -15,17 +14,14 @@ namespace GoatSlipsApi.Controllers
     {
 
         private readonly ILogger<ProjectController> _logger;
-        private readonly IGoatSlipsContext _goatSlipsContext;
         private readonly IProjectService _projectService;
 
         public ProjectController(
             ILogger<ProjectController> logger,
-            IGoatSlipsContext goatSlipsContext,
             IProjectService projectService
         )
         {
             _logger = logger;
-            _goatSlipsContext = goatSlipsContext;
             _projectService = projectService;
         }
 
@@ -64,6 +60,21 @@ namespace GoatSlipsApi.Controllers
             try
             {
                 _projectService.CreateProject(body.ProjectName);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpPost("SetAllowedTasks", Name = "SetAllowedTasks")]
+        public IActionResult SetAllowedTasks(SetAllowedTasksBody body)
+        {
+            try
+            {
+                _projectService.SetAllowedTasksForProject(body.ProjectId, body.AllowedTaskIds);
                 return Ok();
             }
             catch (Exception e)

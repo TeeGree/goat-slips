@@ -43,7 +43,8 @@
         "import/order": "off",
         "prefer-destructuring": "off",
         "react/jsx-props-no-spreading": "off",
-        "react/require-default-props": "off"
+        "react/require-default-props": "off",
+        "no-useless-return": "off"
     },
     "ignorePatterns": ["build/*"],
     "settings": {
