@@ -2,7 +2,6 @@
 using GoatSlipsApi.Exceptions;
 using GoatSlipsApi.Models.Database;
 using System.Data.Entity;
-using System.Data.Entity.Migrations;
 using Task = GoatSlipsApi.Models.Database.Task;
 
 namespace GoatSlipsApi.Services
@@ -15,37 +14,38 @@ namespace GoatSlipsApi.Services
         void DeleteProject(int projectId);
         void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds);
     }
-    public class ProjectService : IProjectService
+    public sealed class ProjectService : IProjectService
     {
         private readonly IGoatSlipsContext _dbContext;
-        public ProjectService(IGoatSlipsContext dbContext)
+        private readonly IProjectRepository _projectRepository;
+        private readonly ITaskRepository _taskRepository;
+        private readonly ITimeSlipRepository _timeSlipRepository;
+        private readonly IProjectTaskRepository _projectTaskRepository;
+        public ProjectService(
+            IGoatSlipsContext dbContext,
+            IProjectRepository projectRepository,
+            ITaskRepository taskRepository,
+            ITimeSlipRepository timeSlipRepository,
+            IProjectTaskRepository projectTaskRepository
+        )
         {
             _dbContext = dbContext;
+            _projectRepository = projectRepository;
+            _taskRepository = taskRepository;
+            _timeSlipRepository = timeSlipRepository;
+            _projectTaskRepository = projectTaskRepository;
         }
 
         public IEnumerable<Project> GetAllProjects()
         {
-            DbSet<Project>? projects = _dbContext.Projects;
-            if (projects == null)
-            {
-                throw new Exception("No projects found!");
-            }
-            return projects;
+            return _projectRepository.Projects;
         }
 
-        public IEnumerable<Models.Database.Task> GetTasksForProject(int projectId)
+        public IEnumerable<Task> GetTasksForProject(int projectId)
         {
-            DbSet<ProjectTask>? projectTasks = _dbContext.ProjectTasks;
-            if (projectTasks == null)
-            {
-                throw new Exception("No project tasks found!");
-            }
+            DbSet<ProjectTask> projectTasks = _projectTaskRepository.ProjectTasks;
 
-            DbSet<Models.Database.Task>? tasks = _dbContext.Tasks;
-            if (tasks == null)
-            {
-                throw new Exception("No tasks found!");
-            }
+            DbSet<Task> tasks = _taskRepository.Tasks;
 
             return from projectTask in projectTasks
                    join task in tasks
@@ -56,11 +56,7 @@ namespace GoatSlipsApi.Services
 
         public void CreateProject(string projectName)
         {
-            DbSet<Project>? projects = _dbContext.Projects;
-            if (projects == null)
-            {
-                throw new Exception("No projects found!");
-            }
+            DbSet<Project> projects = _projectRepository.Projects;
 
             projects.Add(new Project
             {
@@ -72,11 +68,7 @@ namespace GoatSlipsApi.Services
 
         public void DeleteProject(int projectId)
         {
-            DbSet<Project>? projects = _dbContext.Projects;
-            if (projects == null)
-            {
-                throw new Exception("No projects found!");
-            }
+            DbSet<Project> projects = _projectRepository.Projects;
 
             var project = projects.FirstOrDefault(p => p.Id == projectId);
 
@@ -85,22 +77,14 @@ namespace GoatSlipsApi.Services
                 throw new Exception("Project does not exist!");
             }
 
-            DbSet<TimeSlip>? timeSlips = _dbContext.TimeSlips;
-            if (timeSlips == null)
-            {
-                throw new Exception("No time slips found!");
-            }
+            DbSet<TimeSlip> timeSlips = _timeSlipRepository.TimeSlips;
 
             if (timeSlips.Any(ts => ts.ProjectId == projectId))
             {
                 throw new ProjectInUseException("Project is in use!");
             }
 
-            DbSet<ProjectTask>? projectTasks = _dbContext.ProjectTasks;
-            if (projectTasks == null)
-            {
-                throw new Exception("No project tasks found!");
-            }
+            DbSet<ProjectTask> projectTasks = _projectTaskRepository.ProjectTasks;
 
             IEnumerable<ProjectTask> projectTasksToDelete = projectTasks.Where(pt => pt.ProjectId == projectId);
 
@@ -114,77 +98,43 @@ namespace GoatSlipsApi.Services
             _dbContext.SaveChanges();
         }
 
-        public void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds)
+        private void RemoveAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds)
         {
-            DbSet<Project>? projects = _dbContext.Projects;
-            if (projects == null)
-            {
-                throw new Exception("No projects found!");
-            }
-
-            if (!projects.Any(p => p.Id == projectId))
-            {
-                throw new Exception("Project does not exist!");
-            }
-
-            DbSet<Task>? tasks = _dbContext.Tasks;
-            if (tasks == null)
-            {
-                throw new Exception("No tasks found!");
-            }
-
-            if (allowedTaskIds.Any(at => !tasks.Any(t => t.Id == at)))
-            {
-                throw new Exception("Task does not exist!");
-            }
-
-            DbSet<ProjectTask>? projectTaskMapping = _dbContext.ProjectTasks;
-            if (projectTaskMapping == null)
-            {
-                throw new Exception("No project task mappings found!");
-            }
+            DbSet<ProjectTask> projectTaskMapping = _projectTaskRepository.ProjectTasks;
 
             ProjectTask[] projectTasksToRemove = (from pr in projectTaskMapping
                                                   where pr.ProjectId == projectId &&
                                                   !allowedTaskIds.Contains(pr.TaskId)
                                                   select pr).ToArray();
 
-            DbSet<TimeSlip>? timeSlips = _dbContext.TimeSlips;
-            if (timeSlips == null)
-            {
-                throw new Exception("No time slips found!");
-            }
+            DbSet<TimeSlip> timeSlips = _timeSlipRepository.TimeSlips;
 
-            TimeSlip[] projectTimeSlips = timeSlips.Where(ts => ts.ProjectId == projectId).ToArray();
-
-            TimeSlip[] timeSlipsToClearTaskIds = projectTimeSlips.Where(ts =>
-                projectTasksToRemove.Any(pt => pt.TaskId == ts.TaskId)
-            ).ToArray();
-
-            foreach (TimeSlip timeSlip in timeSlipsToClearTaskIds)
-            {
-                timeSlip.TaskId = null;
-                timeSlips.AddOrUpdate(timeSlip);
-            }
+            _timeSlipRepository.ClearTaskIdsForTimeSlips(projectId, projectTasksToRemove.Select(pt => pt.TaskId));
 
             projectTaskMapping.RemoveRange(projectTasksToRemove);
+        }
 
-            int[] taskIdsToAdd = allowedTaskIds.Where(taskId =>
-                !projectTaskMapping.Any(
-                    pt => pt.ProjectId == projectId &&
-                    pt.TaskId == taskId
-                )
-            ).ToArray();
+        public void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds)
+        {
+            DbSet<Project> projects = _projectRepository.Projects;
 
-            ProjectTask[] tasksToAdd = taskIdsToAdd.Select(taskId => new ProjectTask
+            if (!projects.Any(p => p.Id == projectId))
             {
-                TaskId = taskId,
-                ProjectId = projectId
-            }).ToArray();
+                throw new Exception("Project does not exist!");
+            }
 
-            projectTaskMapping.AddRange(tasksToAdd);
+            DbSet<Task> tasks = _taskRepository.Tasks;
 
-            _dbContext.SaveChanges();
+            if (allowedTaskIds.Any(at => !tasks.Any(t => t.Id == at)))
+            {
+                throw new Exception("Task does not exist!");
+            }
+
+            DbSet<ProjectTask> projectTaskMapping = _projectTaskRepository.ProjectTasks;
+
+            RemoveAllowedTasksForProject(projectId, allowedTaskIds);
+
+            _projectTaskRepository.AddAllowedTasksForProject(projectId, allowedTaskIds);
         }
     }
 }

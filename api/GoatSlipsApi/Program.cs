@@ -21,6 +21,10 @@ builder.Services.AddSingleton<IAppSettings>(new AppSettings(connectionString, co
 builder.Services.AddScoped<IGoatSlipsContext, GoatSlipsContext>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<ITimeSlipRepository, TimeSlipRepository>();
+builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITimeSlipService, TimeSlipService>();
 builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
