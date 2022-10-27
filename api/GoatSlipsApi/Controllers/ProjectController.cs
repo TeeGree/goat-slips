@@ -92,9 +92,9 @@ namespace GoatSlipsApi.Controllers
                 _projectService.DeleteProject(id);
                 return Ok();
             }
-            catch (ProjectInUseException e)
+            catch (CodeInUseException e)
             {
-                return Problem(e.Message, statusCode: ProjectInUseException.StatusCode);
+                return Problem(e.Message, statusCode: CodeInUseException.StatusCode);
             }
             catch (Exception e)
             {

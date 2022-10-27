@@ -81,7 +81,7 @@ namespace GoatSlipsApi.Services
 
             if (timeSlips.Any(ts => ts.ProjectId == projectId))
             {
-                throw new ProjectInUseException("Project is in use!");
+                throw new CodeInUseException("Project is in use!");
             }
 
             DbSet<ProjectTask> projectTasks = _projectTaskRepository.ProjectTasks;

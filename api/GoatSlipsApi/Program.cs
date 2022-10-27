@@ -28,6 +28,7 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITimeSlipService, TimeSlipService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
 builder.Services.AddSingleton<ISecretService, SecretService>();
 

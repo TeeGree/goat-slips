@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { modalStyle } from '../constants/modalStyle';
-import { projectInUse } from '../constants/statusCodes';
+import { codeInUse } from '../constants/statusCodes';
 import { fetchDeleteResponse, fetchPostResponse } from '../helpers/fetchFunctions';
 import { DropdownOption } from '../types/DropdownOption';
 import { ErrorDetails } from '../types/ErrorDetails';
@@ -89,7 +89,7 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
         if (response.ok) {
             await fetchProjects();
             setSuccess(`Successfully deleted project ${project.name}!`);
-        } else if (response.status === projectInUse) {
+        } else if (response.status === codeInUse) {
             const message: ErrorDetails = await response.json();
             setError(message.detail);
         }
@@ -106,9 +106,6 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
         if (response.ok) {
             await fetchTasksAllowed();
             setSuccess(`Successfully updated allowed tasks for project ${project.name}!`);
-        } else if (response.status === projectInUse) {
-            const message: ErrorDetails = await response.json();
-            setError(message.detail);
         }
     };
 

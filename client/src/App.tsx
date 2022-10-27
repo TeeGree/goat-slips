@@ -243,6 +243,7 @@ export const App: React.FC<{}> = () => {
                                     laborCodes={laborCodes}
                                     fetchProjects={getProjects}
                                     fetchTasksAllowed={getTasksAllowedForProjects}
+                                    fetchTasks={getTasks}
                                 />
                             </RequireAuthentication>
                         }

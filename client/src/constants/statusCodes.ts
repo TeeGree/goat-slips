@@ -1,1 +1,1 @@
-export const projectInUse = 555;
+export const codeInUse = 555;
