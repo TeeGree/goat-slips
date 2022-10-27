@@ -9,7 +9,7 @@ namespace GoatSlipsApi.Services
     public interface IProjectService
     {
         IEnumerable<Project> GetAllProjects();
-        IEnumerable<Models.Database.Task> GetTasksForProject(int projectId);
+        IEnumerable<Task> GetTasksForProject(int projectId);
         void CreateProject(string projectName);
         void DeleteProject(int projectId);
         void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds);

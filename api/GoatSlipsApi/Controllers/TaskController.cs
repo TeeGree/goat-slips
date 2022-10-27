@@ -1,6 +1,7 @@
 ﻿using GoatSlipsApi.Attributes;
 using GoatSlipsApi.DAL;
 using GoatSlipsApi.Models.Database;
+using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.Entity;
 
@@ -14,11 +15,17 @@ namespace GoatSlipsApi.Controllers
 
         private readonly ILogger<TaskController> _logger;
         private readonly IGoatSlipsContext _goatSlipsContext;
+        private readonly IProjectTaskService _projectTaskService;
 
-        public TaskController(ILogger<TaskController> logger, IGoatSlipsContext goatSlipsContext)
+        public TaskController(
+            ILogger<TaskController> logger,
+            IGoatSlipsContext goatSlipsContext,
+            IProjectTaskService projectTaskService
+        )
         {
             _logger = logger;
             _goatSlipsContext = goatSlipsContext;
+            _projectTaskService = projectTaskService;
         }
 
         [HttpGet(Name = "GetTasks")]
@@ -37,45 +44,16 @@ namespace GoatSlipsApi.Controllers
         [HttpGet("ProjectsAllowedTasks", Name = "GetAllowedTasksForProjects")]
         public ActionResult<IEnumerable<ProjectTaskMapping>> GetAllowedTasksForProjects()
         {
-            int[]? allTaskIds = _goatSlipsContext.Tasks?.Select(t => t.Id).ToArray();
-            if (allTaskIds == null)
+            try
             {
-                var message = "No tasks found!";
-                _logger.LogError(message);
-                return Problem(message);
+                IEnumerable<ProjectTaskMapping> projectTasks = _projectTaskService.GetAllowedTasksForProjects();
+                return Ok(projectTasks);
             }
-
-            int[]? allProjectIds = _goatSlipsContext.Projects?.Select(t => t.Id).ToArray();
-            if (allProjectIds == null)
+            catch (Exception e)
             {
-                var message = "No projects found!";
-                _logger.LogError(message);
-                return Problem(message);
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
             }
-
-            var projectTaskMappings = new List<ProjectTaskMapping>();
-            foreach (int projectId in allProjectIds)
-            {
-                ProjectTask[]? projectTasks = _goatSlipsContext.ProjectTasks?.Where(pt => pt.ProjectId == projectId).ToArray();
-                if (projectTasks != null && projectTasks.Any())
-                {
-                    projectTaskMappings.Add(new ProjectTaskMapping
-                    {
-                        ProjectId = projectId,
-                        AllowedTaskIds = projectTasks.Select(pt => pt.TaskId),
-                    });
-                }
-                else
-                {
-                    projectTaskMappings.Add(new ProjectTaskMapping
-                    {
-                        ProjectId = projectId,
-                        AllowedTaskIds = allTaskIds,
-                    });
-                }
-            }
-
-            return projectTaskMappings;
         }
     }
 }
