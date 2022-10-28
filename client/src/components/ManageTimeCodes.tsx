@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { fetchPostResponse } from '../helpers/fetchFunctions';
 import { AlertMessage } from '../types/AlertMessage';
 import { DropdownOption } from '../types/DropdownOption';
+import { ExistingLaborCode } from './ExistingLaborCode';
 import { ExistingProject } from './ExistingProject';
 import { ExistingTask } from './ExistingTask';
 import classes from './ManageTimeCodes.module.scss';
@@ -16,6 +17,7 @@ interface ManageTimeCodesProps {
     fetchProjects: () => Promise<void>;
     fetchTasksAllowed: () => Promise<void>;
     fetchTasks: () => Promise<void>;
+    fetchLaborCodes: () => Promise<void>;
 }
 
 export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTimeCodesProps) => {
@@ -24,15 +26,16 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
         tasks,
         taskMap,
         tasksAllowedForProjects,
-        // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
         laborCodes,
         fetchProjects,
         fetchTasksAllowed,
         fetchTasks,
+        fetchLaborCodes,
     } = props;
 
     const [newProjectName, setNewProjectName] = useState('');
     const [newTaskName, setNewTaskName] = useState('');
+    const [newLaborCodeName, setNewLaborCodeName] = useState('');
     const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
     const [codesBeingEdited, setCodesBeingEdited] = React.useState<
         'projects' | 'tasks' | 'laborCodes'
@@ -63,6 +66,12 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
         setNewTaskName(value);
     };
 
+    const handleNewLaborCodeNameChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const value = event.target.value;
+
+        setNewLaborCodeName(value);
+    };
+
     const createProject = async () => {
         await fetchPostResponse('Project/Create', { projectName: newProjectName });
         setNewProjectName('');
@@ -75,6 +84,12 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
         await fetchTasks();
     };
 
+    const createLaborCode = async () => {
+        await fetchPostResponse('LaborCode/Create', { laborCodeName: newLaborCodeName });
+        setNewLaborCodeName('');
+        await fetchLaborCodes();
+    };
+
     const getCodesList = () => {
         if (codesBeingEdited === 'projects') {
             return <div>{getProjectsList()}</div>;
@@ -84,7 +99,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
             return <div>{getTasksList()}</div>;
         }
 
-        return <></>;
+        return <div>{getLaborCodesList()}</div>;
     };
 
     const getProjectsList = () => {
@@ -174,6 +189,45 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
         );
     };
 
+    const getLaborCodesList = () => {
+        const existingLaborCodeElements = laborCodes.map((laborCode: DropdownOption) => {
+            return (
+                <ExistingLaborCode
+                    key={`laborCode${laborCode.id}`}
+                    laborCode={laborCode}
+                    fetchLaborCodes={fetchLaborCodes}
+                    setError={(message: string) => setAlertMessage({ message, severity: 'error' })}
+                    setSuccess={(message: string) =>
+                        setAlertMessage({ message, severity: 'success' })
+                    }
+                />
+            );
+        });
+
+        return (
+            <div className={classes.projectsContainer}>
+                <div className={classes.projectContainer}>
+                    <TextField
+                        className={classes.projectName}
+                        label="New Labor Code"
+                        variant="outlined"
+                        value={newLaborCodeName}
+                        onChange={handleNewLaborCodeNameChange}
+                    />
+                    <Button
+                        variant="contained"
+                        color="success"
+                        disabled={newLaborCodeName === ''}
+                        onClick={createLaborCode}
+                    >
+                        Add
+                    </Button>
+                </div>
+                {existingLaborCodeElements}
+            </div>
+        );
+    };
+
     const getAlert = () => {
         if (alertMessage === null) {
             return <></>;
@@ -193,6 +247,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
             >
                 <ToggleButton value="projects">Projects</ToggleButton>
                 <ToggleButton value="tasks">Tasks</ToggleButton>
+                <ToggleButton value="laborCodes">Labor Codes</ToggleButton>
             </ToggleButtonGroup>
             {getAlert()}
             <div>{getCodesList()}</div>

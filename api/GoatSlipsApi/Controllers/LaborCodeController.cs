@@ -1,8 +1,10 @@
 ﻿using GoatSlipsApi.Attributes;
 using GoatSlipsApi.DAL;
+using GoatSlipsApi.Exceptions;
+using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
+using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.Entity;
 
 namespace GoatSlipsApi.Controllers
 {
@@ -13,25 +15,66 @@ namespace GoatSlipsApi.Controllers
     {
 
         private readonly ILogger<LaborCodeController> _logger;
-        private readonly IGoatSlipsContext _goatSlipsContext;
+        private readonly ILaborCodeRepository _laborCodeRepository;
+        private readonly ILaborCodeService _laborCodeService;
 
-        public LaborCodeController(ILogger<LaborCodeController> logger, IGoatSlipsContext goatSlipsContext)
+        public LaborCodeController(
+            ILogger<LaborCodeController> logger,
+            ILaborCodeRepository laborCodeRepository,
+            ILaborCodeService laborCodeService
+        )
         {
             _logger = logger;
-            _goatSlipsContext = goatSlipsContext;
+            _laborCodeRepository = laborCodeRepository;
+            _laborCodeService = laborCodeService;
         }
 
         [HttpGet(Name = "GetLaborCodes")]
         public ActionResult<IEnumerable<LaborCode>> Get()
         {
-            DbSet<LaborCode>? laborCodes = _goatSlipsContext.LaborCodes;
-            if (laborCodes == null)
+            try
             {
-                var message = "No labor codes found!";
-                _logger.LogError(message);
-                return Problem(message);
+                return Ok(_laborCodeRepository.LaborCodes);
             }
-            return laborCodes;
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpPost("Create", Name = "CreateLaborCode")]
+        public IActionResult CreateLaborCode(CreateLaborCodeBody body)
+        {
+            try
+            {
+                _laborCodeService.CreateLaborCode(body.LaborCodeName);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpDelete("Delete/{id}", Name = "DeleteLaborCode")]
+        public IActionResult DeleteLaborCode(int id)
+        {
+            try
+            {
+                _laborCodeService.DeleteLaborCode(id);
+                return Ok();
+            }
+            catch (CodeInUseException e)
+            {
+                return Problem(e.Message, statusCode: CodeInUseException.StatusCode);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
         }
     }
 }

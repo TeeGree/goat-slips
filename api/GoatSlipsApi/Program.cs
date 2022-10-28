@@ -22,6 +22,7 @@ builder.Services.AddScoped<IGoatSlipsContext, GoatSlipsContext>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<ILaborCodeRepository, LaborCodeRepository>();
 builder.Services.AddScoped<ITimeSlipRepository, TimeSlipRepository>();
 builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
@@ -29,6 +30,7 @@ builder.Services.AddScoped<ITimeSlipService, TimeSlipService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<ILaborCodeService, LaborCodeService>();
 builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
 builder.Services.AddSingleton<ISecretService, SecretService>();
 
