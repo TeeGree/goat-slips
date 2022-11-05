@@ -24,8 +24,9 @@ export const RequireAuthentication: React.FC<RequireAuthenticationProps> = (
 
     useEffect(() => {
         if (
-            !isAuthenticated ||
-            (requiredAccessRight !== undefined && !accessRights.has(requiredAccessRight))
+            !isAuthenticationLoading &&
+            (!isAuthenticated ||
+                (requiredAccessRight !== undefined && !accessRights.has(requiredAccessRight)))
         ) {
             navigate('/');
         }

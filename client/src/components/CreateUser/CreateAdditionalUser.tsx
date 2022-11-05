@@ -30,7 +30,7 @@ export const CreateAdditionalUser: React.FC<{}> = () => {
         lastName: string,
         password: string,
     ) => {
-        const response = await fetchPostResponse('User/CreateFirstUser', {
+        const response = await fetchPostResponse('User/CreateUser', {
             username,
             email,
             firstName,

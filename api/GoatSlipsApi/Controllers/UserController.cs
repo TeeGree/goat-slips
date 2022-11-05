@@ -1,4 +1,6 @@
 ﻿using GoatSlipsApi.Attributes;
+using GoatSlipsApi.Exceptions;
+using GoatSlipsApi.Helpers;
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
@@ -29,8 +31,13 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
                 IEnumerable<UserForDropdown> users = _userService.GetAllUsers();
                 return Ok(users);
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
             }
             catch (Exception e)
             {
@@ -96,6 +103,7 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
                 _userService.CreateUser(createUserBody, true);
                 return Ok();
             }
@@ -106,6 +114,10 @@ namespace GoatSlipsApi.Controllers
             catch (InvalidCredentialException e)
             {
                 return BadRequest(e.Message);
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
             }
             catch (Exception e)
             {

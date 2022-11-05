@@ -1,4 +1,6 @@
 ﻿using GoatSlipsApi.Attributes;
+using GoatSlipsApi.Exceptions;
+using GoatSlipsApi.Helpers;
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
@@ -14,14 +16,17 @@ namespace GoatSlipsApi.Controllers
 
         private readonly ILogger<TimeSlipController> _logger;
         private readonly ITimeSlipService _timeSlipService;
+        private readonly IUserService _userService;
 
         public TimeSlipController(
             ILogger<TimeSlipController> logger,
-            ITimeSlipService timeSlipService
+            ITimeSlipService timeSlipService,
+            IUserService userService
         )
         {
             _logger = logger;
             _timeSlipService = timeSlipService;
+            _userService = userService;
         }
 
         [HttpGet(Name = "GetTimeSlips")]
@@ -108,6 +113,7 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
                 TimeSlip[] timeSlips = _timeSlipService.GetTimeSlips(
                     getTimeSlipsBody.UserIds,
                     getTimeSlipsBody.ProjectIds,
@@ -116,6 +122,10 @@ namespace GoatSlipsApi.Controllers
                     getTimeSlipsBody.FromDate,
                     getTimeSlipsBody.ToDate);
                 return Ok(timeSlips);
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
             }
             catch (Exception e)
             {

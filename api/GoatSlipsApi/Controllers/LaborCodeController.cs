@@ -1,6 +1,7 @@
 ﻿using GoatSlipsApi.Attributes;
 using GoatSlipsApi.DAL;
 using GoatSlipsApi.Exceptions;
+using GoatSlipsApi.Helpers;
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
@@ -17,16 +18,19 @@ namespace GoatSlipsApi.Controllers
         private readonly ILogger<LaborCodeController> _logger;
         private readonly ILaborCodeRepository _laborCodeRepository;
         private readonly ILaborCodeService _laborCodeService;
+        private readonly IUserService _userService;
 
         public LaborCodeController(
             ILogger<LaborCodeController> logger,
             ILaborCodeRepository laborCodeRepository,
-            ILaborCodeService laborCodeService
+            ILaborCodeService laborCodeService,
+            IUserService userService
         )
         {
             _logger = logger;
             _laborCodeRepository = laborCodeRepository;
             _laborCodeService = laborCodeService;
+            _userService = userService;
         }
 
         [HttpGet(Name = "GetLaborCodes")]
@@ -48,8 +52,13 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
                 _laborCodeService.CreateLaborCode(body.LaborCodeName);
                 return Ok();
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
             }
             catch (Exception e)
             {
@@ -63,8 +72,13 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
                 _laborCodeService.DeleteLaborCode(id);
                 return Ok();
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
             }
             catch (CodeInUseException e)
             {

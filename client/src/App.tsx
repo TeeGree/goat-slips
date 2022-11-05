@@ -18,6 +18,7 @@ import { RequireAuthentication } from './components/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';
 import {
     addUser,
+    // addUser,
     manageTimeCodes,
     queryTimeSlips,
     requiredAccessRights,
@@ -36,9 +37,6 @@ export const App: React.FC<{}> = () => {
 
     const [anyUsers, setAnyUsers] = useState(false);
     const [isAnyUsersLoading, setAnyUsersLoading] = useState(true);
-
-    const [users, setUsers] = useState<DropdownOption[]>([]);
-    const [userMap, setUserMap] = useState<Map<number, string>>(new Map<number, string>([]));
 
     const [projects, setProjects] = useState<DropdownOption[]>([]);
     const [projectMap, setProjectMap] = useState<Map<number, string>>(new Map<number, string>([]));
@@ -88,7 +86,6 @@ export const App: React.FC<{}> = () => {
 
     useEffect(() => {
         if (isAuthenticated()) {
-            getUsers();
             getProjects();
             getTasks();
             getTasksAllowedForProjects();
@@ -96,17 +93,6 @@ export const App: React.FC<{}> = () => {
             getAccessRights();
         }
     }, [user]);
-
-    const getUsers = async () => {
-        const usersFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('User');
-
-        const map = new Map<number, string>([]);
-        usersFromApi.forEach((userFromApi: DropdownOption) =>
-            map.set(userFromApi.id, userFromApi.name),
-        );
-        setUserMap(map);
-        setUsers(usersFromApi);
-    };
 
     const getProjects = async () => {
         const projectsFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('Project');
@@ -245,8 +231,6 @@ export const App: React.FC<{}> = () => {
                                 requiredAccessRight={requiredAccessRights.get(queryTimeSlips)}
                             >
                                 <QueryTimeSlips
-                                    users={users}
-                                    userMap={userMap}
                                     projects={projects}
                                     projectMap={projectMap}
                                     tasks={tasks}

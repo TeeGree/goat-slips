@@ -1,5 +1,6 @@
 using GoatSlipsApi.Attributes;
 using GoatSlipsApi.Exceptions;
+using GoatSlipsApi.Helpers;
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
@@ -15,14 +16,17 @@ namespace GoatSlipsApi.Controllers
 
         private readonly ILogger<ProjectController> _logger;
         private readonly IProjectService _projectService;
+        private readonly IUserService _userService;
 
         public ProjectController(
             ILogger<ProjectController> logger,
-            IProjectService projectService
+            IProjectService projectService,
+            IUserService userService
         )
         {
             _logger = logger;
             _projectService = projectService;
+            _userService = userService;
         }
 
         [HttpGet(Name = "GetProjects")]
@@ -47,7 +51,8 @@ namespace GoatSlipsApi.Controllers
             {
                 IEnumerable<Models.Database.Task> tasks = _projectService.GetTasksForProject(projectId);
                 return Ok(tasks);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 _logger.LogError(e.Message);
                 return Problem(e.Message);
@@ -59,8 +64,13 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
                 _projectService.CreateProject(body.ProjectName);
                 return Ok();
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
             }
             catch (Exception e)
             {
@@ -74,8 +84,13 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
                 _projectService.SetAllowedTasksForProject(body.ProjectId, body.AllowedTaskIds);
                 return Ok();
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
             }
             catch (Exception e)
             {
@@ -89,8 +104,13 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
                 _projectService.DeleteProject(id);
                 return Ok();
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
             }
             catch (CodeInUseException e)
             {

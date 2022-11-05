@@ -1,4 +1,5 @@
 ﻿using GoatSlipsApi.DAL;
+using GoatSlipsApi.Exceptions;
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
 using System.Data.Entity;
@@ -16,6 +17,7 @@ namespace GoatSlipsApi.Services
         void Logout(HttpContext httpContext);
         void ChangePassword(ChangePasswordBody changePasswordBody, HttpContext httpContext);
         IEnumerable<AccessRight> GetAccessRightsForUser(int userId);
+        void ValidateAccess(string accessRightCode, HttpContext httpContext);
     }
     public sealed class UserService : IUserService
     {
@@ -203,6 +205,21 @@ namespace GoatSlipsApi.Services
                        on userAccessRight.AccessRightId equals accessRight.Id
                    where userAccessRight.UserId == userId
                    select accessRight;
+        }
+
+        public void ValidateAccess(string accessRightCode, HttpContext httpContext)
+        {
+            int? userId = _jwtUtils.GetUserIdFromContext(httpContext);
+            if (!userId.HasValue)
+            {
+                throw new Exception("No user currently logged in!");
+            }
+
+            bool hasAccess = GetAccessRightsForUser(userId.Value).Any(ar => ar.Code == accessRightCode);
+            if (!hasAccess)
+            {
+                throw new InsufficientAccessException("User does not have the required access right.");
+            }
         }
     }
 }

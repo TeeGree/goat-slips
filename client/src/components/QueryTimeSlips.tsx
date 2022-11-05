@@ -24,14 +24,12 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { getCsvOfTimeSlips } from '../helpers/csvGeneration';
-import { fetchPost } from '../helpers/fetchFunctions';
+import { fetchGet, fetchPost } from '../helpers/fetchFunctions';
 import { DropdownOption } from '../types/DropdownOption';
 import { ExportableTimeSlip, TimeSlip } from '../types/TimeSlip';
 import classes from './QueryTimeSlips.module.scss';
 
 interface QueryTimeSlipsProps {
-    users: DropdownOption[];
-    userMap: Map<number, string>;
     projects: DropdownOption[];
     projectMap: Map<number, string>;
     tasks: DropdownOption[];
@@ -46,8 +44,7 @@ const emptyDropdownOption: DropdownOption = {
 };
 
 export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSlipsProps) => {
-    const { users, userMap, projects, projectMap, tasks, taskMap, laborCodes, laborCodeMap } =
-        props;
+    const { projects, projectMap, tasks, taskMap, laborCodes, laborCodeMap } = props;
     const [loadingResults, setLoadingResults] = useState(true);
     const [timeSlips, setTimeSlips] = useState<TimeSlip[]>([]);
 
@@ -57,9 +54,12 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const [selectedLaborCodeIds, setSelectedLaborCodeIds] = useState<number[]>([]);
     const [fromDate, setFromDate] = React.useState<Dayjs | null>(null);
     const [toDate, setToDate] = React.useState<Dayjs | null>(null);
+    const [users, setUsers] = useState<DropdownOption[]>([]);
+    const [userMap, setUserMap] = useState<Map<number, string>>(new Map<number, string>([]));
 
     useEffect(() => {
         fetchTimeSlips();
+        getUsers();
     }, [
         selectedUserIds,
         selectedProjectIds,
@@ -101,6 +101,17 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         setTimeSlips(results);
 
         setLoadingResults(false);
+    };
+
+    const getUsers = async () => {
+        const usersFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('User');
+
+        const map = new Map<number, string>([]);
+        usersFromApi.forEach((userFromApi: DropdownOption) =>
+            map.set(userFromApi.id, userFromApi.name),
+        );
+        setUserMap(map);
+        setUsers(usersFromApi);
     };
 
     const getTask = (taskId: number | null): string => {
