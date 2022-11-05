@@ -240,6 +240,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
         <div className={classes.pageContainer}>
             <div className={classes.header}>Manage Time Codes</div>
             <ToggleButtonGroup
+                className={classes.codeTypeButtonGroup}
                 value={codesBeingEdited}
                 exclusive
                 onChange={handleChangeCodesBeingEdited}
