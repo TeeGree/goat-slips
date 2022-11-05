@@ -1,5 +1,6 @@
 ﻿using GoatSlipsApi.Attributes;
 using GoatSlipsApi.Models;
+using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Authentication;
@@ -16,7 +17,8 @@ namespace GoatSlipsApi.Controllers
 
         public UserController(
             ILogger<UserController> logger,
-            IUserService userService)
+            IUserService userService
+        )
         {
             _logger = logger;
             _userService = userService;
@@ -59,7 +61,7 @@ namespace GoatSlipsApi.Controllers
 
         [AllowAnonymous]
         [HttpGet("GetUser", Name = "GetUser")]
-        public ActionResult<UserForUI?> GetUsername()
+        public ActionResult<UserForUI?> GetUser()
         {
             try
             {
@@ -162,6 +164,21 @@ namespace GoatSlipsApi.Controllers
             catch (InvalidCredentialException e)
             {
                 return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("AccessRights/{userId}", Name = "GetAccessRightsForUser")]
+        public ActionResult<IEnumerable<AccessRight>> GetAccessRightsForUser(int userId)
+        {
+            try
+            {
+                IEnumerable<AccessRight> accessRights = _userService.GetAccessRightsForUser(userId);
+                return Ok(accessRights);
             }
             catch (Exception e)
             {

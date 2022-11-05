@@ -15,10 +15,23 @@ import { DropdownOption } from './types/DropdownOption';
 import { ManageTimeCodes } from './components/ManageTimeCodes';
 import { TaskMap } from './types/TaskMap';
 import { RequireAuthentication } from './components/RequireAuthentication';
+import { AccessRight } from './types/AccessRight';
+import {
+    addUser,
+    manageTimeCodes,
+    queryTimeSlips,
+    requiredAccessRights,
+} from './constants/requiredAccessRights';
+
+const defaultUser: User = {
+    userId: 0,
+    username: '',
+    requiresPasswordChange: true,
+};
 
 export const App: React.FC<{}> = () => {
-    const [username, setUsername] = useState<string>('');
-    const [passwordChangeRequired, setPasswordChangeRequired] = useState(true);
+    const [user, setUser] = useState<User>(defaultUser);
+    const [userAccessRights, setUserAccessRights] = useState<Set<string>>(new Set());
     const [isAuthenticationLoading, setIsAuthenticationLoading] = useState(true);
 
     const [anyUsers, setAnyUsers] = useState(false);
@@ -43,7 +56,7 @@ export const App: React.FC<{}> = () => {
     );
 
     const isAuthenticated = () => {
-        return username !== '';
+        return user.username !== '';
     };
 
     const checkIfAuthenticated = async () => {
@@ -51,11 +64,10 @@ export const App: React.FC<{}> = () => {
         const userResponse = await fetchGetResponse('User/GetUser');
 
         if (userResponse.ok) {
-            const user: User = await userResponse.json();
-            setPasswordChangeRequired(user.requiresPasswordChange);
-            setUsername(user.username);
+            const userFromApi: User = await userResponse.json();
+            setUser(userFromApi);
         } else {
-            setUsername('');
+            setUser(defaultUser);
         }
 
         setIsAuthenticationLoading(false);
@@ -81,14 +93,17 @@ export const App: React.FC<{}> = () => {
             getTasks();
             getTasksAllowedForProjects();
             getLaborCodes();
+            getAccessRights();
         }
-    }, [username]);
+    }, [user]);
 
     const getUsers = async () => {
         const usersFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('User');
 
         const map = new Map<number, string>([]);
-        usersFromApi.forEach((user: DropdownOption) => map.set(user.id, user.name));
+        usersFromApi.forEach((userFromApi: DropdownOption) =>
+            map.set(userFromApi.id, userFromApi.name),
+        );
         setUserMap(map);
         setUsers(usersFromApi);
     };
@@ -132,6 +147,15 @@ export const App: React.FC<{}> = () => {
         setLaborCodes(laborCodesFromApi);
     };
 
+    const getAccessRights = async () => {
+        const accessRightsFromApi: AccessRight[] = await fetchGet<AccessRight[]>(
+            `User/AccessRights/${user.userId}`,
+        );
+
+        const accessRightCodes = accessRightsFromApi.map((ar) => ar.code);
+        setUserAccessRights(new Set(accessRightCodes));
+    };
+
     const fillScreenWithPage = (page: JSX.Element) => {
         return <div className={classes.fillScreen}>{page}</div>;
     };
@@ -150,7 +174,7 @@ export const App: React.FC<{}> = () => {
             );
         }
 
-        if (passwordChangeRequired) {
+        if (user.requiresPasswordChange) {
             return fillScreenWithPage(
                 <ChangePassword
                     onChangePassword={() => checkIfAuthenticated()}
@@ -171,14 +195,15 @@ export const App: React.FC<{}> = () => {
         );
     };
 
-    const canAccessGuardedRoutes = isAuthenticated() && !passwordChangeRequired;
+    const canAccessGuardedRoutes = isAuthenticated() && !user.requiresPasswordChange;
 
     return (
         <div className={classes.app}>
             <AppHeader
                 onLogout={checkIfAuthenticated}
-                username={username}
-                passwordChangeRequired={passwordChangeRequired}
+                username={user.username}
+                passwordChangeRequired={user.requiresPasswordChange}
+                accessRights={userAccessRights}
             />
             <div className={classes.appContent}>
                 <Routes>
@@ -189,6 +214,7 @@ export const App: React.FC<{}> = () => {
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
                                 isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
                             >
                                 <ChangePassword />
                             </RequireAuthentication>
@@ -201,6 +227,8 @@ export const App: React.FC<{}> = () => {
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
                                 isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                                requiredAccessRight={requiredAccessRights.get(addUser)}
                             >
                                 <CreateAdditionalUser />
                             </RequireAuthentication>
@@ -213,6 +241,8 @@ export const App: React.FC<{}> = () => {
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
                                 isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                                requiredAccessRight={requiredAccessRights.get(queryTimeSlips)}
                             >
                                 <QueryTimeSlips
                                     users={users}
@@ -234,6 +264,8 @@ export const App: React.FC<{}> = () => {
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
                                 isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                                requiredAccessRight={requiredAccessRights.get(manageTimeCodes)}
                             >
                                 <ManageTimeCodes
                                     projects={projects}

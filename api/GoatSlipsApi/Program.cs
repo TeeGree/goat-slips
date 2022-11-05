@@ -25,6 +25,8 @@ builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ILaborCodeRepository, LaborCodeRepository>();
 builder.Services.AddScoped<ITimeSlipRepository, TimeSlipRepository>();
 builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
+builder.Services.AddScoped<IAccessRightRepository, AccessRightRepository>();
+builder.Services.AddScoped<IUserAccessRightRepository, UserAccessRightRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITimeSlipService, TimeSlipService>();
 builder.Services.AddScoped<IUserService, UserService>();

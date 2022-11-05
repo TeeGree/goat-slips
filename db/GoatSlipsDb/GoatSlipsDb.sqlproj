@@ -61,6 +61,8 @@
   <ItemGroup>
     <Build Include="Tables\LaborCode.sql" />
     <Build Include="Tables\Project.sql" />
+    <Build Include="Tables\AccessRight.sql" />
+    <Build Include="Tables\UserAccessRight.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="GoatSlipsDb.refactorlog" />

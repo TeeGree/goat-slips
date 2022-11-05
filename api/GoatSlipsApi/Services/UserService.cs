@@ -1,6 +1,7 @@
 ﻿using GoatSlipsApi.DAL;
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Database;
+using System.Data.Entity;
 using System.Security.Authentication;
 
 namespace GoatSlipsApi.Services
@@ -14,20 +15,29 @@ namespace GoatSlipsApi.Services
         bool AnyUsers();
         void Logout(HttpContext httpContext);
         void ChangePassword(ChangePasswordBody changePasswordBody, HttpContext httpContext);
+        IEnumerable<AccessRight> GetAccessRightsForUser(int userId);
     }
     public sealed class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
         private readonly ISecretService _secretService;
         private readonly IJwtUtils _jwtUtils;
+        private readonly IAccessRightRepository _accessRightRepository;
+        private readonly IUserAccessRightRepository _userAccessRightRepository;
+
         public UserService(
             IUserRepository userRepository,
             ISecretService secretService,
-            IJwtUtils jwtUtils)
+            IJwtUtils jwtUtils,
+            IAccessRightRepository accessRightRepository,
+            IUserAccessRightRepository userAccessRightRepository
+        )
         {
             _userRepository = userRepository;
             _secretService = secretService;
             _jwtUtils = jwtUtils;
+            _accessRightRepository = accessRightRepository;
+            _userAccessRightRepository = userAccessRightRepository;
         }
 
         public IEnumerable<UserForDropdown> GetAllUsers()
@@ -108,6 +118,7 @@ namespace GoatSlipsApi.Services
 
             return new UserForUI
             {
+                UserId = user.Id,
                 Username = user.Username,
                 RequiresPasswordChange = user.RequirePasswordChange,
             };
@@ -179,6 +190,19 @@ namespace GoatSlipsApi.Services
                     Secure = true,
                     Expires = DateTime.Now.AddDays(expirationDays)
                 });
+        }
+
+        public IEnumerable<AccessRight> GetAccessRightsForUser(int userId)
+        {
+            DbSet<UserAccessRight> userAccessRights = _userAccessRightRepository.UserAccessRights;
+
+            DbSet<AccessRight> accessRights = _accessRightRepository.AccessRights;
+
+            return from userAccessRight in userAccessRights
+                   join accessRight in accessRights
+                       on userAccessRight.AccessRightId equals accessRight.Id
+                   where userAccessRight.UserId == userId
+                   select accessRight;
         }
     }
 }

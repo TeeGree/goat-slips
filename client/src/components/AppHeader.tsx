@@ -5,15 +5,17 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { Person } from '@mui/icons-material';
 import { fetchGetResponse } from '../helpers/fetchFunctions';
 import { Link } from 'react-router-dom';
+import { ComponentName, requiredAccessRights } from '../constants/requiredAccessRights';
 
 interface AppHeaderProps {
     onLogout: () => void;
     username: string;
     passwordChangeRequired: boolean;
+    accessRights: Set<string>;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
-    const { onLogout, username, passwordChangeRequired } = props;
+    const { onLogout, username, passwordChangeRequired, accessRights } = props;
 
     const [appMenuAnchorEl, setAppMenuAnchorEl] = React.useState<null | HTMLElement>(null);
     const appMenuOpen = Boolean(appMenuAnchorEl);
@@ -47,7 +49,11 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
         }
     };
 
-    const createLink = (path: string, label: string) => {
+    const createLink = (path: string, label: ComponentName) => {
+        const requiredAccessRight = requiredAccessRights.get(label);
+        if (requiredAccessRight !== undefined && !accessRights.has(requiredAccessRight)) {
+            return <></>;
+        }
         return (
             <Link className={classes.link} to={path}>
                 <MenuItem onClick={handleAppMenuClose}>{label}</MenuItem>
