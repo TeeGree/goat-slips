@@ -1,4 +1,4 @@
-﻿namespace GoatSlipsApi.Models
+﻿namespace GoatSlipsApi.Models.Api
 {
     public class ChangePasswordBody
     {

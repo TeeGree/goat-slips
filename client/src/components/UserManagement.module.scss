@@ -1,0 +1,29 @@
+@import '../variables';
+
+.dropdown {
+    width: 150px !important;
+}
+
+.pageContainer {
+    width: 100%;
+    height: calc(100vh - $headerHeight);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.inputContainer {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.tableContainer {
+    flex-grow: 1;
+    width: 90% !important;
+}
+
+.searchButton {
+    margin-left: 10px !important;
+}

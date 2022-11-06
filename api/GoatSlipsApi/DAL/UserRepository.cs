@@ -6,14 +6,28 @@ namespace GoatSlipsApi.DAL
 {
     public interface IUserRepository
     {
+        DbSet<User> Users { get; }
         User? GetById(int id);
         User? GetByUsername(string username);
-        IEnumerable<UserForDropdown> GetAllUsers();
+        IEnumerable<UserForDropdown> GetAllUsersForDropdown();
         void CreateUser(User userToAdd);
         void UpdatePassword(int userId, string newPassword);
     }
     public sealed class UserRepository : IUserRepository
     {
+        public DbSet<User> Users
+        {
+            get
+            {
+                DbSet<User>? users = _dbContext.Users;
+                if (users == null)
+                {
+                    throw new Exception("No users found!");
+                }
+                return users;
+            }
+        }
+
         private readonly IGoatSlipsContext _dbContext;
         public UserRepository(IGoatSlipsContext dbContext)
         {
@@ -30,7 +44,7 @@ namespace GoatSlipsApi.DAL
             return _dbContext.Users?.FirstOrDefault(u => u.Username == username);
         }
 
-        public IEnumerable<UserForDropdown> GetAllUsers()
+        public IEnumerable<UserForDropdown> GetAllUsersForDropdown()
         {
             DbSet<User>? users = _dbContext.Users;
             if (users == null)

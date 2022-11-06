@@ -1,5 +1,5 @@
 ﻿using GoatSlipsApi.DAL;
-using GoatSlipsApi.Models;
+using GoatSlipsApi.Models.Api;
 using GoatSlipsApi.Models.Database;
 using System.Data.Entity;
 

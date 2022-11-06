@@ -104,7 +104,9 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     };
 
     const getUsers = async () => {
-        const usersFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('User');
+        const usersFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>(
+            'User/GetUsersForDropdown',
+        );
 
         const map = new Map<number, string>([]);
         usersFromApi.forEach((userFromApi: DropdownOption) =>

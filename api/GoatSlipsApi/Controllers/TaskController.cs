@@ -2,7 +2,7 @@
 using GoatSlipsApi.DAL;
 using GoatSlipsApi.Exceptions;
 using GoatSlipsApi.Helpers;
-using GoatSlipsApi.Models;
+using GoatSlipsApi.Models.Api;
 using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;

@@ -2,6 +2,7 @@
 using GoatSlipsApi.Exceptions;
 using GoatSlipsApi.Helpers;
 using GoatSlipsApi.Models;
+using GoatSlipsApi.Models.Api;
 using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -26,13 +27,33 @@ namespace GoatSlipsApi.Controllers
             _userService = userService;
         }
 
-        [HttpGet(Name = "GetUsers")]
-        public ActionResult<IEnumerable<UserForDropdown>> Get()
+        [HttpGet("QueryUsers/{searchText?}", Name = "QueryUsersForUserManagement")]
+        public ActionResult<IEnumerable<UserForManagement>> QueryUsersForUserManagement(string? searchText)
+        {
+            try
+            {
+                //_userService.ValidateAccess(AccessRights.Admin, HttpContext);
+                IEnumerable<UserForManagement> users = _userService.QueryUsers(searchText);
+                return Ok(users);
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("GetUsersForDropdown", Name = "GetUsersForDropdown")]
+        public ActionResult<IEnumerable<UserForDropdown>> GetUsersForDropdown()
         {
             try
             {
                 _userService.ValidateAccess(AccessRights.Admin, HttpContext);
-                IEnumerable<UserForDropdown> users = _userService.GetAllUsers();
+                IEnumerable<UserForDropdown> users = _userService.GetAllUsersForDropdown();
                 return Ok(users);
             }
             catch (InsufficientAccessException e)

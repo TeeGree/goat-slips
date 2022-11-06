@@ -1,6 +1,7 @@
 ﻿using GoatSlipsApi.DAL;
 using GoatSlipsApi.Exceptions;
 using GoatSlipsApi.Models;
+using GoatSlipsApi.Models.Api;
 using GoatSlipsApi.Models.Database;
 using System.Data.Entity;
 using System.Security.Authentication;
@@ -9,7 +10,7 @@ namespace GoatSlipsApi.Services
 {
     public interface IUserService
     {
-        IEnumerable<UserForDropdown> GetAllUsers();
+        IEnumerable<UserForDropdown> GetAllUsersForDropdown();
         void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext);
         void CreateUser(CreateUserBody createUserBody, bool requirePasswordChange);
         UserForUI? GetUserFromContext(HttpContext httpContext);
@@ -18,6 +19,7 @@ namespace GoatSlipsApi.Services
         void ChangePassword(ChangePasswordBody changePasswordBody, HttpContext httpContext);
         IEnumerable<AccessRight> GetAccessRightsForUser(int userId);
         void ValidateAccess(string accessRightCode, HttpContext httpContext);
+        IEnumerable<UserForManagement> QueryUsers(string? searchText);
     }
     public sealed class UserService : IUserService
     {
@@ -42,9 +44,58 @@ namespace GoatSlipsApi.Services
             _userAccessRightRepository = userAccessRightRepository;
         }
 
-        public IEnumerable<UserForDropdown> GetAllUsers()
+        public IEnumerable<UserForDropdown> GetAllUsersForDropdown()
         {
-            return _userRepository.GetAllUsers();
+            return _userRepository.GetAllUsersForDropdown();
+        }
+
+        public IEnumerable<UserForManagement> QueryUsers(string? searchText)
+        {
+            DbSet<User> users = _userRepository.Users;
+            User[] filteredUsers;
+            if (searchText == null)
+            {
+                filteredUsers = users.ToArray();
+            }
+            else
+            {
+                filteredUsers = users.Where(u =>
+                    u.Username.StartsWith(searchText) ||
+                    u.Email.StartsWith(searchText) ||
+                    (u.FirstName != null && u.FirstName.StartsWith(searchText)) ||
+                    (u.LastName != null && u.LastName.StartsWith(searchText))
+                ).ToArray();
+            }
+
+            if (filteredUsers.Length == 0)
+            {
+                return Array.Empty<UserForManagement>();
+            }
+
+            DbSet<UserAccessRight> userAccessRights = _userAccessRightRepository.UserAccessRights;
+            DbSet<AccessRight> accessRights = _accessRightRepository.AccessRights;
+
+            IEnumerable<UserForManagement> userResults = filteredUsers.Select(user =>
+            {
+                IEnumerable<UserAccessRight> accessRightLinks = userAccessRights.Where(userAccessRight => userAccessRight.UserId == user.Id);
+                IEnumerable<AccessRight> accessRightsForUser = from accessRightLink in accessRightLinks
+                                                               join accessRight in accessRights
+                                                                   on accessRightLink.AccessRightId equals accessRight.Id
+                                                               select accessRight;
+                var userResult = new UserForManagement
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Username = user.Username,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    AccessRights = accessRightsForUser.ToArray()
+                };
+
+                return userResult;
+            });
+            
+            return userResults;
         }
 
         public void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext)
@@ -128,7 +179,7 @@ namespace GoatSlipsApi.Services
 
         public bool AnyUsers()
         {
-            return _userRepository.GetAllUsers().Count() > 0;
+            return _userRepository.Users.Any();
         }
 
         public void Logout(HttpContext httpContext)

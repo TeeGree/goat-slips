@@ -80,6 +80,7 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
                             'aria-labelledby': 'basic-button',
                         }}
                     >
+                        {createLink('/manage-users', 'Manage Users')}
                         {createLink('/create-user', 'Add User')}
                         {createLink('/', 'Week View')}
                         {createLink('/query-time-slips', 'Query Time Slips')}

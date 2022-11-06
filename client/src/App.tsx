@@ -18,11 +18,11 @@ import { RequireAuthentication } from './components/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';
 import {
     addUser,
-    // addUser,
     manageTimeCodes,
     queryTimeSlips,
     requiredAccessRights,
 } from './constants/requiredAccessRights';
+import { UserManagement } from './components/UserManagement';
 
 const defaultUser: User = {
     userId: 0,
@@ -203,6 +203,19 @@ export const App: React.FC<{}> = () => {
                                 accessRights={userAccessRights}
                             >
                                 <ChangePassword />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/manage-users"
+                        path="/manage-users"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                            >
+                                <UserManagement />
                             </RequireAuthentication>
                         }
                     />
