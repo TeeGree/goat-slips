@@ -14,6 +14,8 @@ The application is split into 3 parts:
 
 Begin by creating a blank SQL Server database and deploying the scripts in the `db` folder to it. You can use the database project (`db/GoatSlipsDb.sln`) to deploy these scripts.
 
+Ensure that the `db/GoatSlipsDb/AddAccessRights.sql` script is ran on the target db once the schema has been deployed.
+
 ## Server
 
 Open the .NET 6 Web API solution (`api/GoatSlipsApi.sln`).
