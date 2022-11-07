@@ -19,4 +19,5 @@ export const requiredAccessRights = new Map<ComponentName, string>([
     [queryTimeSlips, adminAccessRight],
     [manageTimeCodes, adminAccessRight],
     [addUser, adminAccessRight],
+    [manageUsers, adminAccessRight],
 ]);

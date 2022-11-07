@@ -1,3 +1,5 @@
+import { AccessRight } from './AccessRight';
+
 export interface User {
     userId: number;
     username: string;
@@ -10,4 +12,5 @@ export interface UserQueryResult {
     email: string;
     firstName: string;
     lastName: string;
+    accessRights: AccessRight[];
 }

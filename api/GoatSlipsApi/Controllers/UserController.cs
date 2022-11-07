@@ -32,7 +32,7 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
-                //_userService.ValidateAccess(AccessRights.Admin, HttpContext);
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
                 IEnumerable<UserForManagement> users = _userService.QueryUsers(searchText);
                 return Ok(users);
             }
@@ -212,6 +212,26 @@ namespace GoatSlipsApi.Controllers
             {
                 IEnumerable<AccessRight> accessRights = _userService.GetAccessRightsForUser(userId);
                 return Ok(accessRights);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpPost("SetAccessRights", Name = "SetAccessRights")]
+        public IActionResult SetAccessRights(SetAccessRightsBody body)
+        {
+            try
+            {
+                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
+                _userService.SetUserAccessRights(body.UserId, body.AccessRightIds);
+                return Ok();
+            }
+            catch (InsufficientAccessException e)
+            {
+                return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
             }
             catch (Exception e)
             {

@@ -14,9 +14,11 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { fetchGet } from '../helpers/fetchFunctions';
+import { AccessRight } from '../types/AccessRight';
 import { DropdownOption } from '../types/DropdownOption';
 import { UserQueryResult } from '../types/User';
 import classes from './UserManagement.module.scss';
+import { UserRow } from './UserRow';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
 const emptyDropdownOption: DropdownOption = {
@@ -33,9 +35,14 @@ export const UserManagement: React.FC<{}> = () => {
     const [userMap, setUserMap] = useState<Map<number, UserQueryResult>>(
         new Map<number, UserQueryResult>([]),
     );
+    const [accessRights, setAccessRights] = useState<AccessRight[]>([]);
+    const [accessRightMap, setAccessRightMap] = useState<Map<number, string>>(
+        new Map<number, string>([]),
+    );
 
     useEffect(() => {
         getUsers('');
+        getAllAccessRights();
     }, []);
 
     const getUsers = async (searchText: string) => {
@@ -58,6 +65,18 @@ export const UserManagement: React.FC<{}> = () => {
         }
 
         setLoadingResults(false);
+    };
+
+    const getAllAccessRights = async () => {
+        const accessRightsFromApi: AccessRight[] = await fetchGet<AccessRight[]>('AccessRight');
+
+        const map = new Map<number, string>([]);
+        accessRightsFromApi.forEach((accessRightFromApi: AccessRight) =>
+            map.set(accessRightFromApi.id, accessRightFromApi.code),
+        );
+
+        setAccessRightMap(map);
+        setAccessRights(accessRightsFromApi);
     };
 
     const handleUserFilterChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -83,7 +102,9 @@ export const UserManagement: React.FC<{}> = () => {
             return (
                 <TableRow>
                     <TableCell colSpan={7}>
-                        <CircularProgress />
+                        <div className={classes.spinnerContainer}>
+                            <CircularProgress />
+                        </div>
                     </TableCell>
                 </TableRow>
             );
@@ -91,12 +112,13 @@ export const UserManagement: React.FC<{}> = () => {
 
         return users.map((user: UserQueryResult) => {
             return (
-                <TableRow key={user.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.firstName}</TableCell>
-                    <TableCell>{user.lastName}</TableCell>
-                </TableRow>
+                <UserRow
+                    key={user.id}
+                    user={user}
+                    allAccessRights={accessRights}
+                    accessRightMap={accessRightMap}
+                    fetchUsers={() => getUsers(userFilterText)}
+                />
             );
         });
     };
@@ -111,26 +133,30 @@ export const UserManagement: React.FC<{}> = () => {
                     onKeyDown={listenForEnter}
                 />
                 <Tooltip title="Search for users starting with the entered text">
-                    <Button
-                        className={classes.searchButton}
-                        onClick={() => getUsers(userFilterText)}
-                        variant="contained"
-                        color="primary"
-                    >
-                        <Search />
-                    </Button>
+                    <span className={classes.searchButtonContainer}>
+                        <Button
+                            className={classes.searchButton}
+                            onClick={() => getUsers(userFilterText)}
+                            variant="contained"
+                            color="primary"
+                        >
+                            <Search />
+                        </Button>
+                    </span>
                 </Tooltip>
 
                 <Tooltip title="Revert search and show all users in the system">
-                    <Button
-                        disabled={!searchModified}
-                        className={classes.searchButton}
-                        onClick={resetSearch}
-                        variant="contained"
-                        color="primary"
-                    >
-                        <Replay />
-                    </Button>
+                    <span className={classes.searchButtonContainer}>
+                        <Button
+                            className={classes.searchButton}
+                            disabled={!searchModified}
+                            onClick={resetSearch}
+                            variant="contained"
+                            color="primary"
+                        >
+                            <Replay />
+                        </Button>
+                    </span>
                 </Tooltip>
             </div>
         );
@@ -147,6 +173,7 @@ export const UserManagement: React.FC<{}> = () => {
                             <TableCell>Email</TableCell>
                             <TableCell>First Name</TableCell>
                             <TableCell>Last Name</TableCell>
+                            <TableCell>Access Rights</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>{getRows()}</TableBody>

@@ -1,16 +1,5 @@
 import { Delete, Save } from '@mui/icons-material';
-import {
-    Box,
-    Button,
-    Checkbox,
-    FormControl,
-    InputLabel,
-    ListItemText,
-    MenuItem,
-    Modal,
-    Select,
-    SelectChangeEvent,
-} from '@mui/material';
+import { Box, Button, Modal } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { modalStyle } from '../constants/modalStyle';
 import { codeInUse } from '../constants/statusCodes';
@@ -18,6 +7,7 @@ import { fetchDeleteResponse, fetchPostResponse } from '../helpers/fetchFunction
 import { DropdownOption } from '../types/DropdownOption';
 import { ErrorDetails } from '../types/ErrorDetails';
 import classes from './ExistingProject.module.scss';
+import { MultiSelect } from './MultiSelect';
 
 interface ExistingProjectProps {
     project: DropdownOption;
@@ -53,36 +43,6 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
         setIsDirty(false);
     }, [tasksAllowed]);
 
-    const handleSelectChange = (
-        event: SelectChangeEvent<number[]>,
-        setStateAction: React.Dispatch<React.SetStateAction<number[]>>,
-    ) => {
-        const {
-            target: { value },
-        } = event;
-        const values = typeof value === 'string' ? value.split(',').map((v) => Number(v)) : value;
-
-        if (originalTasks.size !== values.length) {
-            setIsDirty(true);
-            setStateAction(values);
-            return;
-        }
-        let dirty = false;
-        values.forEach((v) => {
-            if (!originalTasks.has(v)) {
-                dirty = true;
-                return;
-            }
-        });
-
-        setIsDirty(dirty);
-        setStateAction(values);
-    };
-
-    const handleTaskChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedTaskIds);
-    };
-
     const deleteProject = async () => {
         const response = await fetchDeleteResponse(`Project/Delete/${project.id}`);
 
@@ -109,31 +69,6 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
         }
     };
 
-    const renderSelected = (selectedIds: number[]) => {
-        let displayText = '';
-        selectedIds.forEach((id: number, index: number) => {
-            displayText += taskMap.get(id) ?? 'N/A';
-            if (index < selectedIds.length - 1) {
-                displayText += ', ';
-            }
-        });
-
-        return displayText;
-    };
-
-    const getTaskMenuItems = () => {
-        return allTasks.map((task: DropdownOption) => {
-            const { id, name } = task;
-            const isChecked = selectedTaskIds.indexOf(id) > -1;
-            return (
-                <MenuItem key={`project-${project.name}-${id}`} value={id}>
-                    <Checkbox checked={isChecked} />
-                    <ListItemText primary={name} />
-                </MenuItem>
-            );
-        });
-    };
-
     return (
         <div className={classes.projectContainer}>
             <Modal open={isBeingDeleted}>
@@ -154,18 +89,16 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
                 </Box>
             </Modal>
             <span className={classes.projectName}>{project.name}</span>
-            <FormControl className={classes.projectAllowedTasks}>
-                <InputLabel>Allowed Tasks</InputLabel>
-                <Select
-                    renderValue={(selected) => renderSelected(selected)}
-                    multiple
-                    value={selectedTaskIds}
-                    label="Allowed Tasks"
-                    onChange={handleTaskChange}
-                >
-                    {getTaskMenuItems()}
-                </Select>
-            </FormControl>
+            <MultiSelect
+                label="Allowed Tasks"
+                keyPrefix={`project-${project.name}-`}
+                originalSelectedIds={originalTasks}
+                selectedIds={selectedTaskIds}
+                setSelectedIds={setSelectedTaskIds}
+                setIsDirty={setIsDirty}
+                getDisplayTextForId={(id: number) => taskMap.get(id) ?? ''}
+                options={allTasks}
+            />
             <Button
                 className={classes.button}
                 variant="contained"

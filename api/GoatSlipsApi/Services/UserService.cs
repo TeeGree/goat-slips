@@ -20,6 +20,7 @@ namespace GoatSlipsApi.Services
         IEnumerable<AccessRight> GetAccessRightsForUser(int userId);
         void ValidateAccess(string accessRightCode, HttpContext httpContext);
         IEnumerable<UserForManagement> QueryUsers(string? searchText);
+        void SetUserAccessRights(int userId, HashSet<int> accessRightIds);
     }
     public sealed class UserService : IUserService
     {
@@ -77,7 +78,7 @@ namespace GoatSlipsApi.Services
 
             IEnumerable<UserForManagement> userResults = filteredUsers.Select(user =>
             {
-                IEnumerable<UserAccessRight> accessRightLinks = userAccessRights.Where(userAccessRight => userAccessRight.UserId == user.Id);
+                UserAccessRight[] accessRightLinks = userAccessRights.Where(userAccessRight => userAccessRight.UserId == user.Id).ToArray();
                 IEnumerable<AccessRight> accessRightsForUser = from accessRightLink in accessRightLinks
                                                                join accessRight in accessRights
                                                                    on accessRightLink.AccessRightId equals accessRight.Id
@@ -271,6 +272,41 @@ namespace GoatSlipsApi.Services
             {
                 throw new InsufficientAccessException("User does not have the required access right.");
             }
+        }
+
+        private void RemoveAccessRightsForUser(int userId, HashSet<int> accessRightIds)
+        {
+            DbSet<UserAccessRight> userAccessRightMapping = _userAccessRightRepository.UserAccessRights;
+
+            UserAccessRight[] userAccessRightsToRemove = (from uar in userAccessRightMapping
+                                                          where uar.UserId == userId &&
+                                                          !accessRightIds.Contains(uar.AccessRightId)
+                                                          select uar).ToArray();
+
+            userAccessRightMapping.RemoveRange(userAccessRightsToRemove);
+        }
+
+        public void SetUserAccessRights(int userId, HashSet<int> accessRightIds)
+        {
+            DbSet<User> users = _userRepository.Users;
+
+            if (!users.Any(p => p.Id == userId))
+            {
+                throw new Exception("User does not exist!");
+            }
+
+            DbSet<AccessRight> accessRights = _accessRightRepository.AccessRights;
+
+            if (accessRightIds.Any(ar => !accessRights.Any(t => t.Id == ar)))
+            {
+                throw new Exception("Access right does not exist!");
+            }
+
+            DbSet<UserAccessRight> userAccessRightMapping = _userAccessRightRepository.UserAccessRights;
+
+            RemoveAccessRightsForUser(userId, accessRightIds);
+
+            _userAccessRightRepository.AddAccessRightsForUser(userId, accessRightIds);
         }
     }
 }

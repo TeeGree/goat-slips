@@ -63,6 +63,7 @@
     <Build Include="Tables\Project.sql" />
     <Build Include="Tables\AccessRight.sql" />
     <Build Include="Tables\UserAccessRight.sql" />
+    <None Include="AddAccessRights.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="GoatSlipsDb.refactorlog" />
@@ -72,5 +73,8 @@
     <Build Include="Tables\Task.sql" />
     <Build Include="Tables\TimeSlip.sql" />
     <Build Include="Tables\User.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Script.PostDeployment1.sql" />
   </ItemGroup>
 </Project>

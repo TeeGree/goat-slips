@@ -19,6 +19,7 @@ import { AccessRight } from './types/AccessRight';
 import {
     addUser,
     manageTimeCodes,
+    manageUsers,
     queryTimeSlips,
     requiredAccessRights,
 } from './constants/requiredAccessRights';
@@ -214,6 +215,7 @@ export const App: React.FC<{}> = () => {
                                 isAuthenticated={canAccessGuardedRoutes}
                                 isAuthenticationLoading={isAuthenticationLoading}
                                 accessRights={userAccessRights}
+                                requiredAccessRight={requiredAccessRights.get(manageUsers)}
                             >
                                 <UserManagement />
                             </RequireAuthentication>

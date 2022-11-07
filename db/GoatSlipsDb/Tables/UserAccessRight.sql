@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[UserAccessRight]
 (
-	[Id] INT NOT NULL PRIMARY KEY,
+	[Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	[UserId] INT NOT NULL, 
     [AccessRightId] INT NOT NULL,
 	CONSTRAINT [FK_UserAccessRight_User] FOREIGN KEY ([UserId]) REFERENCES [User]([Id]),
