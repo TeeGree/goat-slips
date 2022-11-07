@@ -1,4 +1,5 @@
-﻿using GoatSlipsApi.DAL;
+﻿using GoatSlipsApi.Constants;
+using GoatSlipsApi.DAL;
 using GoatSlipsApi.Exceptions;
 using GoatSlipsApi.Models;
 using GoatSlipsApi.Models.Api;
@@ -282,6 +283,17 @@ namespace GoatSlipsApi.Services
                                                           where uar.UserId == userId &&
                                                           !accessRightIds.Contains(uar.AccessRightId)
                                                           select uar).ToArray();
+
+            int adminAccessRightId = _accessRightRepository.AccessRights
+                .Where(ar => ar.Code == AccessRights.Admin)
+                .First().Id;
+
+            bool anyOtherAdminUsers = _userAccessRightRepository.UserAccessRights
+                .Any(uar => uar.AccessRightId == adminAccessRightId && uar.UserId != userId);
+            if (!anyOtherAdminUsers)
+            {
+                throw new Exception("Cannot remove admin access right. No other users are admins.");
+            }
 
             userAccessRightMapping.RemoveRange(userAccessRightsToRemove);
         }

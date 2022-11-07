@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface RequireAuthenticationProps {
     isAuthenticationLoading: boolean;
+    isAccessRightsLoading: boolean;
     isAuthenticated: boolean;
     children: React.ReactNode;
     accessRights: Set<string>;
@@ -15,6 +16,7 @@ export const RequireAuthentication: React.FC<RequireAuthenticationProps> = (
 ) => {
     const {
         isAuthenticationLoading,
+        isAccessRightsLoading,
         isAuthenticated,
         children,
         accessRights,
@@ -25,6 +27,7 @@ export const RequireAuthentication: React.FC<RequireAuthenticationProps> = (
     useEffect(() => {
         if (
             !isAuthenticationLoading &&
+            !isAccessRightsLoading &&
             (!isAuthenticated ||
                 (requiredAccessRight !== undefined && !accessRights.has(requiredAccessRight)))
         ) {

@@ -3,7 +3,9 @@ import { Button, TableCell, TableRow } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { fetchPostResponse } from '../helpers/fetchFunctions';
 import { AccessRight } from '../types/AccessRight';
+import { AlertMessage } from '../types/AlertMessage';
 import { DropdownOption } from '../types/DropdownOption';
+import { ErrorDetails } from '../types/ErrorDetails';
 import { UserQueryResult } from '../types/User';
 import { MultiSelect } from './MultiSelect';
 import classes from './UserRow.module.scss';
@@ -13,10 +15,11 @@ interface UserRowProps {
     allAccessRights: AccessRight[];
     accessRightMap: Map<number, string>;
     fetchUsers: () => Promise<void>;
+    setAlertMessage: (alertMessage: AlertMessage) => void;
 }
 
 export const UserRow: React.FC<UserRowProps> = (props: UserRowProps) => {
-    const { user, allAccessRights, accessRightMap, fetchUsers } = props;
+    const { user, allAccessRights, accessRightMap, fetchUsers, setAlertMessage } = props;
     const [isDirty, setIsDirty] = useState(false);
     const [originalSelectedIds, setOriginalSelectedIds] = useState(new Set<number>());
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -47,6 +50,13 @@ export const UserRow: React.FC<UserRowProps> = (props: UserRowProps) => {
         if (response.ok) {
             await fetchUsers();
             setIsDirty(false);
+            setAlertMessage({
+                message: `Access rights updated for user "${user.username}".`,
+                severity: 'success',
+            });
+        } else {
+            const message: ErrorDetails = await response.json();
+            setAlertMessage({ message: message.detail, severity: 'error' });
         }
     };
 

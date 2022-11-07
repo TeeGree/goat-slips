@@ -35,6 +35,7 @@ export const App: React.FC<{}> = () => {
     const [user, setUser] = useState<User>(defaultUser);
     const [userAccessRights, setUserAccessRights] = useState<Set<string>>(new Set());
     const [isAuthenticationLoading, setIsAuthenticationLoading] = useState(true);
+    const [isUserAccessRightsLoading, setIsUserAccessRightsLoading] = useState(true);
 
     const [anyUsers, setAnyUsers] = useState(false);
     const [isAnyUsersLoading, setAnyUsersLoading] = useState(true);
@@ -135,12 +136,14 @@ export const App: React.FC<{}> = () => {
     };
 
     const getAccessRights = async () => {
+        setIsUserAccessRightsLoading(true);
         const accessRightsFromApi: AccessRight[] = await fetchGet<AccessRight[]>(
             `User/AccessRights/${user.userId}`,
         );
 
         const accessRightCodes = accessRightsFromApi.map((ar) => ar.code);
         setUserAccessRights(new Set(accessRightCodes));
+        setIsUserAccessRightsLoading(false);
     };
 
     const fillScreenWithPage = (page: JSX.Element) => {
@@ -200,6 +203,7 @@ export const App: React.FC<{}> = () => {
                         element={
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
                                 isAuthenticationLoading={isAuthenticationLoading}
                                 accessRights={userAccessRights}
                             >
@@ -213,6 +217,7 @@ export const App: React.FC<{}> = () => {
                         element={
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
                                 isAuthenticationLoading={isAuthenticationLoading}
                                 accessRights={userAccessRights}
                                 requiredAccessRight={requiredAccessRights.get(manageUsers)}
@@ -227,6 +232,7 @@ export const App: React.FC<{}> = () => {
                         element={
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
                                 isAuthenticationLoading={isAuthenticationLoading}
                                 accessRights={userAccessRights}
                                 requiredAccessRight={requiredAccessRights.get(addUser)}
@@ -241,6 +247,7 @@ export const App: React.FC<{}> = () => {
                         element={
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
                                 isAuthenticationLoading={isAuthenticationLoading}
                                 accessRights={userAccessRights}
                                 requiredAccessRight={requiredAccessRights.get(queryTimeSlips)}
@@ -262,6 +269,7 @@ export const App: React.FC<{}> = () => {
                         element={
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
                                 isAuthenticationLoading={isAuthenticationLoading}
                                 accessRights={userAccessRights}
                                 requiredAccessRight={requiredAccessRights.get(manageTimeCodes)}

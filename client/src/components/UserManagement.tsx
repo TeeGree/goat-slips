@@ -1,8 +1,10 @@
 import { Replay, Search } from '@mui/icons-material';
 import {
+    Alert,
     Button,
     CircularProgress,
     Paper,
+    Snackbar,
     Table,
     TableBody,
     TableCell,
@@ -15,6 +17,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { fetchGet } from '../helpers/fetchFunctions';
 import { AccessRight } from '../types/AccessRight';
+import { AlertMessage } from '../types/AlertMessage';
 import { DropdownOption } from '../types/DropdownOption';
 import { UserQueryResult } from '../types/User';
 import classes from './UserManagement.module.scss';
@@ -39,6 +42,7 @@ export const UserManagement: React.FC<{}> = () => {
     const [accessRightMap, setAccessRightMap] = useState<Map<number, string>>(
         new Map<number, string>([]),
     );
+    const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
 
     useEffect(() => {
         getUsers('');
@@ -114,6 +118,7 @@ export const UserManagement: React.FC<{}> = () => {
             return (
                 <UserRow
                     key={user.id}
+                    setAlertMessage={setAlertMessage}
                     user={user}
                     allAccessRights={accessRights}
                     accessRightMap={accessRightMap}
@@ -162,6 +167,10 @@ export const UserManagement: React.FC<{}> = () => {
         );
     };
 
+    const handleSnackbarClose = () => {
+        setAlertMessage(null);
+    };
+
     return (
         <div className={classes.pageContainer}>
             {getInputs()}
@@ -179,6 +188,19 @@ export const UserManagement: React.FC<{}> = () => {
                     <TableBody>{getRows()}</TableBody>
                 </Table>
             </TableContainer>
+            <Snackbar
+                open={alertMessage !== null}
+                autoHideDuration={6000}
+                onClose={handleSnackbarClose}
+            >
+                <Alert
+                    onClose={handleSnackbarClose}
+                    severity={alertMessage?.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {alertMessage?.message}
+                </Alert>
+            </Snackbar>
         </div>
     );
 };
