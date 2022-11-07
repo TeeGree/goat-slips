@@ -13,7 +13,7 @@ namespace GoatSlipsApi.Services
     {
         IEnumerable<UserForDropdown> GetAllUsersForDropdown();
         void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext);
-        void CreateUser(CreateUserBody createUserBody, bool requirePasswordChange);
+        int CreateUser(CreateUserBody createUserBody, bool requirePasswordChange);
         UserForUI? GetUserFromContext(HttpContext httpContext);
         bool AnyUsers();
         void Logout(HttpContext httpContext);
@@ -22,6 +22,7 @@ namespace GoatSlipsApi.Services
         void ValidateAccess(string accessRightCode, HttpContext httpContext);
         IEnumerable<UserForManagement> QueryUsers(string? searchText);
         void SetUserAccessRights(int userId, HashSet<int> accessRightIds);
+        void AddAdminAccessRightForUser(int userId);
     }
     public sealed class UserService : IUserService
     {
@@ -120,7 +121,7 @@ namespace GoatSlipsApi.Services
             SetAuthorizationCookie(token, httpContext);
         }
 
-        public void CreateUser(CreateUserBody createUserBody, bool requirePasswordChange)
+        public int CreateUser(CreateUserBody createUserBody, bool requirePasswordChange)
         {
             if (string.IsNullOrEmpty(createUserBody.Username))
             {
@@ -152,7 +153,14 @@ namespace GoatSlipsApi.Services
                 RequirePasswordChange = requirePasswordChange,
             };
 
-            _userRepository.CreateUser(userToAdd);
+            return _userRepository.CreateUser(userToAdd);
+        }
+
+        public void AddAdminAccessRightForUser(int userId)
+        {
+            int adminId = _accessRightRepository.AccessRights.First(ar => ar.Code == AccessRights.Admin).Id;
+
+            _userAccessRightRepository.AddAccessRightsForUser(userId, new HashSet<int> { adminId });
         }
 
         public UserForUI? GetUserFromContext(HttpContext httpContext)

@@ -153,7 +153,8 @@ namespace GoatSlipsApi.Controllers
         {
             try
             {
-                _userService.CreateUser(createUserBody, false);
+                int userId = _userService.CreateUser(createUserBody, false);
+                _userService.AddAdminAccessRightForUser(userId);
                 return Ok();
             }
             catch(InvalidOperationException e)
