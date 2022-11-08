@@ -1,6 +1,6 @@
 import { Button, TextField, Tooltip } from '@mui/material';
 import React, { useState } from 'react';
-import { passwordIsValid } from '../../helpers/passwordValidation';
+import { passwordIsValid } from '../../../helpers/passwordValidation';
 import classes from './CreateUser.module.scss';
 
 interface CreateUserProps {

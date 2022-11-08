@@ -23,10 +23,10 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
-import { getCsvOfTimeSlips } from '../helpers/csvGeneration';
-import { fetchGet, fetchPost } from '../helpers/fetchFunctions';
-import { DropdownOption } from '../types/DropdownOption';
-import { ExportableTimeSlip, TimeSlip } from '../types/TimeSlip';
+import { getCsvOfTimeSlips } from '../../helpers/csvGeneration';
+import { fetchGet, fetchPost } from '../../helpers/fetchFunctions';
+import { DropdownOption } from '../../types/DropdownOption';
+import { ExportableTimeSlip, TimeSlip } from '../../types/TimeSlip';
 import classes from './QueryTimeSlips.module.scss';
 
 interface QueryTimeSlipsProps {

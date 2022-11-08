@@ -13,13 +13,13 @@ import {
     Tooltip,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { fetchGet } from '../helpers/fetchFunctions';
-import { AccessRight } from '../types/AccessRight';
-import { AlertMessage } from '../types/AlertMessage';
-import { UserQueryResult } from '../types/User';
-import { Toast } from './Toast';
+import { fetchGet } from '../../helpers/fetchFunctions';
+import { AccessRight } from '../../types/AccessRight';
+import { AlertMessage } from '../../types/AlertMessage';
+import { UserQueryResult } from '../../types/User';
+import { Toast } from '../Toast';
 import classes from './UserManagement.module.scss';
-import { UserRow } from './UserRow';
+import { UserRow } from '../UserRow';
 
 export const UserManagement: React.FC<{}> = () => {
     const [searchModified, setSearchModified] = useState(false);

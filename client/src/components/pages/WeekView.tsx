@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import classes from './WeekView.module.scss';
-import { DayColumn } from './DayColumn/DayColumn';
-import { Day } from '../types/Day';
-import { DropdownOption } from '../types/DropdownOption';
-import { FavoriteTimeSlip, TimeSlip } from '../types/TimeSlip';
+import { DayColumn } from '../DayColumn/DayColumn';
+import { Day } from '../../types/Day';
+import { DropdownOption } from '../../types/DropdownOption';
+import { FavoriteTimeSlip, TimeSlip } from '../../types/TimeSlip';
 import { Button } from '@mui/material';
 import { ArrowLeft, ArrowRight } from '@mui/icons-material';
-import { fetchGet, fetchPostResponse } from '../helpers/fetchFunctions';
+import { fetchGet, fetchPostResponse } from '../../helpers/fetchFunctions';
 
 interface TimeSlipDaySummary {
     timeSlips: TimeSlip[];

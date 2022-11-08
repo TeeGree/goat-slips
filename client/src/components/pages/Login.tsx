@@ -1,7 +1,7 @@
 import { Alert, Button, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import classes from './Login.module.scss';
-import { fetchPostResponse } from '../helpers/fetchFunctions';
+import { fetchPostResponse } from '../../helpers/fetchFunctions';
 
 interface LoginProps {
     onSuccessfulLogin: () => void;

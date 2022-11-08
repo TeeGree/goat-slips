@@ -1,5 +1,5 @@
 import React from 'react';
-import { fetchPostResponse } from '../../helpers/fetchFunctions';
+import { fetchPostResponse } from '../../../helpers/fetchFunctions';
 import { CreateUser } from './CreateUser';
 
 interface CreateFirstUserProps {

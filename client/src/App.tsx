@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import classes from './App.module.scss';
-import { WeekView } from './components/WeekView';
-import { Login } from './components/Login';
+import { WeekView } from './components/pages/WeekView';
+import { Login } from './components/pages/Login';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
 import { fetchGet, fetchGetResponse } from './helpers/fetchFunctions';
-import { CreateFirstUser } from './components/CreateUser/CreateFirstUser';
+import { CreateFirstUser } from './components/pages/CreateUser/CreateFirstUser';
 import { AppHeader } from './components/AppHeader';
-import { CreateAdditionalUser } from './components/CreateUser/CreateAdditionalUser';
-import { ChangePassword } from './components/ChangePassword';
+import { CreateAdditionalUser } from './components/pages/CreateUser/CreateAdditionalUser';
+import { ChangePassword } from './components/pages/ChangePassword';
 import { User } from './types/User';
-import { QueryTimeSlips } from './components/QueryTimeSlips';
+import { QueryTimeSlips } from './components/pages/QueryTimeSlips';
 import { DropdownOption } from './types/DropdownOption';
 import { ManageTimeCodes } from './components/ManageTimeCodes';
 import { TaskMap } from './types/TaskMap';
-import { RequireAuthentication } from './components/RequireAuthentication';
+import { RequireAuthentication } from './components/HOC/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';
 import {
     addUser,
@@ -23,7 +23,7 @@ import {
     queryTimeSlips,
     requiredAccessRights,
 } from './constants/requiredAccessRights';
-import { UserManagement } from './components/UserManagement';
+import { UserManagement } from './components/pages/UserManagement';
 
 const defaultUser: User = {
     userId: 0,
