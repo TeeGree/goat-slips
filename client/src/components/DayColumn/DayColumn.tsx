@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classes from './DayColumn.module.scss';
 import { Day } from '../../types/Day';
-import { Button } from '@mui/material';
+import { Button, Menu, MenuItem } from '@mui/material';
 import { Add, Star } from '@mui/icons-material';
 import { EditableTimeSlip } from '../TimeSlip/EditableTimeSlip';
 import { DropdownOption } from '../../types/DropdownOption';
-import { TimeSlip } from '../../types/TimeSlip';
+import { FavoriteTimeSlip, TimeSlip } from '../../types/TimeSlip';
 import { ExistingTimeSlip } from '../TimeSlip/ExistingTimeSlip';
 import { TimeTotals } from './TimeTotals';
 
@@ -39,6 +39,8 @@ interface DayColumnProps {
     getLaborCodeName: (laborCodeId: number) => string;
     totalHours: number;
     totalMinutes: number;
+    fetchFavoriteTimeSlips: () => void;
+    favoriteTimeSlipsOptions: FavoriteTimeSlip[];
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
@@ -46,6 +48,27 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
     const [newMinuteDiffs, setNewMinuteDiffs] = useState<Map<number, number>>(
         new Map<number, number>([]),
     );
+
+    const [favoriteTimeSlipToAdd, setFavoriteTimeSlipToAdd] = useState<FavoriteTimeSlip>();
+
+    const [favoriteMenuAnchorEl, setFavoriteMenuAnchorEl] = React.useState<null | HTMLElement>(
+        null,
+    );
+    const favoriteMenuOpen = Boolean(favoriteMenuAnchorEl);
+
+    const handleFavoriteMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setFavoriteMenuAnchorEl(event.currentTarget);
+    };
+
+    const handleFavoriteMenuClose = () => {
+        setFavoriteMenuAnchorEl(null);
+    };
+
+    useEffect(() => {
+        if (!addingTimeSlip && favoriteTimeSlipToAdd !== undefined) {
+            setFavoriteTimeSlipToAdd(undefined);
+        }
+    }, [addingTimeSlip]);
 
     const {
         date,
@@ -63,6 +86,8 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         deleteTimeSlip,
         totalHours,
         totalMinutes,
+        fetchFavoriteTimeSlips,
+        favoriteTimeSlipsOptions,
     } = props;
 
     const getDateString = () => {
@@ -90,6 +115,25 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         });
     };
 
+    const handleNewBlankTimeSlipFromFavorite = (favoritetimeSlip: FavoriteTimeSlip) => {
+        setAddingTimeSlip(true);
+        setFavoriteTimeSlipToAdd(favoritetimeSlip);
+        handleFavoriteMenuClose();
+    };
+
+    const getFavoriteMenuItems = () => {
+        return favoriteTimeSlipsOptions.map((fts: FavoriteTimeSlip) => {
+            return (
+                <MenuItem
+                    key={`favoriteTimeSlip-${fts.id}`}
+                    onClick={() => handleNewBlankTimeSlipFromFavorite(fts)}
+                >
+                    {fts.name}
+                </MenuItem>
+            );
+        });
+    };
+
     const getAddTimeSlipButtonElements = (): JSX.Element => {
         if (addingTimeSlip) {
             return (
@@ -100,6 +144,9 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     laborCodeOptions={laborCodeOptions}
                     getTaskOptionsForProject={getTaskOptionsForProject}
                     stopAddingTimeslip={() => setAddingTimeSlip(false)}
+                    projectId={favoriteTimeSlipToAdd?.projectId}
+                    taskId={favoriteTimeSlipToAdd?.taskId ?? undefined}
+                    laborCodeId={favoriteTimeSlipToAdd?.laborCodeId ?? undefined}
                 />
             );
         }
@@ -113,11 +160,21 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     variant="contained"
                     className={classes.addFromFavorites}
                     color="warning"
-                    onClick={() => setAddingTimeSlip(true)}
+                    onClick={handleFavoriteMenuClick}
                 >
                     <Add />
                     <Star />
                 </Button>
+                <Menu
+                    anchorEl={favoriteMenuAnchorEl}
+                    open={favoriteMenuOpen}
+                    onClose={handleFavoriteMenuClose}
+                    MenuListProps={{
+                        'aria-labelledby': 'basic-button',
+                    }}
+                >
+                    {getFavoriteMenuItems()}
+                </Menu>
             </div>
         );
     };
@@ -137,6 +194,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     getTaskOptionsForProject={getTaskOptionsForProject}
                     saveTimeSlip={updateTimeSlip}
                     deleteTimeSlip={deleteTimeSlip}
+                    fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
                 />
             );
         });

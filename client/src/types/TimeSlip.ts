@@ -18,3 +18,11 @@ export interface ExportableTimeSlip {
     hours: number;
     minutes: number;
 }
+
+export interface FavoriteTimeSlip {
+    id: number;
+    name: string;
+    projectId: number;
+    taskId: number | null;
+    laborCodeId: number | null;
+}

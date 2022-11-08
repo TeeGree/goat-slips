@@ -3,7 +3,7 @@ import classes from './WeekView.module.scss';
 import { DayColumn } from './DayColumn/DayColumn';
 import { Day } from '../types/Day';
 import { DropdownOption } from '../types/DropdownOption';
-import { TimeSlip } from '../types/TimeSlip';
+import { FavoriteTimeSlip, TimeSlip } from '../types/TimeSlip';
 import { Button } from '@mui/material';
 import { ArrowLeft, ArrowRight } from '@mui/icons-material';
 import { fetchGet, fetchPostResponse } from '../helpers/fetchFunctions';
@@ -59,6 +59,8 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         new Map<string, TimeSlipDaySummary>([]),
     );
 
+    const [favoriteTimeSlips, setFavoriteTimeSlips] = useState<FavoriteTimeSlip[]>([]);
+
     const getTimeSlips = async () => {
         const sundayDateText = sundayDate.toLocaleDateString('en').replaceAll('/', '-');
         const timeSlipsFromApi: TimeSlip[] = await fetchGet<TimeSlip[]>(
@@ -101,6 +103,14 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
         setWeekTotalMinutes(weekMinutes);
         setTimeSlipsPerDay(timeSlipMap);
+    };
+
+    const getFavoriteTimeSlips = async () => {
+        const favoriteTimeSlipsFromApi: FavoriteTimeSlip[] = await fetchGet<FavoriteTimeSlip[]>(
+            'FavoriteTimeSlip/FavoriteTimeSlipsForCurrentUser',
+        );
+
+        setFavoriteTimeSlips(favoriteTimeSlipsFromApi);
     };
 
     const saveNewTimeSlip = async (
@@ -163,6 +173,10 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         getTimeSlips();
     }, [sundayDate]);
 
+    useEffect(() => {
+        getFavoriteTimeSlips();
+    }, []);
+
     const getTaskOptionsForProject = (projectId: number): DropdownOption[] => {
         const tasksForProject = tasksAllowedForProjects.get(projectId);
         if (tasksForProject === undefined) {
@@ -214,6 +228,8 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
         return (
             <DayColumn
+                fetchFavoriteTimeSlips={getFavoriteTimeSlips}
+                favoriteTimeSlipsOptions={favoriteTimeSlips}
                 getProjectName={getProjectName}
                 getTaskName={getTaskName}
                 getLaborCodeName={getLaborCodeName}

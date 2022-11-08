@@ -1,5 +1,6 @@
 ﻿using GoatSlipsApi.Attributes;
 using GoatSlipsApi.Models.Api;
+using GoatSlipsApi.Models.Database;
 using GoatSlipsApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,6 +52,21 @@ namespace GoatSlipsApi.Controllers
                 );
 
                 return Ok();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("FavoriteTimeSlipsForCurrentUser", Name = "GetFavoriteTimeSlipsForCurrentUser")]
+        public ActionResult<FavoriteTimeSlip[]> GetFavoriteTimeSlipsForCurrentUser()
+        {
+            try
+            {
+                FavoriteTimeSlip[] favoriteTimeSlips = _favoriteTimeSlipService.GetFavoriteTimeSlipsForCurrentUser(HttpContext).ToArray();
+                return Ok(favoriteTimeSlips);
             }
             catch (Exception e)
             {

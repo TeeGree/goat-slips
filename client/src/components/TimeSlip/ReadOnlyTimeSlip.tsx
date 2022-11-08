@@ -25,11 +25,19 @@ interface ReadOnlyTimeSlipProps {
     getLaborCodeName: (laborCodeId: number) => string;
     handleEdit: () => void;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
+    fetchFavoriteTimeSlips: () => void;
 }
 
 export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnlyTimeSlipProps) => {
-    const { timeSlip, getProjectName, getTaskName, getLaborCodeName, handleEdit, deleteTimeSlip } =
-        props;
+    const {
+        timeSlip,
+        getProjectName,
+        getTaskName,
+        getLaborCodeName,
+        handleEdit,
+        deleteTimeSlip,
+        fetchFavoriteTimeSlips,
+    } = props;
 
     const task = timeSlip.taskId === null ? 'N/A' : getTaskName(timeSlip.taskId);
     const laborCode =
@@ -55,6 +63,7 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
         if (response.ok) {
             setAlertMessage({ message: `Saved "${favoriteName}"`, severity: 'success' });
             handleCloseFavoriteModal();
+            fetchFavoriteTimeSlips();
         } else {
             const message: ErrorDetails = await response.json();
             setAlertMessage({ message: message.detail, severity: 'error' });

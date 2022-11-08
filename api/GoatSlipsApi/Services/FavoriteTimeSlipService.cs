@@ -8,6 +8,7 @@ namespace GoatSlipsApi.Services
     {
         void DeleteFavoriteTimeSlip(int favoriteTimeSlipId);
         void AddFavoriteTimeSlip(HttpContext httpContext, string name, int projectId, int? taskId, int? laborCodeId);
+        IEnumerable<FavoriteTimeSlip> GetFavoriteTimeSlipsForCurrentUser(HttpContext httpContext);
     }
     public sealed class FavoriteTimeSlipService : IFavoriteTimeSlipService
     {
@@ -56,6 +57,18 @@ namespace GoatSlipsApi.Services
                 LaborCodeId = laborCodeId,
                 UserId = userId.Value
             });
+        }
+
+        public IEnumerable<FavoriteTimeSlip> GetFavoriteTimeSlipsForCurrentUser(HttpContext httpContext)
+        {
+            int? userId = _jwtUtils.GetUserIdFromContext(httpContext);
+
+            if (userId == null)
+            {
+                throw new Exception("No user in context.");
+            }
+
+            return _favoriteTimeSlipRepository.FavoriteTimeSlips.Where(fts => fts.UserId == userId);
         }
     }
 }

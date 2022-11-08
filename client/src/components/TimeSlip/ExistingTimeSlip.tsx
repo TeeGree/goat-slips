@@ -23,6 +23,7 @@ interface ExistingTimeSlipProps {
     ) => Promise<Response>;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
     setMinutesDiff: (minutesDiff: number) => void;
+    fetchFavoriteTimeSlips: () => void;
 }
 
 export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: ExistingTimeSlipProps) => {
@@ -37,6 +38,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         saveTimeSlip,
         deleteTimeSlip,
         setMinutesDiff,
+        fetchFavoriteTimeSlips,
     } = props;
 
     const [isEditing, setIsEditing] = useState(false);
@@ -82,6 +84,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
 
         return (
             <ReadOnlyTimeSlip
+                fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
                 timeSlip={timeSlip}
                 getProjectName={getProjectName}
                 getTaskName={getTaskName}
