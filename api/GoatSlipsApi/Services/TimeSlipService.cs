@@ -129,12 +129,7 @@ namespace GoatSlipsApi.Services
             DateTime? toDate
         )
         {
-            // TODO: Allow selecting blank
-            DbSet<TimeSlip>? timeSlips = _dbContext?.TimeSlips;
-            if (timeSlips == null)
-            {
-                throw new Exception("No time slips found!");
-            }
+            DbSet<TimeSlip> timeSlips = _timeSlipRepository.TimeSlips;
 
             IQueryable<TimeSlip> timeSlipsQueryable = timeSlips.AsQueryable();
 

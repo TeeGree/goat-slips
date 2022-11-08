@@ -249,7 +249,11 @@ namespace GoatSlipsApi.Services
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.None, // TODO: This should be able to be Strict in prod.
+#if DEBUG
+                    SameSite = SameSiteMode.None,
+#else
+                    SameSite = SameSiteMode.Strict,
+#endif
                     Secure = true,
                     Expires = DateTime.Now.AddDays(expirationDays)
                 });
