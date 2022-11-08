@@ -12,7 +12,7 @@ import { ChangePassword } from './components/pages/ChangePassword';
 import { User } from './types/User';
 import { QueryTimeSlips } from './components/pages/QueryTimeSlips';
 import { DropdownOption } from './types/DropdownOption';
-import { ManageTimeCodes } from './components/ManageTimeCodes';
+import { ManageTimeCodes } from './components/pages/ManageTimeCodes';
 import { TaskMap } from './types/TaskMap';
 import { RequireAuthentication } from './components/HOC/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';
