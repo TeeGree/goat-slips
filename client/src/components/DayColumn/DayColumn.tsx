@@ -8,6 +8,9 @@ import { DropdownOption } from '../../types/DropdownOption';
 import { FavoriteTimeSlipData, TimeSlip } from '../../types/TimeSlip';
 import { ExistingTimeSlip } from '../TimeSlip/ExistingTimeSlip';
 import { TimeTotals } from './TimeTotals';
+import { AlertMessage } from '../../types/AlertMessage';
+import { Toast } from '../Toast';
+import { ErrorDetails } from '../../types/ErrorDetails';
 
 interface DayColumnProps {
     date: Date;
@@ -60,6 +63,8 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         setFavoriteMenuAnchorEl(event.currentTarget);
     };
 
+    const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
+
     const handleFavoriteMenuClose = () => {
         setFavoriteMenuAnchorEl(null);
     };
@@ -105,6 +110,9 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
 
         if (response.ok) {
             setAddingTimeSlip(false);
+        } else {
+            const message: ErrorDetails = await response.json();
+            setAlertMessage({ message: message.detail, severity: 'error' });
         }
     };
 
@@ -227,6 +235,11 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                 {getAddTimeSlipButtonElements()}
                 {getExistingTimeSlipCards()}
             </div>
+            <Toast
+                severity={alertMessage?.severity}
+                message={alertMessage?.message}
+                onClose={() => setAlertMessage(null)}
+            />
         </div>
     );
 };

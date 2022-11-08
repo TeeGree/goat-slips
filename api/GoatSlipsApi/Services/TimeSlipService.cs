@@ -24,20 +24,17 @@ namespace GoatSlipsApi.Services
     public class TimeSlipService : ITimeSlipService
     {
         private readonly IGoatSlipsContext _dbContext;
+        private readonly ITimeSlipRepository _timeSlipRepository;
 
-        public TimeSlipService(IGoatSlipsContext dbContext)
+        public TimeSlipService(IGoatSlipsContext dbContext, ITimeSlipRepository timeSlipRepository)
         {
             _dbContext = dbContext;
+            _timeSlipRepository = timeSlipRepository;
         }
 
         public IEnumerable<TimeSlip> GetAllTimeSlips()
         {
-            DbSet<TimeSlip>? timeSlips = _dbContext.TimeSlips;
-            if (timeSlips == null)
-            {
-                throw new Exception("No time slips found!");
-            }
-            return timeSlips;
+            return _timeSlipRepository.TimeSlips;
         }
 
         public TimeSlip[] GetWeekOfTimeSlipsForCurrentUser(DateTime weekDate, HttpContext httpContext)
@@ -48,11 +45,7 @@ namespace GoatSlipsApi.Services
                 throw new Exception("No user logged in!");
             }
 
-            DbSet<TimeSlip>? timeSlips = _dbContext.TimeSlips;
-            if (timeSlips == null)
-            {
-                throw new Exception("No time slips found!");
-            }
+            DbSet<TimeSlip> timeSlips = _timeSlipRepository.TimeSlips;
 
             var endDate = weekDate.AddDays(7);
             return timeSlips.Where(ts =>
@@ -70,6 +63,19 @@ namespace GoatSlipsApi.Services
                 throw new Exception("No user logged in!");
             }
 
+            DbSet<TimeSlip> timeSlips = _timeSlipRepository.TimeSlips;
+            bool isDuplicateTimeSlip = timeSlips.Any(ts =>
+                ts.UserId == user.Id &&
+                ts.ProjectId == timeSlip.ProjectId &&
+                ts.TaskId == timeSlip.TaskId &&
+                ts.LaborCodeId == timeSlip.LaborCodeId &&
+                ts.Date == timeSlip.Date.Date
+            );
+            if (isDuplicateTimeSlip)
+            {
+                throw new Exception("Time slip already exists for this date and combination of time codes!");
+            }
+
             var timeSlipToAdd = new TimeSlip
             {
                 Hours = timeSlip.Hours,
@@ -81,7 +87,7 @@ namespace GoatSlipsApi.Services
                 UserId = user.Id
             };
 
-            _dbContext.TimeSlips?.Add(timeSlipToAdd);
+            timeSlips.Add(timeSlipToAdd);
             _dbContext.SaveChanges();
         }
 
