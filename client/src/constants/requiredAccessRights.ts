@@ -4,6 +4,7 @@ export const addUser = 'Add User';
 export const weekView = 'Week View';
 export const changePassword = 'Change Password';
 export const manageUsers = 'Manage Users';
+export const manageFavorites = 'Manage Favorites';
 
 export type ComponentName =
     | typeof queryTimeSlips
@@ -11,7 +12,8 @@ export type ComponentName =
     | typeof addUser
     | typeof weekView
     | typeof changePassword
-    | typeof manageUsers;
+    | typeof manageUsers
+    | typeof manageFavorites;
 
 const adminAccessRight = 'ADMIN';
 

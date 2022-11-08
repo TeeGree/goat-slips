@@ -1,4 +1,4 @@
-.projectContainer {
+.favoriteTimeSlipContainer {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
@@ -9,9 +9,8 @@
     border-radius: 5px;
 }
 
-.projectName {
-    width: 250px !important;
-    margin-right: 10px;
+.favoriteTimeSlipName {
+    width: 200px !important;
 }
 
 .button {
@@ -20,4 +19,8 @@
 
 .modalButtons {
     text-align: right;
+}
+
+.underlined {
+    text-decoration: underline;
 }

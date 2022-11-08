@@ -24,6 +24,8 @@ import {
     requiredAccessRights,
 } from './constants/requiredAccessRights';
 import { UserManagement } from './components/pages/UserManagement';
+import { FavoriteTimeSlipData } from './types/TimeSlip';
+import { ManageFavorites } from './components/pages/ManageFavorites';
 
 const defaultUser: User = {
     userId: 0,
@@ -54,6 +56,8 @@ export const App: React.FC<{}> = () => {
     const [laborCodeMap, setLaborCodeMap] = useState<Map<number, string>>(
         new Map<number, string>([]),
     );
+
+    const [favoriteTimeSlips, setFavoriteTimeSlips] = useState<FavoriteTimeSlipData[]>([]);
 
     const isAuthenticated = () => {
         return user.username !== '';
@@ -93,6 +97,7 @@ export const App: React.FC<{}> = () => {
             getTasksAllowedForProjects();
             getLaborCodes();
             getAccessRights();
+            getFavoriteTimeSlips();
         }
     }, [user]);
 
@@ -146,6 +151,14 @@ export const App: React.FC<{}> = () => {
         setIsUserAccessRightsLoading(false);
     };
 
+    const getFavoriteTimeSlips = async () => {
+        const favoriteTimeSlipsFromApi: FavoriteTimeSlipData[] = await fetchGet<
+            FavoriteTimeSlipData[]
+        >('FavoriteTimeSlip/FavoriteTimeSlipsForCurrentUser');
+
+        setFavoriteTimeSlips(favoriteTimeSlipsFromApi);
+    };
+
     const fillScreenWithPage = (page: JSX.Element) => {
         return <div className={classes.fillScreen}>{page}</div>;
     };
@@ -175,6 +188,8 @@ export const App: React.FC<{}> = () => {
 
         return (
             <WeekView
+                fetchFavoriteTimeSlips={getFavoriteTimeSlips}
+                favoriteTimeSlips={favoriteTimeSlips}
                 projects={projects}
                 projectMap={projectMap}
                 tasks={taskMap}
@@ -284,6 +299,26 @@ export const App: React.FC<{}> = () => {
                                     fetchTasksAllowed={getTasksAllowedForProjects}
                                     fetchTasks={getTasks}
                                     fetchLaborCodes={getLaborCodes}
+                                />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/manage-favorites"
+                        path="/manage-favorites"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                            >
+                                <ManageFavorites
+                                    favoriteTimeSlips={favoriteTimeSlips}
+                                    fetchFavoriteTimeSlips={getFavoriteTimeSlips}
+                                    projectMap={projectMap}
+                                    taskMap={taskMap}
+                                    laborCodeMap={laborCodeMap}
                                 />
                             </RequireAuthentication>
                         }

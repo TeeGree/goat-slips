@@ -19,7 +19,7 @@ export interface ExportableTimeSlip {
     minutes: number;
 }
 
-export interface FavoriteTimeSlip {
+export interface FavoriteTimeSlipData {
     id: number;
     name: string;
     projectId: number;

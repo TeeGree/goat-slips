@@ -3,7 +3,7 @@ import classes from './WeekView.module.scss';
 import { DayColumn } from '../DayColumn/DayColumn';
 import { Day } from '../../types/Day';
 import { DropdownOption } from '../../types/DropdownOption';
-import { FavoriteTimeSlip, TimeSlip } from '../../types/TimeSlip';
+import { FavoriteTimeSlipData, TimeSlip } from '../../types/TimeSlip';
 import { Button } from '@mui/material';
 import { ArrowLeft, ArrowRight } from '@mui/icons-material';
 import { fetchGet, fetchPostResponse } from '../../helpers/fetchFunctions';
@@ -31,11 +31,21 @@ interface WeekViewProps {
     tasksAllowedForProjects: Map<number, number[]>;
     laborCodes: DropdownOption[];
     laborCodeMap: Map<number, string>;
+    favoriteTimeSlips: FavoriteTimeSlipData[];
+    fetchFavoriteTimeSlips: () => Promise<void>;
 }
 
 export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
-    const { projects, projectMap, tasks, tasksAllowedForProjects, laborCodes, laborCodeMap } =
-        props;
+    const {
+        projects,
+        projectMap,
+        tasks,
+        tasksAllowedForProjects,
+        laborCodes,
+        laborCodeMap,
+        favoriteTimeSlips,
+        fetchFavoriteTimeSlips,
+    } = props;
 
     const currentDate = new Date();
 
@@ -58,8 +68,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     const [timeSlipsPerDay, setTimeSlipsPerDay] = useState<Map<string, TimeSlipDaySummary>>(
         new Map<string, TimeSlipDaySummary>([]),
     );
-
-    const [favoriteTimeSlips, setFavoriteTimeSlips] = useState<FavoriteTimeSlip[]>([]);
 
     const getTimeSlips = async () => {
         const sundayDateText = sundayDate.toLocaleDateString('en').replaceAll('/', '-');
@@ -103,14 +111,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
         setWeekTotalMinutes(weekMinutes);
         setTimeSlipsPerDay(timeSlipMap);
-    };
-
-    const getFavoriteTimeSlips = async () => {
-        const favoriteTimeSlipsFromApi: FavoriteTimeSlip[] = await fetchGet<FavoriteTimeSlip[]>(
-            'FavoriteTimeSlip/FavoriteTimeSlipsForCurrentUser',
-        );
-
-        setFavoriteTimeSlips(favoriteTimeSlipsFromApi);
     };
 
     const saveNewTimeSlip = async (
@@ -173,10 +173,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         getTimeSlips();
     }, [sundayDate]);
 
-    useEffect(() => {
-        getFavoriteTimeSlips();
-    }, []);
-
     const getTaskOptionsForProject = (projectId: number): DropdownOption[] => {
         const tasksForProject = tasksAllowedForProjects.get(projectId);
         if (tasksForProject === undefined) {
@@ -228,7 +224,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
         return (
             <DayColumn
-                fetchFavoriteTimeSlips={getFavoriteTimeSlips}
+                fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
                 favoriteTimeSlipsOptions={favoriteTimeSlips}
                 getProjectName={getProjectName}
                 getTaskName={getTaskName}

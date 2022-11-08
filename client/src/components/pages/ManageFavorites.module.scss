@@ -1,0 +1,19 @@
+.pageContainer {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header {
+    padding: 25px;
+}
+
+.modalButtons {
+    text-align: right;
+}
+
+.codeTypeButtonGroup {
+    margin-bottom: 25px;
+}

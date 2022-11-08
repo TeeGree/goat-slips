@@ -109,6 +109,7 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
                             'aria-labelledby': 'basic-button',
                         }}
                     >
+                        {createLink('/manage-favorites', 'Manage Favorites')}
                         {createLink('/change-password', 'Change Password')}
                         <MenuItem onClick={handleLogout}>Logout</MenuItem>
                     </Menu>

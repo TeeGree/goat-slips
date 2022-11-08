@@ -11,12 +11,13 @@ import {
     Tooltip,
 } from '@mui/material';
 import { TimeSlip } from '../../types/TimeSlip';
-import { Add, Flag, Star, Task, Work } from '@mui/icons-material';
+import { Add, Star } from '@mui/icons-material';
 import { modalStyle } from '../../constants/modalStyle';
 import { fetchPostResponse } from '../../helpers/fetchFunctions';
 import { Toast } from '../Toast';
 import { ErrorDetails } from '../../types/ErrorDetails';
 import { AlertMessage } from '../../types/AlertMessage';
+import { TimeCodeLabelWithIcon } from '../TimeCodeLabelWithIcon';
 
 interface ReadOnlyTimeSlipProps {
     timeSlip: TimeSlip;
@@ -70,19 +71,6 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
         }
     };
 
-    const getReadonlyPropText = (text: string, icon: React.ReactNode, tooltip: string) => {
-        return (
-            <div className={classes.readonlyPropText}>
-                <Tooltip title={tooltip} placement="left">
-                    <span className={classes.readonlyPropTextSpan}>
-                        {icon}
-                        {text}
-                    </span>
-                </Tooltip>
-            </div>
-        );
-    };
-
     const handleCloseFavoriteModal = () => {
         setIsFavoriting(false);
         setFavoriteName('');
@@ -92,17 +80,12 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
         <>
             <Card>
                 <CardContent className={classes.content}>
-                    {getReadonlyPropText(
-                        getProjectName(timeSlip.projectId),
-                        <Flag className={classes.icon} />,
-                        'Project',
-                    )}
-                    {getReadonlyPropText(task, <Task className={classes.icon} />, 'Task')}
-                    {getReadonlyPropText(
-                        laborCode,
-                        <Work className={classes.icon} />,
-                        'Labor Code',
-                    )}
+                    <TimeCodeLabelWithIcon
+                        label={getProjectName(timeSlip.projectId)}
+                        timeCodeType="project"
+                    />
+                    <TimeCodeLabelWithIcon label={task} timeCodeType="task" />
+                    <TimeCodeLabelWithIcon label={laborCode} timeCodeType="laborCode" />
                     <div
                         className={classes.time}
                     >{`${timeSlip.hours} hr ${timeSlip.minutes} min`}</div>
@@ -158,17 +141,12 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
                         />
                     </div>
                     <div className={`${classes.padded} ${classes.content}`}>
-                        {getReadonlyPropText(
-                            getProjectName(timeSlip.projectId),
-                            <Flag className={classes.icon} />,
-                            'Project',
-                        )}
-                        {getReadonlyPropText(task, <Task className={classes.icon} />, 'Task')}
-                        {getReadonlyPropText(
-                            laborCode,
-                            <Work className={classes.icon} />,
-                            'Labor Code',
-                        )}
+                        <TimeCodeLabelWithIcon
+                            label={getProjectName(timeSlip.projectId)}
+                            timeCodeType="project"
+                        />
+                        <TimeCodeLabelWithIcon label={task} timeCodeType="task" />
+                        <TimeCodeLabelWithIcon label={laborCode} timeCodeType="laborCode" />
                     </div>
                     <div className={classes.modalButtons}>
                         <Button
