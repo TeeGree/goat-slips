@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
 import classes from './ReadOnlyTimeSlip.module.scss';
-import { Box, Button, Card, CardActions, CardContent, Modal, Tooltip } from '@mui/material';
+import {
+    Box,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Modal,
+    TextField,
+    Tooltip,
+} from '@mui/material';
 import { TimeSlip } from '../../types/TimeSlip';
-import { Flag, Task, Work } from '@mui/icons-material';
+import { Add, Flag, Star, Task, Work } from '@mui/icons-material';
 import { modalStyle } from '../../constants/modalStyle';
+import { fetchPostResponse } from '../../helpers/fetchFunctions';
+import { Toast } from '../Toast';
+import { ErrorDetails } from '../../types/ErrorDetails';
+import { AlertMessage } from '../../types/AlertMessage';
 
 interface ReadOnlyTimeSlipProps {
     timeSlip: TimeSlip;
@@ -23,6 +36,30 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
         timeSlip.laborCodeId === null ? 'N/A' : getLaborCodeName(timeSlip.laborCodeId);
 
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isFavoriting, setIsFavoriting] = useState(false);
+    const [favoriteName, setFavoriteName] = useState('');
+    const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
+
+    const handleFavoriteNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFavoriteName(event.target.value);
+    };
+
+    const saveFavoriteTimeSlip = async (): Promise<void> => {
+        const response = await fetchPostResponse('FavoriteTimeSlip/AddFavoriteTimeSlip', {
+            name: favoriteName,
+            projectId: timeSlip.projectId,
+            taskId: timeSlip.taskId,
+            laborCodeId: timeSlip.laborCodeId,
+        });
+
+        if (response.ok) {
+            setAlertMessage({ message: `Saved "${favoriteName}"`, severity: 'success' });
+            handleCloseFavoriteModal();
+        } else {
+            const message: ErrorDetails = await response.json();
+            setAlertMessage({ message: message.detail, severity: 'error' });
+        }
+    };
 
     const getReadonlyPropText = (text: string, icon: React.ReactNode, tooltip: string) => {
         return (
@@ -35,6 +72,11 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
                 </Tooltip>
             </div>
         );
+    };
+
+    const handleCloseFavoriteModal = () => {
+        setIsFavoriting(false);
+        setFavoriteName('');
     };
 
     return (
@@ -57,6 +99,16 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
                     >{`${timeSlip.hours} hr ${timeSlip.minutes} min`}</div>
                 </CardContent>
                 <CardActions className={classes.cardActions}>
+                    <Tooltip title="Add as favorite">
+                        <Button
+                            color="warning"
+                            className={classes.favoriteButton}
+                            onClick={() => setIsFavoriting(true)}
+                        >
+                            <Add />
+                            <Star />
+                        </Button>
+                    </Tooltip>
                     <Button variant="contained" onClick={handleEdit}>
                         Edit
                     </Button>
@@ -86,6 +138,53 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
                     </div>
                 </Box>
             </Modal>
+            <Modal open={isFavoriting}>
+                <Box sx={modalStyle}>
+                    <h2>Enter a name for this favorite:</h2>
+                    <div className={classes.padded}>
+                        <TextField
+                            label="Name"
+                            value={favoriteName}
+                            onChange={handleFavoriteNameChange}
+                        />
+                    </div>
+                    <div className={`${classes.padded} ${classes.content}`}>
+                        {getReadonlyPropText(
+                            getProjectName(timeSlip.projectId),
+                            <Flag className={classes.icon} />,
+                            'Project',
+                        )}
+                        {getReadonlyPropText(task, <Task className={classes.icon} />, 'Task')}
+                        {getReadonlyPropText(
+                            laborCode,
+                            <Work className={classes.icon} />,
+                            'Labor Code',
+                        )}
+                    </div>
+                    <div className={classes.modalButtons}>
+                        <Button
+                            disabled={favoriteName === ''}
+                            variant="contained"
+                            color="success"
+                            onClick={saveFavoriteTimeSlip}
+                        >
+                            Save Favorite
+                        </Button>
+                        <Button
+                            variant="contained"
+                            className={classes.cancelButton}
+                            onClick={handleCloseFavoriteModal}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </Box>
+            </Modal>
+            <Toast
+                severity={alertMessage?.severity}
+                message={alertMessage?.message}
+                onClose={() => setAlertMessage(null)}
+            />
         </>
     );
 };

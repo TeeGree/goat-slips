@@ -1,10 +1,8 @@
 import { Replay, Search } from '@mui/icons-material';
 import {
-    Alert,
     Button,
     CircularProgress,
     Paper,
-    Snackbar,
     Table,
     TableBody,
     TableCell,
@@ -18,26 +16,17 @@ import React, { useEffect, useState } from 'react';
 import { fetchGet } from '../helpers/fetchFunctions';
 import { AccessRight } from '../types/AccessRight';
 import { AlertMessage } from '../types/AlertMessage';
-import { DropdownOption } from '../types/DropdownOption';
 import { UserQueryResult } from '../types/User';
+import { Toast } from './Toast';
 import classes from './UserManagement.module.scss';
 import { UserRow } from './UserRow';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-const emptyDropdownOption: DropdownOption = {
-    id: -1,
-    name: 'N/A',
-};
 
 export const UserManagement: React.FC<{}> = () => {
     const [searchModified, setSearchModified] = useState(false);
     const [loadingResults, setLoadingResults] = useState(true);
     const [userFilterText, setUserFilterText] = useState('');
     const [users, setUsers] = useState<UserQueryResult[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-    const [userMap, setUserMap] = useState<Map<number, UserQueryResult>>(
-        new Map<number, UserQueryResult>([]),
-    );
+
     const [accessRights, setAccessRights] = useState<AccessRight[]>([]);
     const [accessRightMap, setAccessRightMap] = useState<Map<number, string>>(
         new Map<number, string>([]),
@@ -55,11 +44,6 @@ export const UserManagement: React.FC<{}> = () => {
             `User/QueryUsers/${searchText}`,
         );
 
-        const map = new Map<number, UserQueryResult>([]);
-        usersFromApi.forEach((userFromApi: UserQueryResult) =>
-            map.set(userFromApi.id, userFromApi),
-        );
-        setUserMap(map);
         setUsers(usersFromApi);
 
         if (searchText !== '') {
@@ -188,19 +172,11 @@ export const UserManagement: React.FC<{}> = () => {
                     <TableBody>{getRows()}</TableBody>
                 </Table>
             </TableContainer>
-            <Snackbar
-                open={alertMessage !== null}
-                autoHideDuration={6000}
+            <Toast
+                severity={alertMessage?.severity}
+                message={alertMessage?.message}
                 onClose={handleSnackbarClose}
-            >
-                <Alert
-                    onClose={handleSnackbarClose}
-                    severity={alertMessage?.severity}
-                    sx={{ width: '100%' }}
-                >
-                    {alertMessage?.message}
-                </Alert>
-            </Snackbar>
+            />
         </div>
     );
 };

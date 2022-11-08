@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import classes from './DayColumn.module.scss';
 import { Day } from '../../types/Day';
 import { Button } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Add, Star } from '@mui/icons-material';
 import { EditableTimeSlip } from '../TimeSlip/EditableTimeSlip';
 import { DropdownOption } from '../../types/DropdownOption';
 import { TimeSlip } from '../../types/TimeSlip';
@@ -105,9 +105,20 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         }
 
         return (
-            <Button variant="contained" onClick={() => setAddingTimeSlip(true)}>
-                <Add />
-            </Button>
+            <div>
+                <Button variant="contained" onClick={() => setAddingTimeSlip(true)}>
+                    <Add />
+                </Button>
+                <Button
+                    variant="contained"
+                    className={classes.addFromFavorites}
+                    color="warning"
+                    onClick={() => setAddingTimeSlip(true)}
+                >
+                    <Add />
+                    <Star />
+                </Button>
+            </div>
         );
     };
 
