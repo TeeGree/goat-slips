@@ -36,3 +36,7 @@ Open a terminal and navigate to the `client` folder.
 1. Run `npm install` to install dependencies.
 
 2. Run `npm start` from the terminal.
+
+## License
+
+G.O.A.T. Slips is licensed under the [GNU GPLv3 License](https://github.com/TeeGree/goat-slips/LICENSE.md).
