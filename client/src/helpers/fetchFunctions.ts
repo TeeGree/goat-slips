@@ -1,6 +1,15 @@
-import path from 'path-browserify';
-
 const apiEndpoint = process.env.REACT_APP_API_ENDPOINT;
+
+const getApiPath = (apiPath: string) => {
+    if (apiEndpoint === undefined) {
+        throw Error('No REACT_APP_API_ENDPOINT has been set!');
+    }
+    if (!apiEndpoint.endsWith('/')) {
+        return `${apiEndpoint}/${apiPath}`;
+    }
+
+    return `${apiEndpoint}${apiPath}`;
+};
 
 export const fetchGet = async <T>(apiPath: string): Promise<T> => {
     const result = await fetchGetResponse(apiPath);
@@ -10,33 +19,21 @@ export const fetchGet = async <T>(apiPath: string): Promise<T> => {
 };
 
 export const fetchGetResponse = async (apiPath: string): Promise<Response> => {
-    if (apiEndpoint === undefined) {
-        throw Error('No REACT_APP_API_ENDPOINT has been set!');
-    }
-
-    const url = path.join(apiEndpoint, apiPath);
+    const url = getApiPath(apiPath);
     const response = await fetch(url, { credentials: 'include' });
 
     return response;
 };
 
 export const fetchDeleteResponse = async (apiPath: string): Promise<Response> => {
-    if (apiEndpoint === undefined) {
-        throw Error('No REACT_APP_API_ENDPOINT has been set!');
-    }
-
-    const url = path.join(apiEndpoint, apiPath);
+    const url = getApiPath(apiPath);
     const response = await fetch(url, { method: 'DELETE', credentials: 'include' });
 
     return response;
 };
 
 export const fetchPostResponse = async (apiPath: string, body?: any): Promise<Response> => {
-    if (apiEndpoint === undefined) {
-        throw Error('No REACT_APP_API_ENDPOINT has been set!');
-    }
-
-    const url = path.join(apiEndpoint, apiPath);
+    const url = getApiPath(apiPath);
 
     const requestInit: RequestInit = {
         method: 'POST',
