@@ -75,7 +75,7 @@ builder.Services.AddCors(p => {
     p.AddPolicy("corsapp", builder =>
     {
         builder
-            .WithOrigins("http://localhost:3000")
+            .WithOrigins(config["ClientUrl"])
             .AllowCredentials()
             .AllowAnyMethod()
             .AllowAnyHeader();
