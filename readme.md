@@ -8,7 +8,7 @@ The application is split into 3 parts:
 - Server: .NET 6 Web API
 - Client: React Application build with TypeScript, utilizing Material UI.
 
-# Running the application
+# Debugging the application
 
 ## Database
 
@@ -18,25 +18,39 @@ Ensure that the `db/GoatSlipsDb/AddAccessRights.sql` script is ran on the target
 
 ## Server
 
-Open the .NET 6 Web API solution (`api/GoatSlips.sln`).
+Open the .NET 6 Web API solution (`src/GoatSlips.sln`).
 
-Edit the `api/GoastSlipsApi/appsettings.Development.json` file.
+Edit the `src/GoastSlips/appsettings.Development.json` file.
 
-- Set the "Secret" configuration with any string that is at least 20 characters long. This is used to sign the JWT security token. _It is **not** used to hash the user passwords._
+- Set the "Secret" configuration with any string that is at least 25 characters long. This is used to sign the JWT security token. _It is **not** used to hash the user passwords._
 - Set the `ConnectionStrings/ConnectionString` configuration to a connection string pointing to the database created in the steps outlined above. A sample connection string is `"Server=localhost\\SQLEXPRESS;Database=GoatSlipsDb;Trusted=Connection=True"`.
 
 Begin debugging the `GoatSlips` project.
 
 ## Client
 
-Edit the `client/.env` file and ensure the `REACT_APP_API_ENDPOINT` is set to the URL of the debugging instance of the `GoatSlips` project from the steps above.
+The client React app can be found in the `src/GoatSlips/Client` folder.
 
-Open a terminal and navigate to the `client` folder.
+Edit the `src//.env` file and ensure the `REACT_APP_API_ENDPOINT` is set to the URL of the debugging instance of the `GoatSlips` project from the steps above.
 
-1. Run `npm install` to install dependencies.
+Debugging the GoatSlips .NET project will automatically run the following commands to install dependencies for and start up the react app:
 
-2. Run `npm start` from the terminal.
+1. `npm install`
+2. `npm run start`
 
-## License
+# Deploying the application
+
+Deploying the application requires:
+
+1. Updating the `src/GoatSlips/Client/.env` file to point to the target URL of the application.
+2. Publishing the GoatSlips.csproj.
+3. Setting necessary configurations in the published `appsettings.json` file.
+4. Creating a website in IIS that points to the published directory.
+
+Steps 1, 2, and 3 are handled by the `deploy.sh` script. Run this interactive script and it will prompt you for all necessary configuration options and the directory where the published application should be placed.
+
+In IIS, a website or application must be pointed to the folder location of the published files. The application pool used by that website should use an identity user with access to the GoatSlipsDb server. This can be found in the advanced settings of the application pool, under `Process Model` > `Identity`.
+
+# License
 
 G.O.A.T. Slips is licensed under the [GNU GPLv3 License](https://github.com/TeeGree/goat-slips/blob/main/LICENSE.md).
