@@ -20,14 +20,18 @@ export const fetchGet = async <T>(apiPath: string): Promise<T> => {
 
 export const fetchGetResponse = async (apiPath: string): Promise<Response> => {
     const url = getApiPath(apiPath);
-    const response = await fetch(url, { credentials: 'include' });
+    const response = await fetch(url, { credentials: 'include', headers: { mode: 'no-cors' } });
 
     return response;
 };
 
 export const fetchDeleteResponse = async (apiPath: string): Promise<Response> => {
     const url = getApiPath(apiPath);
-    const response = await fetch(url, { method: 'DELETE', credentials: 'include' });
+    const response = await fetch(url, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { mode: 'no-cors' },
+    });
 
     return response;
 };
@@ -39,6 +43,7 @@ export const fetchPostResponse = async (apiPath: string, body?: any): Promise<Re
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            mode: 'no-cors',
         },
         credentials: 'include',
     };

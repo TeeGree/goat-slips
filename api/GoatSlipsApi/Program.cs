@@ -4,6 +4,7 @@ using GoatSlipsApi.Models;
 using GoatSlipsApi.Services;
 using System.Diagnostics;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,12 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ILaborCodeService, LaborCodeService>();
 builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
 builder.Services.AddSingleton<ISecretService, SecretService>();
+
+// In production, the React files will be served from this directory
+builder.Services.AddSpaStaticFiles(configuration =>
+{
+    configuration.RootPath = "ClientApp/build";
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -88,17 +95,38 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("v1/swagger.json", "Goat Slips API");
+    });
 }
 
 app.UseMiddleware<JwtMiddleware>();
 
-app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseSpaStaticFiles();
 
-app.UseAuthorization();
+app.UseHttpsRedirection();
 
 app.UseCors("corsapp");
 
-app.MapControllers();
+app.UseRouting();
+app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller}/{action=Index}/{id?}");
+});
+
+app.UseSpa(spa =>
+{
+    spa.Options.SourcePath = "ClientApp";
+
+    if (Debugger.IsAttached)
+    {
+        spa.UseReactDevelopmentServer(npmScript: "start");
+    }
+});
 
 app.Run();
