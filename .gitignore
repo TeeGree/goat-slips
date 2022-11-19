@@ -20,15 +20,15 @@ DeploymentReport.txt
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-api/GoatSlipsApi/ClientApp/node_modules
-api/GoatSlipsApi/ClientApp/.pnp
+src/GoatSlips/Client/node_modules
+src/GoatSlips/Client/.pnp
 .pnp.js
 
 # testing
-api/GoatSlipsApi/ClientApp/coverage
+src/GoatSlips/Client/coverage
 
 # production
-api/GoatSlipsApi/ClientApp/build
+src/GoatSlips/Client/build
 
 # misc
 .DS_Store

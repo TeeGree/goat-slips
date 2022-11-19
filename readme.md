@@ -18,18 +18,18 @@ Ensure that the `db/GoatSlipsDb/AddAccessRights.sql` script is ran on the target
 
 ## Server
 
-Open the .NET 6 Web API solution (`api/GoatSlipsApi.sln`).
+Open the .NET 6 Web API solution (`api/GoatSlips.sln`).
 
 Edit the `api/GoastSlipsApi/appsettings.Development.json` file.
 
 - Set the "Secret" configuration with any string that is at least 20 characters long. This is used to sign the JWT security token. _It is **not** used to hash the user passwords._
 - Set the `ConnectionStrings/ConnectionString` configuration to a connection string pointing to the database created in the steps outlined above. A sample connection string is `"Server=localhost\\SQLEXPRESS;Database=GoatSlipsDb;Trusted=Connection=True"`.
 
-Begin debugging the `GoatSlipsApi` project.
+Begin debugging the `GoatSlips` project.
 
 ## Client
 
-Edit the `client/.env` file and ensure the `REACT_APP_API_ENDPOINT` is set to the URL of the debugging instance of the `GoatSlipsApi` project from the steps above.
+Edit the `client/.env` file and ensure the `REACT_APP_API_ENDPOINT` is set to the URL of the debugging instance of the `GoatSlips` project from the steps above.
 
 Open a terminal and navigate to the `client` folder.
 
