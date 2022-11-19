@@ -82,7 +82,7 @@ builder.Services.AddCors(p => {
     p.AddPolicy("corsapp", builder =>
     {
         builder
-            .WithOrigins(config["ClientUrl"])
+            .WithOrigins()
             .AllowCredentials()
             .AllowAnyMethod()
             .AllowAnyHeader();
