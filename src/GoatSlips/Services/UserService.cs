@@ -249,7 +249,7 @@ namespace GoatSlips.Services
                 new CookieOptions
                 {
                     HttpOnly = true,
-                    SameSite = SameSiteMode.None,
+                    SameSite = SameSiteMode.Strict,
                     Secure = true,
                     Expires = DateTime.Now.AddDays(expirationDays)
                 });
