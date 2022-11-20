@@ -47,7 +47,7 @@ Deploying the application requires:
 3. Setting necessary configurations in the published `appsettings.json` file.
 4. Creating a website in IIS that points to the published directory.
 
-Steps 1, 2, and 3 are handled by the `deploy.sh` script. Run this interactive script and it will prompt you for all necessary configuration options and the directory where the published application should be placed.
+Steps 1, 2, and 3 are handled by the `publish.sh` script. Run this interactive script and it will prompt you for all necessary configuration options and the directory where the published application should be placed.
 
 In IIS, a website or application must be pointed to the folder location of the published files. The application pool used by that website should use an identity user with access to the GoatSlipsDb server. This can be found in the advanced settings of the application pool, under `Process Model` > `Identity`.
 
