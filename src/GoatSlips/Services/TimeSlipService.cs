@@ -1,4 +1,5 @@
-﻿using GoatSlips.DAL;
+﻿using GoatSlips.Constants;
+using GoatSlips.DAL;
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
 using System.Data.Entity;
@@ -12,6 +13,7 @@ namespace GoatSlips.Services
         void AddTimeSlip(AddTimeSlipBody timeSlip, HttpContext httpContext);
         void UpdateTimeSlip(UpdateTimeSlipBody timeSlip);
         void DeleteTimeSlip(int id);
+        TimeSlip[] QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody, HttpContext httpContext);
         TimeSlip[] GetTimeSlips(
             int[]? userIds,
             int[]? projectIds,
@@ -25,11 +27,20 @@ namespace GoatSlips.Services
     {
         private readonly IGoatSlipsContext _dbContext;
         private readonly ITimeSlipRepository _timeSlipRepository;
+        private readonly IJwtUtils _jwtUtils;
+        private readonly IUserService _userService;
 
-        public TimeSlipService(IGoatSlipsContext dbContext, ITimeSlipRepository timeSlipRepository)
+        public TimeSlipService(
+            IGoatSlipsContext dbContext,
+            ITimeSlipRepository timeSlipRepository,
+            IJwtUtils jwtUtils,
+            IUserService userService
+        )
         {
             _dbContext = dbContext;
             _timeSlipRepository = timeSlipRepository;
+            _jwtUtils = jwtUtils;
+            _userService = userService;
         }
 
         public IEnumerable<TimeSlip> GetAllTimeSlips()
@@ -118,6 +129,29 @@ namespace GoatSlips.Services
 
             _dbContext.TimeSlips?.Remove(timeSlip);
             _dbContext.SaveChanges();
+        }
+
+        public TimeSlip[] QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody, HttpContext httpContext)
+        {
+            // Allow querying for your own time slips if not admin.
+            int[]? userIds = getTimeSlipsBody.UserIds;
+            if (
+                userIds == null ||
+                userIds.Length != 1 ||
+                userIds[0] != _jwtUtils.GetUserIdFromContext(httpContext))
+            {
+                _userService.ValidateAccess(AccessRights.Admin, httpContext);
+            }
+            
+            TimeSlip[] timeSlips = GetTimeSlips(
+                getTimeSlipsBody.UserIds,
+                getTimeSlipsBody.ProjectIds,
+                getTimeSlipsBody.TaskIds?.Select(t => t == -1 ? (int?)null : t).ToArray(),
+                getTimeSlipsBody.LaborCodeIds?.Select(l => l == -1 ? (int?)null : l).ToArray(),
+                getTimeSlipsBody.FromDate,
+                getTimeSlipsBody.ToDate);
+
+            return timeSlips;
         }
 
         public TimeSlip[] GetTimeSlips(

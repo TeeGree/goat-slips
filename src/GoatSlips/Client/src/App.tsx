@@ -18,9 +18,9 @@ import { RequireAuthentication } from './components/HOC/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';
 import {
     addUser,
+    adminAccessRight,
     manageTimeCodes,
     manageUsers,
-    queryTimeSlips,
     requiredAccessRights,
 } from './constants/requiredAccessRights';
 import { UserManagement } from './components/pages/UserManagement';
@@ -265,7 +265,6 @@ export const App: React.FC<{}> = () => {
                                 isAccessRightsLoading={isUserAccessRightsLoading}
                                 isAuthenticationLoading={isAuthenticationLoading}
                                 accessRights={userAccessRights}
-                                requiredAccessRight={requiredAccessRights.get(queryTimeSlips)}
                             >
                                 <QueryTimeSlips
                                     projects={projects}
@@ -274,6 +273,8 @@ export const App: React.FC<{}> = () => {
                                     taskMap={taskMap}
                                     laborCodes={laborCodes}
                                     laborCodeMap={laborCodeMap}
+                                    isAdmin={userAccessRights.has(adminAccessRight)}
+                                    currentUserId={user.userId}
                                 />
                             </RequireAuthentication>
                         }

@@ -36,6 +36,8 @@ interface QueryTimeSlipsProps {
     taskMap: Map<number, string>;
     laborCodes: DropdownOption[];
     laborCodeMap: Map<number, string>;
+    isAdmin: boolean;
+    currentUserId: number;
 }
 
 const emptyDropdownOption: DropdownOption = {
@@ -44,11 +46,21 @@ const emptyDropdownOption: DropdownOption = {
 };
 
 export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSlipsProps) => {
-    const { projects, projectMap, tasks, taskMap, laborCodes, laborCodeMap } = props;
+    const {
+        projects,
+        projectMap,
+        tasks,
+        taskMap,
+        laborCodes,
+        laborCodeMap,
+        isAdmin,
+        currentUserId,
+    } = props;
     const [loadingResults, setLoadingResults] = useState(true);
     const [timeSlips, setTimeSlips] = useState<TimeSlip[]>([]);
 
-    const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+    const defaultSelectedUserIds = isAdmin ? [] : [currentUserId];
+    const [selectedUserIds, setSelectedUserIds] = useState<number[]>(defaultSelectedUserIds);
     const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
     const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([]);
     const [selectedLaborCodeIds, setSelectedLaborCodeIds] = useState<number[]>([]);
@@ -59,7 +71,9 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
 
     useEffect(() => {
         fetchTimeSlips();
-        getUsers();
+        if (isAdmin) {
+            getUsers();
+        }
     }, [
         selectedUserIds,
         selectedProjectIds,
@@ -268,9 +282,9 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         window.URL.revokeObjectURL(url);
     };
 
-    const getInputs = () => {
-        return (
-            <div className={classes.inputContainer}>
+    const getUserInput = () => {
+        if (isAdmin) {
+            return (
                 <FormControl className={classes.dropdown}>
                     <InputLabel>User</InputLabel>
                     <Select
@@ -282,6 +296,15 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                         {getUserOptions()}
                     </Select>
                 </FormControl>
+            );
+        }
+        return null;
+    };
+
+    const getInputs = () => {
+        return (
+            <div className={classes.inputContainer}>
+                {getUserInput()}
                 <FormControl className={classes.dropdown}>
                     <InputLabel>Project</InputLabel>
                     <Select

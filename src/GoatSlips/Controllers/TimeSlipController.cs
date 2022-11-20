@@ -112,14 +112,7 @@ namespace GoatSlips.Controllers
         {
             try
             {
-                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
-                TimeSlip[] timeSlips = _timeSlipService.GetTimeSlips(
-                    getTimeSlipsBody.UserIds,
-                    getTimeSlipsBody.ProjectIds,
-                    getTimeSlipsBody.TaskIds?.Select(t => t == -1 ? (int?)null : t).ToArray(),
-                    getTimeSlipsBody.LaborCodeIds?.Select(l => l == -1 ? (int?)null : l).ToArray(),
-                    getTimeSlipsBody.FromDate,
-                    getTimeSlipsBody.ToDate);
+                TimeSlip[] timeSlips = _timeSlipService.QueryTimeSlips(getTimeSlipsBody, HttpContext);
                 return Ok(timeSlips);
             }
             catch (InsufficientAccessException e)

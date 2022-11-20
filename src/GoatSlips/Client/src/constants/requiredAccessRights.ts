@@ -15,10 +15,9 @@ export type ComponentName =
     | typeof manageUsers
     | typeof manageFavorites;
 
-const adminAccessRight = 'ADMIN';
+export const adminAccessRight = 'ADMIN';
 
 export const requiredAccessRights = new Map<ComponentName, string>([
-    [queryTimeSlips, adminAccessRight],
     [manageTimeCodes, adminAccessRight],
     [addUser, adminAccessRight],
     [manageUsers, adminAccessRight],
