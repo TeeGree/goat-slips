@@ -6,7 +6,7 @@ The application is split into 3 parts:
 
 - Database: SQL Server database
 - Server: .NET 6 Web API
-- Client: React Application build with TypeScript, utilizing Material UI.
+- Client: React Application built with TypeScript, utilizing Material UI.
 
 # Debugging the application
 
