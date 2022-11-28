@@ -51,7 +51,10 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
 
     const createLink = (path: string, label: ComponentName) => {
         const requiredAccessRight = requiredAccessRights.get(label);
-        if (requiredAccessRight !== undefined && !accessRights.has(requiredAccessRight)) {
+        if (
+            passwordChangeRequired ||
+            (requiredAccessRight !== undefined && !accessRights.has(requiredAccessRight))
+        ) {
             return null;
         }
         return (
