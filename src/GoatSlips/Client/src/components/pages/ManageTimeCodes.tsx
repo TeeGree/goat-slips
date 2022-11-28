@@ -76,6 +76,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
         await fetchPostResponse('Project/Create', { projectName: newProjectName });
         setNewProjectName('');
         await fetchProjects();
+        await fetchTasksAllowed();
     };
 
     const createTask = async () => {
