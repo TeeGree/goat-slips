@@ -93,6 +93,8 @@ namespace GoatSlips.Services
                 projectTasks.RemoveRange(projectTasksToDelete);
             }
 
+            _dbContext.SaveChanges();
+
             projects.Remove(project);
 
             _dbContext.SaveChanges();
