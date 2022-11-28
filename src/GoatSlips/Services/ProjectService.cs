@@ -21,12 +21,15 @@ namespace GoatSlips.Services
         private readonly ITaskRepository _taskRepository;
         private readonly ITimeSlipRepository _timeSlipRepository;
         private readonly IProjectTaskRepository _projectTaskRepository;
+        private readonly IFavoriteTimeSlipRepository _favoriteTimeSlipRepository;
+
         public ProjectService(
             IGoatSlipsContext dbContext,
             IProjectRepository projectRepository,
             ITaskRepository taskRepository,
             ITimeSlipRepository timeSlipRepository,
-            IProjectTaskRepository projectTaskRepository
+            IProjectTaskRepository projectTaskRepository,
+            IFavoriteTimeSlipRepository favoriteTimeSlipRepository
         )
         {
             _dbContext = dbContext;
@@ -34,6 +37,7 @@ namespace GoatSlips.Services
             _taskRepository = taskRepository;
             _timeSlipRepository = timeSlipRepository;
             _projectTaskRepository = projectTaskRepository;
+            _favoriteTimeSlipRepository = favoriteTimeSlipRepository;
         }
 
         public IEnumerable<Project> GetAllProjects()
@@ -92,6 +96,11 @@ namespace GoatSlips.Services
             {
                 projectTasks.RemoveRange(projectTasksToDelete);
             }
+
+            // Delete user favorites that include this project.
+            DbSet<FavoriteTimeSlip> favoriteTimeSlips = _favoriteTimeSlipRepository.FavoriteTimeSlips;
+            IEnumerable<FavoriteTimeSlip> favoritesToDelete = favoriteTimeSlips.Where(fts => fts.ProjectId == projectId);
+            favoriteTimeSlips.RemoveRange(favoritesToDelete);
 
             _dbContext.SaveChanges();
 

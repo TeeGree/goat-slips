@@ -18,6 +18,7 @@ interface ManageTimeCodesProps {
     fetchTasksAllowed: () => Promise<void>;
     fetchTasks: () => Promise<void>;
     fetchLaborCodes: () => Promise<void>;
+    fetchFavorites: () => Promise<void>;
 }
 
 export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTimeCodesProps) => {
@@ -31,6 +32,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
         fetchTasksAllowed,
         fetchTasks,
         fetchLaborCodes,
+        fetchFavorites,
     } = props;
 
     const [newProjectName, setNewProjectName] = useState('');
@@ -72,6 +74,16 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
         setNewLaborCodeName(value);
     };
 
+    const fetchProjectsAndFavorites = async () => {
+        await fetchProjects();
+        await fetchFavorites();
+    };
+
+    const fetchLaborCodesAndFavorites = async () => {
+        await fetchLaborCodes();
+        await fetchFavorites();
+    };
+
     const createProject = async () => {
         await fetchPostResponse('Project/Create', { projectName: newProjectName });
         setNewProjectName('');
@@ -83,6 +95,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
         await fetchPostResponse('Task/Create', { taskName: newTaskName });
         setNewTaskName('');
         await fetchTasks();
+        await fetchTasksAllowed();
     };
 
     const createLaborCode = async () => {
@@ -112,7 +125,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
                     taskMap={taskMap}
                     key={`project${project.id}`}
                     project={project}
-                    fetchProjects={fetchProjects}
+                    fetchProjects={fetchProjectsAndFavorites}
                     fetchTasksAllowed={fetchTasksAllowed}
                     setError={(message: string) => setAlertMessage({ message, severity: 'error' })}
                     setSuccess={(message: string) =>
@@ -149,6 +162,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
     const refetchTasks = async () => {
         await fetchTasks();
         await fetchTasksAllowed();
+        await fetchFavorites();
     };
 
     const getTasksList = () => {
@@ -196,7 +210,7 @@ export const ManageTimeCodes: React.FC<ManageTimeCodesProps> = (props: ManageTim
                 <ExistingLaborCode
                     key={`laborCode${laborCode.id}`}
                     laborCode={laborCode}
-                    fetchLaborCodes={fetchLaborCodes}
+                    fetchLaborCodes={fetchLaborCodesAndFavorites}
                     setError={(message: string) => setAlertMessage({ message, severity: 'error' })}
                     setSuccess={(message: string) =>
                         setAlertMessage({ message, severity: 'success' })

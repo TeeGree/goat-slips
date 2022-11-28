@@ -300,6 +300,7 @@ export const App: React.FC<{}> = () => {
                                     fetchTasksAllowed={getTasksAllowedForProjects}
                                     fetchTasks={getTasks}
                                     fetchLaborCodes={getLaborCodes}
+                                    fetchFavorites={getFavoriteTimeSlips}
                                 />
                             </RequireAuthentication>
                         }

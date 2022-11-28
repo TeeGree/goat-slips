@@ -15,15 +15,19 @@ namespace GoatSlips.Services
         private readonly ILaborCodeRepository _laborCodeRepository;
         private readonly ITimeSlipRepository _timeSlipRepository;
         private readonly IGoatSlipsContext _dbContext;
+        private readonly IFavoriteTimeSlipRepository _favoriteTimeSlipRepository;
+
         public LaborCodeService(
             ILaborCodeRepository laborCodeRepository,
             ITimeSlipRepository timeSlipRepository,
-            IGoatSlipsContext dbContext
+            IGoatSlipsContext dbContext,
+            IFavoriteTimeSlipRepository favoriteTimeSlipRepository
         )
         {
             _laborCodeRepository = laborCodeRepository;
             _timeSlipRepository = timeSlipRepository;
             _dbContext = dbContext;
+            _favoriteTimeSlipRepository = favoriteTimeSlipRepository;
         }
 
         public void CreateLaborCode(string laborCodeName)
@@ -55,6 +59,14 @@ namespace GoatSlips.Services
             {
                 throw new CodeInUseException("Labor code is in use!");
             }
+
+            // Delete user favorites that include this labor code.
+            DbSet<FavoriteTimeSlip> favoriteTimeSlips = _favoriteTimeSlipRepository.FavoriteTimeSlips;
+            IEnumerable<FavoriteTimeSlip> favoritesToDelete = favoriteTimeSlips.Where(fts => fts.LaborCodeId == laborCodeId);
+            favoriteTimeSlips.RemoveRange(favoritesToDelete);
+
+            _dbContext.SaveChanges();
+
 
             laborCodes.Remove(laborCode);
 
