@@ -4,8 +4,14 @@ import { DayColumn } from '../DayColumn/DayColumn';
 import { Day } from '../../types/Day';
 import { DropdownOption } from '../../types/DropdownOption';
 import { FavoriteTimeSlipData, TimeSlip } from '../../types/TimeSlip';
-import { Button } from '@mui/material';
-import { ArrowLeft, ArrowRight } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
+import {
+    FilterAlt,
+    KeyboardArrowDown,
+    KeyboardArrowLeft,
+    KeyboardArrowRight,
+    KeyboardArrowUp,
+} from '@mui/icons-material';
 import { fetchGet, fetchPostResponse } from '../../helpers/fetchFunctions';
 
 interface TimeSlipDaySummary {
@@ -64,6 +70,8 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
     const [sundayDate, setSundayDate] = useState<Date>(getSundayDateForDate(currentDate));
     const [weekTotalMinutes, setWeekTotalMinutes] = useState<number>(0);
+
+    const [showFilterSection, setShowFilterSection] = useState(false);
 
     const [timeSlipsPerDay, setTimeSlipsPerDay] = useState<Map<string, TimeSlipDaySummary>>(
         new Map<string, TimeSlipDaySummary>([]),
@@ -254,13 +262,13 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     const getWeekChanger = () => {
         return (
             <div className={classes.weekChanger}>
-                <Button variant="contained" onClick={() => changeWeek(false)}>
-                    <ArrowLeft />
-                </Button>
+                <IconButton className={classes.squareIconButton} onClick={() => changeWeek(false)}>
+                    <KeyboardArrowLeft />
+                </IconButton>
                 Week of {sundayDateString}
-                <Button variant="contained" onClick={() => changeWeek(true)}>
-                    <ArrowRight />
-                </Button>
+                <IconButton className={classes.squareIconButton} onClick={() => changeWeek(true)}>
+                    <KeyboardArrowRight />
+                </IconButton>
             </div>
         );
     };
@@ -273,11 +281,37 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         return `${hours} hr ${minutes} min`;
     };
 
+    const getFilterSection = () => {
+        if (showFilterSection) {
+            return <div className={classes.basicHeader}>cool stuff</div>;
+        }
+
+        return <></>;
+    };
+
+    const toggleShowFilters = () => {
+        setShowFilterSection((previous) => !previous);
+    };
+
+    const getShowFilterButton = () => {
+        const arrowIcon = showFilterSection ? <KeyboardArrowUp /> : <KeyboardArrowDown />;
+        return (
+            <IconButton className={classes.squareIconButtonLong} onClick={toggleShowFilters}>
+                {arrowIcon}
+                <FilterAlt />
+            </IconButton>
+        );
+    };
+
     return (
         <div className={classes.homeContainer}>
             <div className={classes.weekHeader}>
-                <div className={classes.weekHeaderHalf}>{getWeekChanger()}</div>
-                <div className={classes.weekHeaderHalf}>Week Total: {getWeekTotalText()}</div>
+                <div className={classes.basicHeader}>
+                    {getShowFilterButton()}
+                    <div className={classes.weekHeaderHalf}>{getWeekChanger()}</div>
+                    <div className={classes.weekHeaderHalf}>Week Total: {getWeekTotalText()}</div>
+                </div>
+                {getFilterSection()}
             </div>
             <div className={classes.weekContainer}>
                 {getDayColumn(0)}
