@@ -13,14 +13,11 @@ import {
     KeyboardArrowUp,
 } from '@mui/icons-material';
 import { fetchGet, fetchPostResponse } from '../../helpers/fetchFunctions';
+import { MultiSelect } from '../MultiSelect';
 
-interface TimeSlipDaySummary {
-    timeSlips: TimeSlip[];
-    totalHours: number;
-    totalMinutes: number;
-}
+type DayIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-const dayMap = new Map<number, Day>([
+const dayMap = new Map<DayIndex, Day>([
     [0, 'Sunday'],
     [1, 'Monday'],
     [2, 'Tuesday'],
@@ -33,7 +30,8 @@ const dayMap = new Map<number, Day>([
 interface WeekViewProps {
     projects: DropdownOption[];
     projectMap: Map<number, string>;
-    tasks: Map<number, string>;
+    tasks: DropdownOption[];
+    taskMap: Map<number, string>;
     tasksAllowedForProjects: Map<number, number[]>;
     laborCodes: DropdownOption[];
     laborCodeMap: Map<number, string>;
@@ -41,11 +39,17 @@ interface WeekViewProps {
     fetchFavoriteTimeSlips: () => Promise<void>;
 }
 
+interface HoursMinutesSplit {
+    hours: number;
+    minutes: number;
+}
+
 export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     const {
         projects,
         projectMap,
         tasks,
+        taskMap,
         tasksAllowedForProjects,
         laborCodes,
         laborCodeMap,
@@ -55,12 +59,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
     const currentDate = new Date();
 
-    const defaultTimeSlipDaySummary: TimeSlipDaySummary = {
-        timeSlips: [],
-        totalHours: 0,
-        totalMinutes: 0,
-    };
-
     const getSundayDateForDate = (date: Date) => {
         const currentDay = date.getDay();
         const calculatedSundayDate = new Date();
@@ -69,13 +67,47 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     };
 
     const [sundayDate, setSundayDate] = useState<Date>(getSundayDateForDate(currentDate));
-    const [weekTotalMinutes, setWeekTotalMinutes] = useState<number>(0);
 
     const [showFilterSection, setShowFilterSection] = useState(false);
+    const [projectIdsInUse, setProjectIdsInUse] = useState<Set<number>>(new Set<number>());
+    const [taskIdsInUse, setTaskIdsInUse] = useState<Set<number>>(new Set<number>());
+    const [laborCodeIdsInUse, setLaborCodeIdsInUse] = useState<Set<number>>(new Set<number>());
 
-    const [timeSlipsPerDay, setTimeSlipsPerDay] = useState<Map<string, TimeSlipDaySummary>>(
-        new Map<string, TimeSlipDaySummary>([]),
+    const [selectedFilterProjectIds, setSelectedFilterProjectIds] = useState<number[]>([]);
+    const [selectedFilterTaskIds, setSelectedFilterTaskIds] = useState<number[]>([]);
+    const [selectedFilterLaborCodeIds, setSelectedFilterLaborCodeIds] = useState<number[]>([]);
+
+    const [timeSlipsPerDay, setTimeSlipsPerDay] = useState<Map<string, TimeSlip[]>>(
+        new Map<string, TimeSlip[]>([]),
     );
+
+    const addInUseProjectId = (projectId: number) => {
+        setProjectIdsInUse((prev) => {
+            const newInUseProjectIds = new Set(prev);
+            newInUseProjectIds.add(projectId);
+            return newInUseProjectIds;
+        });
+    };
+
+    const addInUseTaskId = (taskId: number | null) => {
+        if (taskId !== null) {
+            setTaskIdsInUse((prev) => {
+                const newInUseTaskIds = new Set(prev);
+                newInUseTaskIds.add(taskId);
+                return newInUseTaskIds;
+            });
+        }
+    };
+
+    const addInUseLaborCodeId = (laborCodeId: number | null) => {
+        if (laborCodeId !== null) {
+            setLaborCodeIdsInUse((prev) => {
+                const newInUseLaborCodeIds = new Set(prev);
+                newInUseLaborCodeIds.add(laborCodeId);
+                return newInUseLaborCodeIds;
+            });
+        }
+    };
 
     const getTimeSlips = async () => {
         const sundayDateText = sundayDate.toLocaleDateString('en').replaceAll('/', '-');
@@ -83,41 +115,27 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
             `TimeSlip/WeekOfTimeSlipsForCurrentUser/${sundayDateText}`,
         );
 
-        const timeSlipMap = new Map<string, TimeSlipDaySummary>([]);
-        let weekMinutes = 0;
+        const timeSlipMap = new Map<string, TimeSlip[]>([]);
         timeSlipsFromApi.forEach((timeSlip: TimeSlip) => {
             const dateOftimeSlip = new Date(timeSlip.date).toLocaleDateString('en');
-            const totalMinutesForTimeSlip = timeSlip.minutes + timeSlip.hours * 60;
+
+            addInUseProjectId(timeSlip.projectId);
+            addInUseTaskId(timeSlip.taskId);
+            addInUseLaborCodeId(timeSlip.laborCodeId);
+
             if (timeSlipMap.has(dateOftimeSlip)) {
-                const timeSlipsDaySummary =
-                    timeSlipMap.get(dateOftimeSlip) ?? defaultTimeSlipDaySummary;
+                const timeSlips = timeSlipMap.get(dateOftimeSlip) ?? [];
 
-                timeSlipsDaySummary.timeSlips.push(timeSlip);
+                timeSlips.push(timeSlip);
 
-                const hours = timeSlipsDaySummary.totalHours + timeSlip.hours;
-
-                const totalMinutes =
-                    timeSlipsDaySummary.totalMinutes + timeSlip.minutes + hours * 60;
-
-                timeSlipsDaySummary.totalHours = Math.floor(totalMinutes / 60);
-
-                timeSlipsDaySummary.totalMinutes =
-                    totalMinutes - timeSlipsDaySummary.totalHours * 60;
-
-                timeSlipMap.set(dateOftimeSlip, timeSlipsDaySummary);
+                timeSlipMap.set(dateOftimeSlip, timeSlips);
             } else {
-                const timeSlipsDaySummary: TimeSlipDaySummary = {
-                    timeSlips: [timeSlip],
-                    totalHours: timeSlip.hours,
-                    totalMinutes: timeSlip.minutes,
-                };
+                const timeSlips = [timeSlip];
 
-                timeSlipMap.set(dateOftimeSlip, timeSlipsDaySummary);
+                timeSlipMap.set(dateOftimeSlip, timeSlips);
             }
-            weekMinutes += totalMinutesForTimeSlip;
         });
 
-        setWeekTotalMinutes(weekMinutes);
         setTimeSlipsPerDay(timeSlipMap);
     };
 
@@ -188,7 +206,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         }
 
         return tasksForProject.map((taskId: number) => {
-            const name = tasks.get(taskId);
+            const name = taskMap.get(taskId);
             if (name === undefined) {
                 throw Error('No tasks found for project!');
             }
@@ -202,19 +220,62 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     };
 
     const getTaskName = (taskId: number) => {
-        return tasks.get(taskId) ?? '';
+        return taskMap.get(taskId) ?? '';
     };
 
     const getLaborCodeName = (laborCodeId: number) => {
         return laborCodeMap.get(laborCodeId) ?? '';
     };
 
-    const getDateOfDay = (day: 0 | 1 | 2 | 3 | 4 | 5 | 6): Date => {
+    const getDateOfDay = (day: DayIndex): Date => {
         const dayDate = new Date(sundayDate.getTime() + day * 24 * 60 * 60 * 1000);
         return dayDate;
     };
 
-    const getDayColumn = (day: 0 | 1 | 2 | 3 | 4 | 5 | 6) => {
+    const getTimeSlipsForDay = (day: DayIndex) => {
+        const dayDate = getDateOfDay(day);
+        const timeSlips = timeSlipsPerDay.get(dayDate.toLocaleDateString('en')) ?? [];
+
+        const filteredProjectIds = new Set(selectedFilterProjectIds);
+        const filteredTaskIds = new Set(selectedFilterTaskIds);
+        const filteredLaborCodeIds = new Set(selectedFilterLaborCodeIds);
+
+        return timeSlips.filter((timeSlip: TimeSlip) => {
+            if (filteredProjectIds.size > 0 && !filteredProjectIds.has(timeSlip.projectId)) {
+                return false;
+            }
+
+            if (
+                filteredTaskIds.size > 0 &&
+                (timeSlip.taskId === null || !filteredTaskIds.has(timeSlip.taskId))
+            ) {
+                return false;
+            }
+
+            if (
+                filteredLaborCodeIds.size > 0 &&
+                (timeSlip.laborCodeId === null || !filteredLaborCodeIds.has(timeSlip.laborCodeId))
+            ) {
+                return false;
+            }
+
+            return true;
+        });
+    };
+
+    const getTotalMinutesForDay = (day: DayIndex) => {
+        const timeSlips = getTimeSlipsForDay(day);
+
+        return getTotalMinutes(timeSlips);
+    };
+
+    const getTotalMinutes = (timeSlips: TimeSlip[]) => {
+        return timeSlips.reduce((sum, timeSlip) => {
+            return sum + timeSlip.minutes + timeSlip.hours * 60;
+        }, 0);
+    };
+
+    const getDayColumn = (day: DayIndex) => {
         const dayString = dayMap.get(day);
 
         if (dayString === undefined) {
@@ -227,8 +288,9 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
             dayDate.getMonth() === currentDate.getMonth() &&
             dayDate.getDate() === currentDate.getDate();
 
-        const timeSlipsDaySummary =
-            timeSlipsPerDay.get(dayDate.toLocaleDateString('en')) ?? defaultTimeSlipDaySummary;
+        const timeSlips = getTimeSlipsForDay(day);
+        const totalMinutes = getTotalMinutes(timeSlips);
+        const { hours, minutes } = splitHoursAndMinutes(totalMinutes);
 
         return (
             <DayColumn
@@ -237,7 +299,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 getProjectName={getProjectName}
                 getTaskName={getTaskName}
                 getLaborCodeName={getLaborCodeName}
-                timeSlips={timeSlipsDaySummary.timeSlips}
+                timeSlips={timeSlips}
                 projectOptions={projects}
                 laborCodeOptions={laborCodes}
                 getTaskOptionsForProject={getTaskOptionsForProject}
@@ -247,8 +309,8 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 day={dayString}
                 isCurrentDay={isCurrentDay}
                 date={dayDate}
-                totalHours={timeSlipsDaySummary.totalHours}
-                totalMinutes={timeSlipsDaySummary.totalMinutes}
+                totalHours={hours}
+                totalMinutes={minutes}
             />
         );
     };
@@ -275,15 +337,76 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
     const sundayDateString = sundayDate.toLocaleDateString('en');
 
+    const splitHoursAndMinutes = (totalMinutes: number): HoursMinutesSplit => {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes - hours * 60;
+        return {
+            hours,
+            minutes,
+        };
+    };
+
     const getWeekTotalText = () => {
-        const hours = Math.floor(weekTotalMinutes / 60);
-        const minutes = weekTotalMinutes - hours * 60;
+        let totalMinutes = 0;
+        for (let i = 0; i <= 6; i++) {
+            totalMinutes += getTotalMinutesForDay(i as DayIndex);
+        }
+
+        const { hours, minutes } = splitHoursAndMinutes(totalMinutes);
         return `${hours} hr ${minutes} min`;
+    };
+
+    const getInUseProjectOptions = () => {
+        const projectsInUse = projects.filter((project) => {
+            return projectIdsInUse.has(project.id);
+        });
+        return projectsInUse;
+    };
+
+    const getInUseTaskOptions = () => {
+        const tasksInUse = tasks.filter((task) => {
+            return taskIdsInUse.has(task.id);
+        });
+        return tasksInUse;
+    };
+
+    const getInUseLaborCodeOptions = () => {
+        const laborCodesInUse = laborCodes.filter((laborCode) => {
+            return laborCodeIdsInUse.has(laborCode.id);
+        });
+        return laborCodesInUse;
     };
 
     const getFilterSection = () => {
         if (showFilterSection) {
-            return <div className={classes.basicHeader}>cool stuff</div>;
+            return (
+                <div className={classes.basicHeader}>
+                    <MultiSelect
+                        label="Projects"
+                        keyPrefix="project-filter-"
+                        options={getInUseProjectOptions()}
+                        selectedIds={selectedFilterProjectIds}
+                        setSelectedIds={setSelectedFilterProjectIds}
+                        getDisplayTextForId={(id: number) => projectMap.get(id) ?? ''}
+                    />
+                    <MultiSelect
+                        label="Tasks"
+                        keyPrefix="task-filter-"
+                        options={getInUseTaskOptions()}
+                        selectedIds={selectedFilterTaskIds}
+                        setSelectedIds={setSelectedFilterTaskIds}
+                        getDisplayTextForId={(id: number) => taskMap.get(id) ?? ''}
+                    />
+                    <MultiSelect
+                        label="Labor Codes"
+                        keyPrefix="labor-code-filter-"
+                        options={getInUseLaborCodeOptions()}
+                        selectedIds={selectedFilterLaborCodeIds}
+                        setSelectedIds={setSelectedFilterLaborCodeIds}
+                        getDisplayTextForId={(id: number) => laborCodeMap.get(id) ?? ''}
+                    />
+                </div>
+            );
         }
 
         return <></>;

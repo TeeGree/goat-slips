@@ -12,10 +12,10 @@ import { DropdownOption } from '../types/DropdownOption';
 import classes from './MultiSelect.module.scss';
 
 interface MultiSelectProps {
-    originalSelectedIds: Set<number>;
+    originalSelectedIds?: Set<number>;
     selectedIds: number[];
     setSelectedIds: (selectedIds: number[]) => void;
-    setIsDirty: (isDirty: boolean) => void;
+    setIsDirty?: (isDirty: boolean) => void;
     getDisplayTextForId: (id: number) => string;
     label: string;
     keyPrefix?: string;
@@ -55,8 +55,10 @@ export const MultiSelect: React.FC<MultiSelectProps> = (props: MultiSelectProps)
         } = event;
         const values = typeof value === 'string' ? value.split(',').map((v) => Number(v)) : value;
 
-        if (originalSelectedIds.size !== values.length) {
-            setIsDirty(true);
+        if (originalSelectedIds === undefined || originalSelectedIds.size !== values.length) {
+            if (setIsDirty !== undefined) {
+                setIsDirty(true);
+            }
             setStateAction(values);
             return;
         }
@@ -68,7 +70,9 @@ export const MultiSelect: React.FC<MultiSelectProps> = (props: MultiSelectProps)
             }
         });
 
-        setIsDirty(dirty);
+        if (setIsDirty !== undefined) {
+            setIsDirty(dirty);
+        }
         setStateAction(values);
     };
 
