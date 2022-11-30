@@ -25,15 +25,31 @@
     padding: 0.2em;
 }
 
-.weekHeader {
+.weekHeader,
+.basicHeader {
+    width: 100%;
+}
+
+.basicHeader {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    width: 100%;
 }
 
 .weekHeaderHalf {
     width: 50%;
     display: flex;
     justify-content: center;
+}
+
+.squareIconButton {
+    width: $headerHeight;
+    height: $headerHeight;
+    border-radius: 4px !important;
+}
+
+.squareIconButtonLong {
+    width: 60px;
+    height: $headerHeight;
+    border-radius: 4px !important;
 }

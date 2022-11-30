@@ -192,7 +192,8 @@ export const App: React.FC<{}> = () => {
                 favoriteTimeSlips={favoriteTimeSlips}
                 projects={projects}
                 projectMap={projectMap}
-                tasks={taskMap}
+                tasks={tasks}
+                taskMap={taskMap}
                 tasksAllowedForProjects={tasksAllowedForProjects}
                 laborCodes={laborCodes}
                 laborCodeMap={laborCodeMap}
