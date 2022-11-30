@@ -7,6 +7,7 @@ import { FavoriteTimeSlipData, TimeSlip } from '../../types/TimeSlip';
 import { IconButton, Tooltip } from '@mui/material';
 import {
     FilterAlt,
+    FilterAltOff,
     KeyboardArrowDown,
     KeyboardArrowLeft,
     KeyboardArrowRight,
@@ -432,17 +433,39 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         return <></>;
     };
 
-    const toggleShowFilters = () => {
-        setShowFilterSection((previous) => !previous);
+    const hideFilters = () => {
+        setShowFilterSection(false);
+        if (isFiltered()) {
+            setSelectedFilterProjectIds([]);
+            setSelectedFilterTaskIds([]);
+            setSelectedFilterLaborCodeIds([]);
+        }
     };
 
     const getShowFilterButton = () => {
-        const arrowIcon = showFilterSection ? <KeyboardArrowUp /> : <KeyboardArrowDown />;
+        if (showFilterSection) {
+            return (
+                <Tooltip title="Hide and clear the filters" placement="right">
+                    <IconButton className={classes.squareIconButtonLong} onClick={hideFilters}>
+                        <KeyboardArrowUp />
+                        <FilterAltOff />
+                    </IconButton>
+                </Tooltip>
+            );
+        }
         return (
-            <IconButton className={classes.squareIconButtonLong} onClick={toggleShowFilters}>
-                {arrowIcon}
-                <FilterAlt />
-            </IconButton>
+            <Tooltip
+                title="Show dropdowns that can be used to filter the visible time slips"
+                placement="right"
+            >
+                <IconButton
+                    className={classes.squareIconButtonLong}
+                    onClick={() => setShowFilterSection(true)}
+                >
+                    <KeyboardArrowDown />
+                    <FilterAlt />
+                </IconButton>
+            </Tooltip>
         );
     };
 
