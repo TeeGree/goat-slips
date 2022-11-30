@@ -44,6 +44,7 @@ interface DayColumnProps {
     totalMinutes: number;
     fetchFavoriteTimeSlips: () => Promise<void>;
     favoriteTimeSlipsOptions: FavoriteTimeSlipData[];
+    isFiltered: boolean;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
@@ -93,6 +94,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         totalMinutes,
         fetchFavoriteTimeSlips,
         favoriteTimeSlipsOptions,
+        isFiltered,
     } = props;
 
     const getDateString = () => {
@@ -230,6 +232,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                 totalHours={totalHours}
                 totalMinutes={totalMinutes}
                 newMinuteDiffs={newMinuteDiffs}
+                isFiltered={isFiltered}
             />
             <div className={classes.dayBody}>
                 {getAddTimeSlipButtonElements()}

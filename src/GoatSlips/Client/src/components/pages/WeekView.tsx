@@ -4,9 +4,10 @@ import { DayColumn } from '../DayColumn/DayColumn';
 import { Day } from '../../types/Day';
 import { DropdownOption } from '../../types/DropdownOption';
 import { FavoriteTimeSlipData, TimeSlip } from '../../types/TimeSlip';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import {
     FilterAlt,
+    FilterAltOff,
     KeyboardArrowDown,
     KeyboardArrowLeft,
     KeyboardArrowRight,
@@ -311,6 +312,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 date={dayDate}
                 totalHours={hours}
                 totalMinutes={minutes}
+                isFiltered={isFiltered()}
             />
         );
     };
@@ -346,6 +348,14 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         };
     };
 
+    const isFiltered = () => {
+        return (
+            selectedFilterProjectIds.length > 0 ||
+            selectedFilterTaskIds.length > 0 ||
+            selectedFilterLaborCodeIds.length > 0
+        );
+    };
+
     const getWeekTotalText = () => {
         let totalMinutes = 0;
         for (let i = 0; i <= 6; i++) {
@@ -353,7 +363,18 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         }
 
         const { hours, minutes } = splitHoursAndMinutes(totalMinutes);
-        return `${hours} hr ${minutes} min`;
+
+        const text = `${hours} hr ${minutes} min`;
+
+        if (isFiltered()) {
+            return (
+                <Tooltip title="Total is based on filtered time slips" placement="top">
+                    <span className={classes.filteredTotal}>{text}*</span>
+                </Tooltip>
+            );
+        }
+
+        return <span className={classes.weekTotal}>{text}</span>;
     };
 
     const getInUseProjectOptions = () => {
@@ -412,17 +433,39 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         return <></>;
     };
 
-    const toggleShowFilters = () => {
-        setShowFilterSection((previous) => !previous);
+    const hideFilters = () => {
+        setShowFilterSection(false);
+        if (isFiltered()) {
+            setSelectedFilterProjectIds([]);
+            setSelectedFilterTaskIds([]);
+            setSelectedFilterLaborCodeIds([]);
+        }
     };
 
     const getShowFilterButton = () => {
-        const arrowIcon = showFilterSection ? <KeyboardArrowUp /> : <KeyboardArrowDown />;
+        if (showFilterSection) {
+            return (
+                <Tooltip title="Hide and clear the filters" placement="right">
+                    <IconButton className={classes.squareIconButtonLong} onClick={hideFilters}>
+                        <KeyboardArrowUp />
+                        <FilterAltOff />
+                    </IconButton>
+                </Tooltip>
+            );
+        }
         return (
-            <IconButton className={classes.squareIconButtonLong} onClick={toggleShowFilters}>
-                {arrowIcon}
-                <FilterAlt />
-            </IconButton>
+            <Tooltip
+                title="Show dropdowns that can be used to filter the visible time slips"
+                placement="right"
+            >
+                <IconButton
+                    className={classes.squareIconButtonLong}
+                    onClick={() => setShowFilterSection(true)}
+                >
+                    <KeyboardArrowDown />
+                    <FilterAlt />
+                </IconButton>
+            </Tooltip>
         );
     };
 
@@ -432,7 +475,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 <div className={classes.basicHeader}>
                     {getShowFilterButton()}
                     <div className={classes.weekHeaderHalf}>{getWeekChanger()}</div>
-                    <div className={classes.weekHeaderHalf}>Week Total: {getWeekTotalText()}</div>
+                    <div className={classes.weekHeaderHalf}>Week Total:{getWeekTotalText()}</div>
                 </div>
                 {getFilterSection()}
             </div>
