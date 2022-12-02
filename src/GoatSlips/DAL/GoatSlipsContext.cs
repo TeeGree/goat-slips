@@ -16,6 +16,7 @@ namespace GoatSlips.DAL
         DbSet<AccessRight>? AccessRights { get; set; }
         DbSet<UserAccessRight>? UserAccessRights { get; set; }
         DbSet<FavoriteTimeSlip>? FavoriteTimeSlips { get; set; }
+        DbSet<Query>? Queries { get; set; }
         int SaveChanges();
     }
     public sealed class GoatSlipsContext : DbContext, IGoatSlipsContext
@@ -31,6 +32,7 @@ namespace GoatSlips.DAL
         public DbSet<AccessRight>? AccessRights { get; set; }
         public DbSet<UserAccessRight>? UserAccessRights { get; set; }
         public DbSet<FavoriteTimeSlip>? FavoriteTimeSlips { get; set; }
+        public DbSet<Query>? Queries { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

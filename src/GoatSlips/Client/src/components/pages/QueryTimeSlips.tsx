@@ -111,7 +111,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
             queryBody.toDate = toDate.format('YYYY-MM-DD');
         }
 
-        const results = await fetchPost<TimeSlip[]>('TimeSlip/QueryTimeSlips', queryBody);
+        const results = await fetchPost<TimeSlip[]>('Query/QueryTimeSlips', queryBody);
         setTimeSlips(results);
 
         setLoadingResults(false);

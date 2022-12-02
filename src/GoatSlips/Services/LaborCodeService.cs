@@ -16,18 +16,21 @@ namespace GoatSlips.Services
         private readonly ITimeSlipRepository _timeSlipRepository;
         private readonly IGoatSlipsContext _dbContext;
         private readonly IFavoriteTimeSlipRepository _favoriteTimeSlipRepository;
+        private readonly IQueryRepository _queryRepository;
 
         public LaborCodeService(
             ILaborCodeRepository laborCodeRepository,
             ITimeSlipRepository timeSlipRepository,
             IGoatSlipsContext dbContext,
-            IFavoriteTimeSlipRepository favoriteTimeSlipRepository
+            IFavoriteTimeSlipRepository favoriteTimeSlipRepository,
+            IQueryRepository queryRepository
         )
         {
             _laborCodeRepository = laborCodeRepository;
             _timeSlipRepository = timeSlipRepository;
             _dbContext = dbContext;
             _favoriteTimeSlipRepository = favoriteTimeSlipRepository;
+            _queryRepository = queryRepository;
         }
 
         public void CreateLaborCode(string laborCodeName)
@@ -67,6 +70,7 @@ namespace GoatSlips.Services
 
             _dbContext.SaveChanges();
 
+            _queryRepository.ReleaseLaborCodeId(laborCodeId);
 
             laborCodes.Remove(laborCode);
 
