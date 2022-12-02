@@ -1,15 +1,8 @@
 import { FileDownload } from '@mui/icons-material';
 import {
     Button,
-    Checkbox,
     CircularProgress,
-    FormControl,
-    InputLabel,
-    ListItemText,
-    MenuItem,
     Paper,
-    Select,
-    SelectChangeEvent,
     Table,
     TableBody,
     TableCell,
@@ -27,6 +20,7 @@ import { getCsvOfTimeSlips } from '../../helpers/csvGeneration';
 import { fetchGet, fetchPost } from '../../helpers/fetchFunctions';
 import { DropdownOption } from '../../types/DropdownOption';
 import { ExportableTimeSlip, TimeSlip } from '../../types/TimeSlip';
+import { MultiSelect } from '../MultiSelect';
 import classes from './QueryTimeSlips.module.scss';
 
 interface QueryTimeSlipsProps {
@@ -82,6 +76,12 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         fromDate,
         toDate,
     ]);
+
+    useEffect(() => {
+        if (isAdmin) {
+            getUsers();
+        }
+    }, [isAdmin]);
 
     const fetchTimeSlips = async () => {
         setLoadingResults(true);
@@ -172,83 +172,6 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         });
     };
 
-    const getDropdownOptions = (
-        options: DropdownOption[],
-        dropdownName: string,
-        selectedIds: number[],
-    ): JSX.Element[] => {
-        return options.map((user: DropdownOption) => {
-            const { id, name } = user;
-            return (
-                <MenuItem key={`${dropdownName}${id}`} value={id}>
-                    <Checkbox checked={selectedIds.indexOf(id) > -1} />
-                    <ListItemText primary={name} />
-                </MenuItem>
-            );
-        });
-    };
-
-    const getUserOptions = (): JSX.Element[] => {
-        return getDropdownOptions(users, 'user', selectedUserIds);
-    };
-
-    const getProjectOptions = (): JSX.Element[] => {
-        return getDropdownOptions(projects, 'project', selectedProjectIds);
-    };
-
-    const getTaskOptions = (): JSX.Element[] => {
-        return getDropdownOptions([emptyDropdownOption, ...tasks], 'task', selectedTaskIds);
-    };
-
-    const getLaborCodeOptions = (): JSX.Element[] => {
-        return getDropdownOptions(
-            [emptyDropdownOption, ...laborCodes],
-            'laborCode',
-            selectedLaborCodeIds,
-        );
-    };
-
-    const handleSelectChange = (
-        event: SelectChangeEvent<number[]>,
-        setStateAction: React.Dispatch<React.SetStateAction<number[]>>,
-    ) => {
-        const {
-            target: { value },
-        } = event;
-        setStateAction(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',').map((v) => Number(v)) : value,
-        );
-    };
-
-    const handleUserChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedUserIds);
-    };
-
-    const handleProjectChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedProjectIds);
-    };
-
-    const handleTaskChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedTaskIds);
-    };
-
-    const handleLaborCodeChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedLaborCodeIds);
-    };
-
-    const renderSelected = (selectedIds: number[], map: Map<number, string>) => {
-        let displayText = '';
-        selectedIds.forEach((id: number, index: number) => {
-            displayText += map.get(id) ?? 'N/A';
-            if (index < selectedIds.length - 1) {
-                displayText += ', ';
-            }
-        });
-
-        return displayText;
-    };
-
     const getCsvOfSearchResults = (): string => {
         const exportableTimeSlips: ExportableTimeSlip[] = timeSlips.map((ts: TimeSlip) => {
             return {
@@ -285,17 +208,14 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const getUserInput = () => {
         if (isAdmin) {
             return (
-                <FormControl className={classes.dropdown}>
-                    <InputLabel>User</InputLabel>
-                    <Select
-                        renderValue={(selected) => renderSelected(selected, userMap)}
-                        multiple
-                        value={selectedUserIds}
-                        onChange={handleUserChange}
-                    >
-                        {getUserOptions()}
-                    </Select>
-                </FormControl>
+                <MultiSelect
+                    selectedIds={selectedUserIds}
+                    getDisplayTextForId={(id: number) => userMap.get(id) ?? 'N/A'}
+                    setSelectedIds={setSelectedUserIds}
+                    label="User"
+                    options={users}
+                    keyPrefix="user-"
+                />
             );
         }
         return null;
@@ -305,39 +225,30 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         return (
             <div className={classes.inputContainer}>
                 {getUserInput()}
-                <FormControl className={classes.dropdown}>
-                    <InputLabel>Project</InputLabel>
-                    <Select
-                        renderValue={(selected) => renderSelected(selected, projectMap)}
-                        multiple
-                        value={selectedProjectIds}
-                        onChange={handleProjectChange}
-                    >
-                        {getProjectOptions()}
-                    </Select>
-                </FormControl>
-                <FormControl className={classes.dropdown}>
-                    <InputLabel>Task</InputLabel>
-                    <Select
-                        renderValue={(selected) => renderSelected(selected, taskMap)}
-                        multiple
-                        value={selectedTaskIds}
-                        onChange={handleTaskChange}
-                    >
-                        {getTaskOptions()}
-                    </Select>
-                </FormControl>
-                <FormControl className={classes.dropdown}>
-                    <InputLabel>Labor Code</InputLabel>
-                    <Select
-                        renderValue={(selected) => renderSelected(selected, laborCodeMap)}
-                        multiple
-                        value={selectedLaborCodeIds}
-                        onChange={handleLaborCodeChange}
-                    >
-                        {getLaborCodeOptions()}
-                    </Select>
-                </FormControl>
+                <MultiSelect
+                    selectedIds={selectedProjectIds}
+                    getDisplayTextForId={(id: number) => projectMap.get(id) ?? 'N/A'}
+                    setSelectedIds={setSelectedProjectIds}
+                    label="Project"
+                    options={projects}
+                    keyPrefix="project-"
+                />
+                <MultiSelect
+                    selectedIds={selectedTaskIds}
+                    getDisplayTextForId={(id: number) => taskMap.get(id) ?? 'N/A'}
+                    setSelectedIds={setSelectedTaskIds}
+                    label="Task"
+                    options={[emptyDropdownOption, ...tasks]}
+                    keyPrefix="task-"
+                />
+                <MultiSelect
+                    selectedIds={selectedLaborCodeIds}
+                    getDisplayTextForId={(id: number) => laborCodeMap.get(id) ?? 'N/A'}
+                    setSelectedIds={setSelectedLaborCodeIds}
+                    label="Labor Code"
+                    options={[emptyDropdownOption, ...laborCodes]}
+                    keyPrefix="laborCode-"
+                />
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                         label="From Date"
@@ -367,8 +278,13 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         );
     };
 
+    const getActionBar = () => {
+        return <div className={classes.actionBar}>hey there</div>;
+    };
+
     return (
         <div className={classes.pageContainer}>
+            {getActionBar()}
             {getInputs()}
             <TableContainer component={Paper} className={classes.tableContainer}>
                 <Table aria-label="simple table">

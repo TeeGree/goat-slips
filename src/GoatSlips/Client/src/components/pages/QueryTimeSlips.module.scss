@@ -1,4 +1,5 @@
 @import '../../variables';
+@import '../../colors';
 
 .dropdown {
     width: 150px !important;
@@ -22,4 +23,9 @@
 .tableContainer {
     flex-grow: 1;
     width: 90% !important;
+}
+
+.actionBar {
+    background-color: $goatBlue;
+    width: 100%;
 }
