@@ -31,10 +31,12 @@ import {
     fetchPostResponse,
     fetchDeleteResponse,
 } from '../../helpers/fetchFunctions';
+import { AlertMessage } from '../../types/AlertMessage';
 import { DropdownOption } from '../../types/DropdownOption';
 import { Query } from '../../types/Query';
 import { ExportableTimeSlip, TimeSlip } from '../../types/TimeSlip';
 import { MultiSelect } from '../MultiSelect';
+import { Toast } from '../Toast';
 import classes from './QueryTimeSlips.module.scss';
 
 interface QueryTimeSlipsProps {
@@ -100,6 +102,8 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const [selectedQueryId, setSelectedQueryId] = useState<number | ''>('');
 
     const [isDeletingQuery, setIsDeletingQuery] = useState(false);
+
+    const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
 
     useEffect(() => {
         fetchTimeSlips();
@@ -330,29 +334,40 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         setQueryName(event.target.value);
     };
 
-    const saveFavoriteTimeSlip = async (): Promise<void> => {
+    const saveQuery = async (): Promise<void> => {
         const saveQueryBody: SaveQueryBody = { ...buildQueryBody(), name: queryName };
 
         const response = await fetchPostResponse('Query/SaveQuery', saveQueryBody);
 
         if (response.ok) {
-            // setAlertMessage({ message: `Saved "${queryName}"`, severity: 'success' });
+            setAlertMessage({ message: `Saved "${queryName}"`, severity: 'success' });
             handleCloseSaveQueryModal();
             fetchSavedQueries();
         } else {
-            // const message: ErrorDetails = await response.json();
-            // setAlertMessage({ message: message.detail, severity: 'error' });
+            setAlertMessage({
+                message: `Error occurred while attempting to save "${queryName}"`,
+                severity: 'error',
+            });
         }
     };
 
     const deleteSelectedQuery = async () => {
+        const nameOfQueryBeingDeleted = getSelectedQueryName();
         const response = await fetchDeleteResponse(`Query/Delete/${selectedQueryId}`);
 
         if (response.ok) {
             await fetchSavedQueries();
-            // setSuccess(`Successfully deleted project ${project.name}!`);
+            setAlertMessage({
+                message: `Deleted "${nameOfQueryBeingDeleted}"`,
+                severity: 'success',
+            });
             setSelectedQueryId('');
             setIsDeletingQuery(false);
+        } else {
+            setAlertMessage({
+                message: `Error occurred while attempting to delete "${nameOfQueryBeingDeleted}"`,
+                severity: 'error',
+            });
         }
     };
 
@@ -522,7 +537,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                             disabled={queryName === ''}
                             variant="contained"
                             color="success"
-                            onClick={saveFavoriteTimeSlip}
+                            onClick={saveQuery}
                         >
                             Save Query
                         </Button>
@@ -555,6 +570,11 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                     </div>
                 </Box>
             </Modal>
+            <Toast
+                severity={alertMessage?.severity}
+                message={alertMessage?.message}
+                onClose={() => setAlertMessage(null)}
+            />
         </div>
     );
 };
