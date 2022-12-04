@@ -17,7 +17,7 @@ import { fetchPostResponse } from '../../helpers/fetchFunctions';
 import { Toast } from '../Toast';
 import { ErrorDetails } from '../../types/ErrorDetails';
 import { AlertMessage } from '../../types/AlertMessage';
-import { TimeCodeLabelWithIcon } from '../TimeCodeLabelWithIcon';
+import { EntityLabelWithIcon } from '../EntityLabelWithIcon';
 
 interface ReadOnlyTimeSlipProps {
     timeSlip: TimeSlip;
@@ -80,12 +80,12 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
         <>
             <Card>
                 <CardContent className={classes.content}>
-                    <TimeCodeLabelWithIcon
+                    <EntityLabelWithIcon
                         label={getProjectName(timeSlip.projectId)}
                         timeCodeType="project"
                     />
-                    <TimeCodeLabelWithIcon label={task} timeCodeType="task" />
-                    <TimeCodeLabelWithIcon label={laborCode} timeCodeType="laborCode" />
+                    <EntityLabelWithIcon label={task} timeCodeType="task" />
+                    <EntityLabelWithIcon label={laborCode} timeCodeType="laborCode" />
                     <div
                         className={classes.time}
                     >{`${timeSlip.hours} hr ${timeSlip.minutes} min`}</div>
@@ -141,12 +141,12 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
                         />
                     </div>
                     <div className={`${classes.padded} ${classes.content}`}>
-                        <TimeCodeLabelWithIcon
+                        <EntityLabelWithIcon
                             label={getProjectName(timeSlip.projectId)}
                             timeCodeType="project"
                         />
-                        <TimeCodeLabelWithIcon label={task} timeCodeType="task" />
-                        <TimeCodeLabelWithIcon label={laborCode} timeCodeType="laborCode" />
+                        <EntityLabelWithIcon label={task} timeCodeType="task" />
+                        <EntityLabelWithIcon label={laborCode} timeCodeType="laborCode" />
                     </div>
                     <div className={classes.modalButtons}>
                         <Button

@@ -7,7 +7,7 @@ import { fetchPostResponse } from '../helpers/fetchFunctions';
 import { ErrorDetails } from '../types/ErrorDetails';
 import { FavoriteTimeSlipData } from '../types/TimeSlip';
 import classes from './FavoriteTimeSlip.module.scss';
-import { TimeCodeLabelWithIcon } from './TimeCodeLabelWithIcon';
+import { TimeCodeLabelWithIcon } from './EntityLabelWithIcon';
 
 interface FavoriteTimeSlipProps {
     favoriteTimeSlip: FavoriteTimeSlipData;

@@ -1,12 +1,12 @@
-import { FileDownload } from '@mui/icons-material';
+import { Delete, FileDownload, Save, SavedSearch } from '@mui/icons-material';
 import {
+    Box,
     Button,
-    Checkbox,
     CircularProgress,
     FormControl,
     InputLabel,
-    ListItemText,
     MenuItem,
+    Modal,
     Paper,
     Select,
     SelectChangeEvent,
@@ -21,12 +21,23 @@ import {
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
+import { modalStyle } from '../../constants/modalStyle';
 import { getCsvOfTimeSlips } from '../../helpers/csvGeneration';
-import { fetchGet, fetchPost } from '../../helpers/fetchFunctions';
+import {
+    fetchGet,
+    fetchPost,
+    fetchPostResponse,
+    fetchDeleteResponse,
+} from '../../helpers/fetchFunctions';
+import { AlertMessage } from '../../types/AlertMessage';
 import { DropdownOption } from '../../types/DropdownOption';
+import { Query } from '../../types/Query';
 import { ExportableTimeSlip, TimeSlip } from '../../types/TimeSlip';
+import { MultiSelect } from '../MultiSelect';
+import { EntityLabelWithIcon } from '../EntityLabelWithIcon';
+import { Toast } from '../Toast';
 import classes from './QueryTimeSlips.module.scss';
 
 interface QueryTimeSlipsProps {
@@ -38,12 +49,28 @@ interface QueryTimeSlipsProps {
     laborCodeMap: Map<number, string>;
     isAdmin: boolean;
     currentUserId: number;
+    savedQueries: DropdownOption[];
+    savedQueriesMap: Map<number, Query>;
+    fetchSavedQueries: () => Promise<void>;
 }
 
 const emptyDropdownOption: DropdownOption = {
     id: -1,
     name: 'N/A',
 };
+
+interface QueryBody {
+    userIds?: number[];
+    projectIds?: number[];
+    taskIds?: number[];
+    laborCodeIds?: number[];
+    fromDate?: string;
+    toDate?: string;
+}
+
+interface SaveQueryBody extends QueryBody {
+    name: string;
+}
 
 export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSlipsProps) => {
     const {
@@ -55,6 +82,9 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         laborCodeMap,
         isAdmin,
         currentUserId,
+        savedQueries,
+        savedQueriesMap,
+        fetchSavedQueries,
     } = props;
     const [loadingResults, setLoadingResults] = useState(true);
     const [timeSlips, setTimeSlips] = useState<TimeSlip[]>([]);
@@ -68,6 +98,13 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const [toDate, setToDate] = React.useState<Dayjs | null>(null);
     const [users, setUsers] = useState<DropdownOption[]>([]);
     const [userMap, setUserMap] = useState<Map<number, string>>(new Map<number, string>([]));
+    const [isSavingQuery, setIsSavingQuery] = useState(false);
+    const [queryName, setQueryName] = useState('');
+    const [selectedQueryId, setSelectedQueryId] = useState<number | ''>('');
+
+    const [isDeletingQuery, setIsDeletingQuery] = useState(false);
+
+    const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
 
     useEffect(() => {
         fetchTimeSlips();
@@ -83,35 +120,46 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         toDate,
     ]);
 
-    const fetchTimeSlips = async () => {
-        setLoadingResults(true);
+    useEffect(() => {
+        if (isAdmin) {
+            getUsers();
+        }
+    }, [isAdmin]);
 
-        const queryBody: any = {};
+    const buildQueryBody = () => {
+        const newQueryBody: QueryBody = {};
         if (selectedUserIds.length !== 0) {
-            queryBody.userIds = selectedUserIds;
+            newQueryBody.userIds = selectedUserIds;
         }
 
         if (selectedProjectIds.length !== 0) {
-            queryBody.projectIds = selectedProjectIds;
+            newQueryBody.projectIds = selectedProjectIds;
         }
 
         if (selectedTaskIds.length !== 0) {
-            queryBody.taskIds = selectedTaskIds;
+            newQueryBody.taskIds = selectedTaskIds;
         }
 
         if (selectedLaborCodeIds.length !== 0) {
-            queryBody.laborCodeIds = selectedLaborCodeIds;
+            newQueryBody.laborCodeIds = selectedLaborCodeIds;
         }
 
         if (fromDate !== null) {
-            queryBody.fromDate = fromDate.format('YYYY-MM-DD');
+            newQueryBody.fromDate = fromDate.format('YYYY-MM-DD');
         }
 
         if (toDate !== null) {
-            queryBody.toDate = toDate.format('YYYY-MM-DD');
+            newQueryBody.toDate = toDate.format('YYYY-MM-DD');
         }
+        return newQueryBody;
+    };
 
-        const results = await fetchPost<TimeSlip[]>('TimeSlip/QueryTimeSlips', queryBody);
+    const fetchTimeSlips = async () => {
+        setLoadingResults(true);
+
+        const queryBody: QueryBody = buildQueryBody();
+
+        const results = await fetchPost<TimeSlip[]>('Query/QueryTimeSlips', queryBody);
         setTimeSlips(results);
 
         setLoadingResults(false);
@@ -172,83 +220,6 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         });
     };
 
-    const getDropdownOptions = (
-        options: DropdownOption[],
-        dropdownName: string,
-        selectedIds: number[],
-    ): JSX.Element[] => {
-        return options.map((user: DropdownOption) => {
-            const { id, name } = user;
-            return (
-                <MenuItem key={`${dropdownName}${id}`} value={id}>
-                    <Checkbox checked={selectedIds.indexOf(id) > -1} />
-                    <ListItemText primary={name} />
-                </MenuItem>
-            );
-        });
-    };
-
-    const getUserOptions = (): JSX.Element[] => {
-        return getDropdownOptions(users, 'user', selectedUserIds);
-    };
-
-    const getProjectOptions = (): JSX.Element[] => {
-        return getDropdownOptions(projects, 'project', selectedProjectIds);
-    };
-
-    const getTaskOptions = (): JSX.Element[] => {
-        return getDropdownOptions([emptyDropdownOption, ...tasks], 'task', selectedTaskIds);
-    };
-
-    const getLaborCodeOptions = (): JSX.Element[] => {
-        return getDropdownOptions(
-            [emptyDropdownOption, ...laborCodes],
-            'laborCode',
-            selectedLaborCodeIds,
-        );
-    };
-
-    const handleSelectChange = (
-        event: SelectChangeEvent<number[]>,
-        setStateAction: React.Dispatch<React.SetStateAction<number[]>>,
-    ) => {
-        const {
-            target: { value },
-        } = event;
-        setStateAction(
-            // On autofill we get a stringified value.
-            typeof value === 'string' ? value.split(',').map((v) => Number(v)) : value,
-        );
-    };
-
-    const handleUserChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedUserIds);
-    };
-
-    const handleProjectChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedProjectIds);
-    };
-
-    const handleTaskChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedTaskIds);
-    };
-
-    const handleLaborCodeChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedLaborCodeIds);
-    };
-
-    const renderSelected = (selectedIds: number[], map: Map<number, string>) => {
-        let displayText = '';
-        selectedIds.forEach((id: number, index: number) => {
-            displayText += map.get(id) ?? 'N/A';
-            if (index < selectedIds.length - 1) {
-                displayText += ', ';
-            }
-        });
-
-        return displayText;
-    };
-
     const getCsvOfSearchResults = (): string => {
         const exportableTimeSlips: ExportableTimeSlip[] = timeSlips.map((ts: TimeSlip) => {
             return {
@@ -285,17 +256,14 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const getUserInput = () => {
         if (isAdmin) {
             return (
-                <FormControl className={classes.dropdown}>
-                    <InputLabel>User</InputLabel>
-                    <Select
-                        renderValue={(selected) => renderSelected(selected, userMap)}
-                        multiple
-                        value={selectedUserIds}
-                        onChange={handleUserChange}
-                    >
-                        {getUserOptions()}
-                    </Select>
-                </FormControl>
+                <MultiSelect
+                    selectedIds={selectedUserIds}
+                    getDisplayTextForId={(id: number) => userMap.get(id) ?? 'N/A'}
+                    setSelectedIds={setSelectedUserIds}
+                    label="User"
+                    options={users}
+                    keyPrefix="user-"
+                />
             );
         }
         return null;
@@ -305,39 +273,30 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         return (
             <div className={classes.inputContainer}>
                 {getUserInput()}
-                <FormControl className={classes.dropdown}>
-                    <InputLabel>Project</InputLabel>
-                    <Select
-                        renderValue={(selected) => renderSelected(selected, projectMap)}
-                        multiple
-                        value={selectedProjectIds}
-                        onChange={handleProjectChange}
-                    >
-                        {getProjectOptions()}
-                    </Select>
-                </FormControl>
-                <FormControl className={classes.dropdown}>
-                    <InputLabel>Task</InputLabel>
-                    <Select
-                        renderValue={(selected) => renderSelected(selected, taskMap)}
-                        multiple
-                        value={selectedTaskIds}
-                        onChange={handleTaskChange}
-                    >
-                        {getTaskOptions()}
-                    </Select>
-                </FormControl>
-                <FormControl className={classes.dropdown}>
-                    <InputLabel>Labor Code</InputLabel>
-                    <Select
-                        renderValue={(selected) => renderSelected(selected, laborCodeMap)}
-                        multiple
-                        value={selectedLaborCodeIds}
-                        onChange={handleLaborCodeChange}
-                    >
-                        {getLaborCodeOptions()}
-                    </Select>
-                </FormControl>
+                <MultiSelect
+                    selectedIds={selectedProjectIds}
+                    getDisplayTextForId={(id: number) => projectMap.get(id) ?? 'N/A'}
+                    setSelectedIds={setSelectedProjectIds}
+                    label="Project"
+                    options={projects}
+                    keyPrefix="project-"
+                />
+                <MultiSelect
+                    selectedIds={selectedTaskIds}
+                    getDisplayTextForId={(id: number) => taskMap.get(id) ?? 'N/A'}
+                    setSelectedIds={setSelectedTaskIds}
+                    label="Task"
+                    options={[emptyDropdownOption, ...tasks]}
+                    keyPrefix="task-"
+                />
+                <MultiSelect
+                    selectedIds={selectedLaborCodeIds}
+                    getDisplayTextForId={(id: number) => laborCodeMap.get(id) ?? 'N/A'}
+                    setSelectedIds={setSelectedLaborCodeIds}
+                    label="Labor Code"
+                    options={[emptyDropdownOption, ...laborCodes]}
+                    keyPrefix="laborCode-"
+                />
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                         label="From Date"
@@ -367,25 +326,367 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         );
     };
 
+    const handleCloseSaveQueryModal = () => {
+        setIsSavingQuery(false);
+        setQueryName('');
+    };
+
+    const handleQueryNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setQueryName(event.target.value);
+    };
+
+    const saveQuery = async (): Promise<void> => {
+        const saveQueryBody: SaveQueryBody = { ...buildQueryBody(), name: queryName };
+
+        const response = await fetchPostResponse('Query/SaveQuery', saveQueryBody);
+
+        if (response.ok) {
+            setAlertMessage({ message: `Saved "${queryName}"`, severity: 'success' });
+            handleCloseSaveQueryModal();
+            fetchSavedQueries();
+        } else {
+            setAlertMessage({
+                message: `Error occurred while attempting to save "${queryName}"`,
+                severity: 'error',
+            });
+        }
+    };
+
+    const deleteSelectedQuery = async () => {
+        const nameOfQueryBeingDeleted = getSelectedQueryName();
+        const response = await fetchDeleteResponse(`Query/Delete/${selectedQueryId}`);
+
+        if (response.ok) {
+            await fetchSavedQueries();
+            setAlertMessage({
+                message: `Deleted "${nameOfQueryBeingDeleted}"`,
+                severity: 'success',
+            });
+            setSelectedQueryId('');
+            setIsDeletingQuery(false);
+        } else {
+            setAlertMessage({
+                message: `Error occurred while attempting to delete "${nameOfQueryBeingDeleted}"`,
+                severity: 'error',
+            });
+        }
+    };
+
+    const handleSelectedQueryChange = (event: SelectChangeEvent<number>) => {
+        setSelectedQueryId(Number(event.target.value));
+    };
+
+    const getSavedQueryOptions = (): JSX.Element[] => {
+        return savedQueries.map((query: DropdownOption) => {
+            const { id, name } = query;
+            return (
+                <MenuItem key={`query${id}`} value={id}>
+                    {name}
+                </MenuItem>
+            );
+        });
+    };
+
+    const anyParametersSelected = () => {
+        return (
+            selectedProjectIds.length > 0 ||
+            selectedTaskIds.length > 0 ||
+            selectedLaborCodeIds.length > 0 ||
+            fromDate !== null ||
+            toDate !== null ||
+            (isAdmin && selectedUserIds.length > 0)
+        );
+    };
+
+    const getSaveQueryButton = () => {
+        const nothingSelected = !anyParametersSelected();
+
+        const button = (
+            <Button
+                disabled={nothingSelected}
+                variant="contained"
+                className={classes.saveQuery}
+                onClick={() => setIsSavingQuery(true)}
+            >
+                <Save />
+                Save Query
+            </Button>
+        );
+
+        if (nothingSelected) {
+            return (
+                <Tooltip title="Cannot save a query with no filters selected!">
+                    <span className={classes.saveQuerySpan}>{button}</span>
+                </Tooltip>
+            );
+        }
+        return button;
+    };
+
+    const getSelectedQuery = () => {
+        if (selectedQueryId === '') {
+            throw Error('No query selected to load!');
+        }
+
+        const query = savedQueriesMap.get(selectedQueryId);
+        if (query === undefined) {
+            throw Error('Error loading saved query!');
+        }
+
+        return query;
+    };
+
+    const getSelectedQueryName = () => {
+        const defaultName = 'N/A';
+        if (selectedQueryId === '') {
+            return defaultName;
+        }
+
+        const query = savedQueriesMap.get(selectedQueryId);
+        if (query === undefined) {
+            return defaultName;
+        }
+
+        return query.name;
+    };
+
+    const loadSelectedQuery = () => {
+        const query = getSelectedQuery();
+
+        setSelectedUserIds(query.userIds);
+        setSelectedProjectIds(query.projectIds);
+        setSelectedTaskIds(query.taskIds);
+        setSelectedLaborCodeIds(query.laborCodeIds);
+        setFromDate(query.fromDate === null ? null : dayjs(query.fromDate));
+        setToDate(query.toDate === null ? null : dayjs(query.toDate));
+    };
+
+    const getActionBar = () => {
+        return (
+            <div className={classes.actionBar}>
+                <span className={classes.fullHeight}>
+                    <FormControl className={classes.dropdown}>
+                        <InputLabel>Saved Queries</InputLabel>
+                        <Select
+                            value={selectedQueryId}
+                            onChange={handleSelectedQueryChange}
+                            label="Saved Queries"
+                        >
+                            {getSavedQueryOptions()}
+                        </Select>
+                    </FormControl>
+                    <Button
+                        disabled={selectedQueryId === ''}
+                        variant="contained"
+                        className={classes.loadQuery}
+                        onClick={loadSelectedQuery}
+                    >
+                        <SavedSearch />
+                        Load Query
+                    </Button>
+                    <Tooltip title="Delete the selected query">
+                        <span className={classes.deleteQuerySpan}>
+                            <Button
+                                disabled={selectedQueryId === ''}
+                                variant="contained"
+                                color="error"
+                                className={classes.deleteQuery}
+                                onClick={() => setIsDeletingQuery(true)}
+                            >
+                                <Delete />
+                            </Button>
+                        </span>
+                    </Tooltip>
+                </span>
+                {getSaveQueryButton()}
+            </div>
+        );
+    };
+
+    const getDatesForModal = () => {
+        const dateDivs: JSX.Element[] = [];
+        if (fromDate !== null) {
+            dateDivs.push(
+                <div className={classes.modalCodes}>
+                    <>From Date: {fromDate.toDate().toLocaleDateString('en')}</>
+                </div>,
+            );
+        }
+        if (toDate !== null) {
+            dateDivs.push(
+                <div className={classes.modalCodes}>
+                    <>To Date: {toDate.toDate().toLocaleDateString('en')}</>
+                </div>,
+            );
+        }
+
+        return dateDivs;
+    };
+
+    const getUsersForModal = () => {
+        if (!isAdmin || selectedUserIds.length === 0) {
+            return null;
+        }
+
+        const label = selectedUserIds
+            .map((uid) => {
+                return userMap.get(uid) ?? 'N/A';
+            })
+            .join(', ');
+
+        return (
+            <div className={classes.modalCodes}>
+                <EntityLabelWithIcon label={label} timeCodeType="user" />
+            </div>
+        );
+    };
+
+    const getProjectsForModal = () => {
+        if (selectedProjectIds.length === 0) {
+            return null;
+        }
+
+        const label = selectedProjectIds
+            .map((pid) => {
+                return projectMap.get(pid) ?? 'N/A';
+            })
+            .join(', ');
+
+        return (
+            <div className={classes.modalCodes}>
+                <EntityLabelWithIcon label={label} timeCodeType="project" />
+            </div>
+        );
+    };
+
+    const getTasksForModal = () => {
+        if (selectedTaskIds.length === 0) {
+            return null;
+        }
+
+        const label = selectedTaskIds
+            .map((tid) => {
+                return taskMap.get(tid) ?? 'N/A';
+            })
+            .join(', ');
+
+        return (
+            <div className={classes.modalCodes}>
+                <EntityLabelWithIcon label={label} timeCodeType="task" />
+            </div>
+        );
+    };
+
+    const getLaborCodesForModal = () => {
+        if (selectedLaborCodeIds.length === 0) {
+            return null;
+        }
+
+        const label = selectedLaborCodeIds
+            .map((lcid) => {
+                return laborCodeMap.get(lcid) ?? 'N/A';
+            })
+            .join(', ');
+
+        return (
+            <div className={classes.modalCodes}>
+                <EntityLabelWithIcon label={label} timeCodeType="laborCode" />
+            </div>
+        );
+    };
+
+    const getSaveQueryModal = () => {
+        return (
+            <Modal open={isSavingQuery}>
+                <Box sx={modalStyle}>
+                    <h2>Enter a name for this query:</h2>
+                    <div className={classes.padded}>
+                        <TextField
+                            label="Name"
+                            value={queryName}
+                            onChange={handleQueryNameChange}
+                        />
+                    </div>
+                    <div className={classes.padded}>
+                        <>
+                            {getUsersForModal()}
+                            {getProjectsForModal()}
+                            {getTasksForModal()}
+                            {getLaborCodesForModal()}
+                            {getDatesForModal()}
+                        </>
+                    </div>
+                    <div className={classes.modalButtons}>
+                        <Button
+                            disabled={queryName === ''}
+                            variant="contained"
+                            color="success"
+                            onClick={saveQuery}
+                        >
+                            Save Query
+                        </Button>
+                        <Button
+                            variant="contained"
+                            className={classes.cancelButton}
+                            onClick={handleCloseSaveQueryModal}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </Box>
+            </Modal>
+        );
+    };
+
+    const getDeleteQueryModal = () => {
+        <Modal open={isDeletingQuery}>
+            <Box sx={modalStyle}>
+                <h2>Are you sure you want to delete the {`"${getSelectedQueryName()}"`} query?</h2>
+                <div className={classes.modalButtons}>
+                    <Button variant="contained" color="error" onClick={deleteSelectedQuery}>
+                        Delete
+                    </Button>
+                    <Button
+                        variant="contained"
+                        className={classes.cancelButton}
+                        onClick={() => setIsDeletingQuery(false)}
+                    >
+                        Cancel
+                    </Button>
+                </div>
+            </Box>
+        </Modal>;
+    };
+
     return (
         <div className={classes.pageContainer}>
-            {getInputs()}
-            <TableContainer component={Paper} className={classes.tableContainer}>
-                <Table aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>User</TableCell>
-                            <TableCell>Project</TableCell>
-                            <TableCell>Task</TableCell>
-                            <TableCell>Labor Code</TableCell>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Hours</TableCell>
-                            <TableCell>Minutes</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>{getRows()}</TableBody>
-                </Table>
-            </TableContainer>
+            <>
+                {getActionBar()}
+                {getInputs()}
+                <TableContainer component={Paper} className={classes.tableContainer}>
+                    <Table aria-label="simple table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>User</TableCell>
+                                <TableCell>Project</TableCell>
+                                <TableCell>Task</TableCell>
+                                <TableCell>Labor Code</TableCell>
+                                <TableCell>Date</TableCell>
+                                <TableCell>Hours</TableCell>
+                                <TableCell>Minutes</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>{getRows()}</TableBody>
+                    </Table>
+                </TableContainer>
+                {getSaveQueryModal()}
+                {getDeleteQueryModal()}
+                <Toast
+                    severity={alertMessage?.severity}
+                    message={alertMessage?.message}
+                    onClose={() => setAlertMessage(null)}
+                />
+            </>
         </div>
     );
 };

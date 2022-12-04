@@ -18,13 +18,15 @@ namespace GoatSlips.Services
         private readonly IProjectTaskRepository _projectTaskRepository;
         private readonly IGoatSlipsContext _dbContext;
         private readonly IFavoriteTimeSlipRepository _favoriteTimeSlipRepository;
+        private readonly IQueryRepository _queryRepository;
 
         public TaskService(
             ITaskRepository taskRepository,
             ITimeSlipRepository timeSlipRepository,
             IProjectTaskRepository projectTaskRepository,
             IGoatSlipsContext dbContext,
-            IFavoriteTimeSlipRepository favoriteTimeSlipRepository
+            IFavoriteTimeSlipRepository favoriteTimeSlipRepository,
+            IQueryRepository queryRepository
         )
         {
             _taskRepository = taskRepository;
@@ -32,6 +34,7 @@ namespace GoatSlips.Services
             _projectTaskRepository = projectTaskRepository;
             _dbContext = dbContext;
             _favoriteTimeSlipRepository = favoriteTimeSlipRepository;
+            _queryRepository = queryRepository;
         }
 
         public void CreateTask(string taskName)
@@ -79,6 +82,8 @@ namespace GoatSlips.Services
             favoriteTimeSlips.RemoveRange(favoritesToDelete);
 
             _dbContext.SaveChanges();
+
+            _queryRepository.ReleaseTaskId(taskId);
 
             tasks.Remove(task);
 

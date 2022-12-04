@@ -1,17 +1,18 @@
 import React from 'react';
-import classes from './TimeCodeLabelWithIcon.module.scss';
+import classes from './EntityLabelWithIcon.module.scss';
 import { Tooltip } from '@mui/material';
-import { Flag, Task, Work } from '@mui/icons-material';
+import { EmojiPeople, Flag, Task, Work } from '@mui/icons-material';
 
 const project = 'project';
 const task = 'task';
 const laborCode = 'laborCode';
+const user = 'user';
 
-type TimeCodeType = typeof project | typeof task | typeof laborCode;
+type EntityType = typeof project | typeof task | typeof laborCode | typeof user;
 
-interface TimeCodeLabelWithIconProps {
+interface EntityLabelWithIconProps {
     label: string;
-    timeCodeType: TimeCodeType;
+    timeCodeType: EntityType;
 }
 
 interface LabelProps {
@@ -19,14 +20,15 @@ interface LabelProps {
     tooltip: string;
 }
 
-const labelPropsMap = new Map<TimeCodeType, LabelProps>([
+const labelPropsMap = new Map<EntityType, LabelProps>([
     [project, { iconElement: <Flag className={classes.icon} />, tooltip: 'Project' }],
     [task, { iconElement: <Task className={classes.icon} />, tooltip: 'Task' }],
     [laborCode, { iconElement: <Work className={classes.icon} />, tooltip: 'Labor Code' }],
+    [user, { iconElement: <EmojiPeople className={classes.icon} />, tooltip: 'User' }],
 ]);
 
-export const TimeCodeLabelWithIcon: React.FC<TimeCodeLabelWithIconProps> = (
-    props: TimeCodeLabelWithIconProps,
+export const EntityLabelWithIcon: React.FC<EntityLabelWithIconProps> = (
+    props: EntityLabelWithIconProps,
 ) => {
     const { label, timeCodeType } = props;
 

@@ -26,6 +26,7 @@ import {
 import { UserManagement } from './components/pages/UserManagement';
 import { FavoriteTimeSlipData } from './types/TimeSlip';
 import { ManageFavorites } from './components/pages/ManageFavorites';
+import { Query } from './types/Query';
 
 const defaultUser: User = {
     userId: 0,
@@ -58,6 +59,11 @@ export const App: React.FC<{}> = () => {
     );
 
     const [favoriteTimeSlips, setFavoriteTimeSlips] = useState<FavoriteTimeSlipData[]>([]);
+
+    const [savedQueries, setSavedQueries] = useState<DropdownOption[]>([]);
+    const [savedQueriesMap, setSavedQueriesMap] = useState<Map<number, Query>>(
+        new Map<number, Query>([]),
+    );
 
     const isAuthenticated = () => {
         return user.username !== '';
@@ -98,6 +104,7 @@ export const App: React.FC<{}> = () => {
             getLaborCodes();
             getAccessRights();
             getFavoriteTimeSlips();
+            getSavedQueries();
         }
     }, [user]);
 
@@ -157,6 +164,16 @@ export const App: React.FC<{}> = () => {
         >('FavoriteTimeSlip/FavoriteTimeSlipsForCurrentUser');
 
         setFavoriteTimeSlips(favoriteTimeSlipsFromApi);
+    };
+
+    const getSavedQueries = async () => {
+        const queriesFromApi: Query[] = await fetchGet<Query[]>('Query');
+
+        const map = new Map<number, Query>([]);
+        queriesFromApi.forEach((query: Query) => map.set(query.id, query));
+
+        setSavedQueriesMap(map);
+        setSavedQueries(queriesFromApi);
     };
 
     const fillScreenWithPage = (page: JSX.Element) => {
@@ -276,6 +293,9 @@ export const App: React.FC<{}> = () => {
                                     laborCodeMap={laborCodeMap}
                                     isAdmin={userAccessRights.has(adminAccessRight)}
                                     currentUserId={user.userId}
+                                    savedQueries={savedQueries}
+                                    savedQueriesMap={savedQueriesMap}
+                                    fetchSavedQueries={getSavedQueries}
                                 />
                             </RequireAuthentication>
                         }

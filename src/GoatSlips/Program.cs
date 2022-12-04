@@ -29,6 +29,7 @@ builder.Services.AddScoped<IProjectTaskRepository, ProjectTaskRepository>();
 builder.Services.AddScoped<IAccessRightRepository, AccessRightRepository>();
 builder.Services.AddScoped<IUserAccessRightRepository, UserAccessRightRepository>();
 builder.Services.AddScoped<IFavoriteTimeSlipRepository, FavoriteTimeSlipRepository>();
+builder.Services.AddScoped<IQueryRepository, QueryRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITimeSlipService, TimeSlipService>();
 builder.Services.AddScoped<IFavoriteTimeSlipService, FavoriteTimeSlipService>();
@@ -36,6 +37,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<ILaborCodeService, LaborCodeService>();
+builder.Services.AddScoped<IQueryService, QueryService>();
 builder.Services.AddSingleton<IJwtUtils, JwtUtils>();
 builder.Services.AddSingleton<ISecretService, SecretService>();
 
