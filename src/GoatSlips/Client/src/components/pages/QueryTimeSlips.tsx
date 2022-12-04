@@ -391,7 +391,11 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
             <div className={classes.actionBar}>
                 <FormControl className={classes.dropdown}>
                     <InputLabel>Saved Queries</InputLabel>
-                    <Select value={selectedQueryId} onChange={handleSelectedQueryChange}>
+                    <Select
+                        value={selectedQueryId}
+                        onChange={handleSelectedQueryChange}
+                        label="Saved Queries"
+                    >
                         {getSavedQueryOptions()}
                     </Select>
                 </FormControl>

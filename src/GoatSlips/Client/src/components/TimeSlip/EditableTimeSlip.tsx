@@ -171,14 +171,18 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
             <CardContent>
                 <FormControl fullWidth>
                     <InputLabel>Project</InputLabel>
-                    <Select value={selectedProjectId} onChange={handleProjectChange}>
+                    <Select
+                        value={selectedProjectId}
+                        onChange={handleProjectChange}
+                        label="Project"
+                    >
                         {getProjectOptions()}
                     </Select>
                 </FormControl>
 
                 <FormControl fullWidth className={classes.cardInput}>
                     <InputLabel>Task</InputLabel>
-                    <Select value={selectedTaskId} onChange={handleTaskChange}>
+                    <Select value={selectedTaskId} onChange={handleTaskChange} label="Task">
                         {getTaskOptions()}
                     </Select>
                 </FormControl>
@@ -188,6 +192,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                     <Select
                         disabled={selectedProjectId === undefined}
                         value={selectedLaborCodeId}
+                        label="Labor Code"
                         onChange={handleLaborCodeChange}
                     >
                         {getLaborCodeOptions()}
