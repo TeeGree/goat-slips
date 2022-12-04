@@ -1,4 +1,4 @@
-import { FileDownload, Save, SavedSearch } from '@mui/icons-material';
+import { Delete, FileDownload, Save, SavedSearch } from '@mui/icons-material';
 import {
     Box,
     Button,
@@ -25,7 +25,12 @@ import dayjs, { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { modalStyle } from '../../constants/modalStyle';
 import { getCsvOfTimeSlips } from '../../helpers/csvGeneration';
-import { fetchGet, fetchPost, fetchPostResponse } from '../../helpers/fetchFunctions';
+import {
+    fetchGet,
+    fetchPost,
+    fetchPostResponse,
+    fetchDeleteResponse,
+} from '../../helpers/fetchFunctions';
 import { DropdownOption } from '../../types/DropdownOption';
 import { Query } from '../../types/Query';
 import { ExportableTimeSlip, TimeSlip } from '../../types/TimeSlip';
@@ -93,6 +98,8 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const [isSavingQuery, setIsSavingQuery] = useState(false);
     const [queryName, setQueryName] = useState('');
     const [selectedQueryId, setSelectedQueryId] = useState<number | ''>('');
+
+    const [isDeletingQuery, setIsDeletingQuery] = useState(false);
 
     useEffect(() => {
         fetchTimeSlips();
@@ -338,6 +345,17 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         }
     };
 
+    const deleteSelectedQuery = async () => {
+        const response = await fetchDeleteResponse(`Query/Delete/${selectedQueryId}`);
+
+        if (response.ok) {
+            await fetchSavedQueries();
+            // setSuccess(`Successfully deleted project ${project.name}!`);
+            setSelectedQueryId('');
+            setIsDeletingQuery(false);
+        }
+    };
+
     const handleSelectedQueryChange = (event: SelectChangeEvent<number>) => {
         setSelectedQueryId(Number(event.target.value));
     };
@@ -389,7 +407,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         return button;
     };
 
-    const loadSelectedQuery = () => {
+    const getSelectedQuery = () => {
         if (selectedQueryId === '') {
             throw Error('No query selected to load!');
         }
@@ -398,6 +416,26 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         if (query === undefined) {
             throw Error('Error loading saved query!');
         }
+
+        return query;
+    };
+
+    const getSelectedQueryName = () => {
+        const defaultName = 'N/A';
+        if (selectedQueryId === '') {
+            return defaultName;
+        }
+
+        const query = savedQueriesMap.get(selectedQueryId);
+        if (query === undefined) {
+            return defaultName;
+        }
+
+        return query.name;
+    };
+
+    const loadSelectedQuery = () => {
+        const query = getSelectedQuery();
 
         setSelectedUserIds(query.userIds);
         setSelectedProjectIds(query.projectIds);
@@ -430,6 +468,19 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                         <SavedSearch />
                         Load Query
                     </Button>
+                    <Tooltip title="Delete the selected query">
+                        <span className={classes.deleteQuerySpan}>
+                            <Button
+                                disabled={selectedQueryId === ''}
+                                variant="contained"
+                                color="error"
+                                className={classes.deleteQuery}
+                                onClick={() => setIsDeletingQuery(true)}
+                            >
+                                <Delete />
+                            </Button>
+                        </span>
+                    </Tooltip>
                 </span>
                 {getSaveQueryButton()}
             </div>
@@ -479,6 +530,25 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                             variant="contained"
                             className={classes.cancelButton}
                             onClick={handleCloseSaveQueryModal}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </Box>
+            </Modal>
+            <Modal open={isDeletingQuery}>
+                <Box sx={modalStyle}>
+                    <h2>
+                        Are you sure you want to delete the {`"${getSelectedQueryName()}"`} query?
+                    </h2>
+                    <div className={classes.modalButtons}>
+                        <Button variant="contained" color="error" onClick={deleteSelectedQuery}>
+                            Delete
+                        </Button>
+                        <Button
+                            variant="contained"
+                            className={classes.cancelButton}
+                            onClick={() => setIsDeletingQuery(false)}
                         >
                             Cancel
                         </Button>
