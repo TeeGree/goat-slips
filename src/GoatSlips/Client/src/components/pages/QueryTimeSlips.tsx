@@ -1,8 +1,15 @@
-import { FileDownload } from '@mui/icons-material';
+import { FileDownload, Save } from '@mui/icons-material';
 import {
+    Box,
     Button,
     CircularProgress,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Modal,
     Paper,
+    Select,
+    SelectChangeEvent,
     Table,
     TableBody,
     TableCell,
@@ -16,8 +23,9 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
+import { modalStyle } from '../../constants/modalStyle';
 import { getCsvOfTimeSlips } from '../../helpers/csvGeneration';
-import { fetchGet, fetchPost } from '../../helpers/fetchFunctions';
+import { fetchGet, fetchPost, fetchPostResponse } from '../../helpers/fetchFunctions';
 import { DropdownOption } from '../../types/DropdownOption';
 import { ExportableTimeSlip, TimeSlip } from '../../types/TimeSlip';
 import { MultiSelect } from '../MultiSelect';
@@ -32,12 +40,27 @@ interface QueryTimeSlipsProps {
     laborCodeMap: Map<number, string>;
     isAdmin: boolean;
     currentUserId: number;
+    savedQueries: DropdownOption[];
+    fetchSavedQueries: () => Promise<void>;
 }
 
 const emptyDropdownOption: DropdownOption = {
     id: -1,
     name: 'N/A',
 };
+
+interface QueryBody {
+    userIds?: number[];
+    projectIds?: number[];
+    taskIds?: number[];
+    laborCodeIds?: number[];
+    fromDate?: string;
+    toDate?: string;
+}
+
+interface SaveQueryBody extends QueryBody {
+    name: string;
+}
 
 export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSlipsProps) => {
     const {
@@ -49,6 +72,8 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         laborCodeMap,
         isAdmin,
         currentUserId,
+        savedQueries,
+        fetchSavedQueries,
     } = props;
     const [loadingResults, setLoadingResults] = useState(true);
     const [timeSlips, setTimeSlips] = useState<TimeSlip[]>([]);
@@ -62,6 +87,9 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const [toDate, setToDate] = React.useState<Dayjs | null>(null);
     const [users, setUsers] = useState<DropdownOption[]>([]);
     const [userMap, setUserMap] = useState<Map<number, string>>(new Map<number, string>([]));
+    const [isSavingQuery, setIsSavingQuery] = useState(false);
+    const [queryName, setQueryName] = useState('');
+    const [selectedQueryId, setSelectedQueryId] = useState<number | ''>('');
 
     useEffect(() => {
         fetchTimeSlips();
@@ -83,33 +111,38 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         }
     }, [isAdmin]);
 
-    const fetchTimeSlips = async () => {
-        setLoadingResults(true);
-
-        const queryBody: any = {};
+    const buildQueryBody = () => {
+        const newQueryBody: QueryBody = {};
         if (selectedUserIds.length !== 0) {
-            queryBody.userIds = selectedUserIds;
+            newQueryBody.userIds = selectedUserIds;
         }
 
         if (selectedProjectIds.length !== 0) {
-            queryBody.projectIds = selectedProjectIds;
+            newQueryBody.projectIds = selectedProjectIds;
         }
 
         if (selectedTaskIds.length !== 0) {
-            queryBody.taskIds = selectedTaskIds;
+            newQueryBody.taskIds = selectedTaskIds;
         }
 
         if (selectedLaborCodeIds.length !== 0) {
-            queryBody.laborCodeIds = selectedLaborCodeIds;
+            newQueryBody.laborCodeIds = selectedLaborCodeIds;
         }
 
         if (fromDate !== null) {
-            queryBody.fromDate = fromDate.format('YYYY-MM-DD');
+            newQueryBody.fromDate = fromDate.format('YYYY-MM-DD');
         }
 
         if (toDate !== null) {
-            queryBody.toDate = toDate.format('YYYY-MM-DD');
+            newQueryBody.toDate = toDate.format('YYYY-MM-DD');
         }
+        return newQueryBody;
+    };
+
+    const fetchTimeSlips = async () => {
+        setLoadingResults(true);
+
+        const queryBody: QueryBody = buildQueryBody();
 
         const results = await fetchPost<TimeSlip[]>('Query/QueryTimeSlips', queryBody);
         setTimeSlips(results);
@@ -278,8 +311,93 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         );
     };
 
+    const handleCloseSaveQueryModal = () => {
+        setIsSavingQuery(false);
+        setQueryName('');
+    };
+
+    const handleQueryNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setQueryName(event.target.value);
+    };
+
+    const saveFavoriteTimeSlip = async (): Promise<void> => {
+        const saveQueryBody: SaveQueryBody = { ...buildQueryBody(), name: queryName };
+
+        const response = await fetchPostResponse('Query/SaveQuery', saveQueryBody);
+
+        if (response.ok) {
+            // setAlertMessage({ message: `Saved "${queryName}"`, severity: 'success' });
+            handleCloseSaveQueryModal();
+            fetchSavedQueries();
+        } else {
+            // const message: ErrorDetails = await response.json();
+            // setAlertMessage({ message: message.detail, severity: 'error' });
+        }
+    };
+
+    const handleSelectedQueryChange = (event: SelectChangeEvent<number>) => {
+        setSelectedQueryId(Number(event.target.value));
+    };
+
+    const getSavedQueryOptions = (): JSX.Element[] => {
+        return savedQueries.map((query: DropdownOption) => {
+            const { id, name } = query;
+            return (
+                <MenuItem key={`query${id}`} value={id}>
+                    {name}
+                </MenuItem>
+            );
+        });
+    };
+
+    const anyParametersSelected = () => {
+        return (
+            selectedProjectIds.length > 0 ||
+            selectedTaskIds.length > 0 ||
+            selectedLaborCodeIds.length > 0 ||
+            fromDate !== null ||
+            toDate !== null ||
+            (isAdmin && selectedUserIds.length > 0)
+        );
+    };
+
+    const getSaveQueryButton = () => {
+        const nothingSelected = !anyParametersSelected();
+
+        const button = (
+            <Button
+                disabled={nothingSelected}
+                variant="contained"
+                className={classes.saveQuery}
+                onClick={() => setIsSavingQuery(true)}
+            >
+                <Save />
+                Save Query
+            </Button>
+        );
+
+        if (nothingSelected) {
+            return (
+                <Tooltip title="Cannot save a query with no filters selected!">
+                    <span className={classes.saveQuerySpan}>{button}</span>
+                </Tooltip>
+            );
+        }
+        return button;
+    };
+
     const getActionBar = () => {
-        return <div className={classes.actionBar}>hey there</div>;
+        return (
+            <div className={classes.actionBar}>
+                <FormControl className={classes.dropdown}>
+                    <InputLabel>Saved Queries</InputLabel>
+                    <Select value={selectedQueryId} onChange={handleSelectedQueryChange}>
+                        {getSavedQueryOptions()}
+                    </Select>
+                </FormControl>
+                {getSaveQueryButton()}
+            </div>
+        );
     };
 
     return (
@@ -302,6 +420,35 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                     <TableBody>{getRows()}</TableBody>
                 </Table>
             </TableContainer>
+            <Modal open={isSavingQuery}>
+                <Box sx={modalStyle}>
+                    <h2>Enter a name for this query:</h2>
+                    <div className={classes.padded}>
+                        <TextField
+                            label="Name"
+                            value={queryName}
+                            onChange={handleQueryNameChange}
+                        />
+                    </div>
+                    <div className={classes.modalButtons}>
+                        <Button
+                            disabled={queryName === ''}
+                            variant="contained"
+                            color="success"
+                            onClick={saveFavoriteTimeSlip}
+                        >
+                            Save Query
+                        </Button>
+                        <Button
+                            variant="contained"
+                            className={classes.cancelButton}
+                            onClick={handleCloseSaveQueryModal}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </Box>
+            </Modal>
         </div>
     );
 };

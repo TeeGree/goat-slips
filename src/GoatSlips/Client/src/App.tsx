@@ -59,6 +59,8 @@ export const App: React.FC<{}> = () => {
 
     const [favoriteTimeSlips, setFavoriteTimeSlips] = useState<FavoriteTimeSlipData[]>([]);
 
+    const [savedQueries, setSavedQueries] = useState<DropdownOption[]>([]);
+
     const isAuthenticated = () => {
         return user.username !== '';
     };
@@ -98,6 +100,7 @@ export const App: React.FC<{}> = () => {
             getLaborCodes();
             getAccessRights();
             getFavoriteTimeSlips();
+            getSavedQueries();
         }
     }, [user]);
 
@@ -157,6 +160,12 @@ export const App: React.FC<{}> = () => {
         >('FavoriteTimeSlip/FavoriteTimeSlipsForCurrentUser');
 
         setFavoriteTimeSlips(favoriteTimeSlipsFromApi);
+    };
+
+    const getSavedQueries = async () => {
+        const queriesFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('Query');
+
+        setSavedQueries(queriesFromApi);
     };
 
     const fillScreenWithPage = (page: JSX.Element) => {
@@ -276,6 +285,8 @@ export const App: React.FC<{}> = () => {
                                     laborCodeMap={laborCodeMap}
                                     isAdmin={userAccessRights.has(adminAccessRight)}
                                     currentUserId={user.userId}
+                                    savedQueries={savedQueries}
+                                    fetchSavedQueries={getSavedQueries}
                                 />
                             </RequireAuthentication>
                         }

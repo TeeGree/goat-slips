@@ -28,4 +28,29 @@
 .actionBar {
     background-color: $goatBlue;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 10px;
+}
+
+.saveQuerySpan {
+    display: flex;
+}
+
+.saveQuery,
+.saveQuerySpan {
+    height: 100%;
+}
+
+.padded {
+    padding: 20px;
+}
+
+.modalButtons {
+    text-align: right;
+}
+
+.cancelButton {
+    margin-left: 1em !important;
 }
