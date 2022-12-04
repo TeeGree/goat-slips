@@ -1,4 +1,4 @@
-import { FileDownload, Save } from '@mui/icons-material';
+import { FileDownload, Save, SavedSearch } from '@mui/icons-material';
 import {
     Box,
     Button,
@@ -21,12 +21,13 @@ import {
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { modalStyle } from '../../constants/modalStyle';
 import { getCsvOfTimeSlips } from '../../helpers/csvGeneration';
 import { fetchGet, fetchPost, fetchPostResponse } from '../../helpers/fetchFunctions';
 import { DropdownOption } from '../../types/DropdownOption';
+import { Query } from '../../types/Query';
 import { ExportableTimeSlip, TimeSlip } from '../../types/TimeSlip';
 import { MultiSelect } from '../MultiSelect';
 import classes from './QueryTimeSlips.module.scss';
@@ -41,6 +42,7 @@ interface QueryTimeSlipsProps {
     isAdmin: boolean;
     currentUserId: number;
     savedQueries: DropdownOption[];
+    savedQueriesMap: Map<number, Query>;
     fetchSavedQueries: () => Promise<void>;
 }
 
@@ -73,6 +75,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         isAdmin,
         currentUserId,
         savedQueries,
+        savedQueriesMap,
         fetchSavedQueries,
     } = props;
     const [loadingResults, setLoadingResults] = useState(true);
@@ -386,19 +389,48 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         return button;
     };
 
+    const loadSelectedQuery = () => {
+        if (selectedQueryId === '') {
+            throw Error('No query selected to load!');
+        }
+
+        const query = savedQueriesMap.get(selectedQueryId);
+        if (query === undefined) {
+            throw Error('Error loading saved query!');
+        }
+
+        setSelectedUserIds(query.userIds);
+        setSelectedProjectIds(query.projectIds);
+        setSelectedTaskIds(query.taskIds);
+        setSelectedLaborCodeIds(query.laborCodeIds);
+        setFromDate(query.fromDate === null ? null : dayjs(query.fromDate));
+        setToDate(query.toDate === null ? null : dayjs(query.toDate));
+    };
+
     const getActionBar = () => {
         return (
             <div className={classes.actionBar}>
-                <FormControl className={classes.dropdown}>
-                    <InputLabel>Saved Queries</InputLabel>
-                    <Select
-                        value={selectedQueryId}
-                        onChange={handleSelectedQueryChange}
-                        label="Saved Queries"
+                <span className={classes.fullHeight}>
+                    <FormControl className={classes.dropdown}>
+                        <InputLabel>Saved Queries</InputLabel>
+                        <Select
+                            value={selectedQueryId}
+                            onChange={handleSelectedQueryChange}
+                            label="Saved Queries"
+                        >
+                            {getSavedQueryOptions()}
+                        </Select>
+                    </FormControl>
+                    <Button
+                        disabled={selectedQueryId === ''}
+                        variant="contained"
+                        className={classes.loadQuery}
+                        onClick={loadSelectedQuery}
                     >
-                        {getSavedQueryOptions()}
-                    </Select>
-                </FormControl>
+                        <SavedSearch />
+                        Load Query
+                    </Button>
+                </span>
                 {getSaveQueryButton()}
             </div>
         );

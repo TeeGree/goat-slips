@@ -39,7 +39,9 @@
 }
 
 .saveQuery,
-.saveQuerySpan {
+.saveQuerySpan,
+.fullHeight,
+.loadQuery {
     height: 100%;
 }
 
@@ -51,6 +53,7 @@
     text-align: right;
 }
 
-.cancelButton {
+.cancelButton,
+.loadQuery {
     margin-left: 1em !important;
 }

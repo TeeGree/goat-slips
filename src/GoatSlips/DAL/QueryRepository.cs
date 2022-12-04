@@ -9,6 +9,11 @@ namespace GoatSlips.DAL
     public interface IQueryRepository
     {
         DbSet<Query> Queries { get; }
+        DbSet<QueryUser> QueryUsers { get; }
+        DbSet<QueryProject> QueryProjects { get; }
+        DbSet<QueryTask> QueryTasks { get; }
+        DbSet<QueryLaborCode> QueryLaborCodes { get; }
+
         void ReleaseProjectId(int projectId);
         void ReleaseTaskId(int taskId);
         void ReleaseLaborCodeId(int laborCodeId);

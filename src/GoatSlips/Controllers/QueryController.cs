@@ -1,5 +1,6 @@
 ﻿using GoatSlips.Attributes;
 using GoatSlips.Exceptions;
+using GoatSlips.Models;
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
 using GoatSlips.Models.Database.Query;
@@ -26,11 +27,11 @@ namespace GoatSlips.Controllers
         }
 
         [HttpGet(Name = "GetQueries")]
-        public ActionResult<IEnumerable<Query>> Get()
+        public ActionResult<IEnumerable<QueryForUI>> Get()
         {
             try
             {
-                IEnumerable<Query> queries = _queryService.GetQueries(HttpContext);
+                IEnumerable<QueryForUI> queries = _queryService.GetQueries(HttpContext);
                 return Ok(queries);
             }
             catch (Exception e)

@@ -1,5 +1,6 @@
 ﻿using GoatSlips.Constants;
 using GoatSlips.DAL;
+using GoatSlips.Models;
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
 using GoatSlips.Models.Database.Query;
@@ -9,7 +10,7 @@ namespace GoatSlips.Services
 {
     public interface IQueryService
     {
-        IEnumerable<Query> GetQueries(HttpContext httpContext);
+        IEnumerable<QueryForUI> GetQueries(HttpContext httpContext);
         TimeSlip[] QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody, HttpContext httpContext);
         void AddQuery(
             string name,
@@ -65,7 +66,7 @@ namespace GoatSlips.Services
             _laborCodeRepository = laborCodeRepository;
         }
 
-        public IEnumerable<Query> GetQueries(HttpContext httpContext)
+        public IEnumerable<QueryForUI> GetQueries(HttpContext httpContext)
         {
             int? ownerUserId = _jwtUtils.GetUserIdFromContext(httpContext);
             if (ownerUserId == null)
@@ -73,7 +74,32 @@ namespace GoatSlips.Services
                 throw new Exception("No user currently logged in!");
             }
 
-            return _queryRepository.Queries.Where(q => q.OwnerUserId == ownerUserId);
+            IEnumerable<QueryForUI> queries = from query in _queryRepository.Queries
+                                              join user in _queryRepository.QueryUsers
+                                                  on query.Id equals user.QueryId
+                                                  into userQuery
+                                              join project in _queryRepository.QueryProjects
+                                                  on query.Id equals project.QueryId
+                                                  into projectQuery
+                                              join task in _queryRepository.QueryTasks
+                                                  on query.Id equals task.QueryId
+                                                  into taskQuery
+                                              join laborCode in _queryRepository.QueryLaborCodes
+                                                  on query.Id equals laborCode.QueryId
+                                                  into laborCodeQuery
+                                              where query.OwnerUserId == ownerUserId
+                                              select new QueryForUI
+                                              {
+                                                  Id = query.Id,
+                                                  Name = query.Name,
+                                                  FromDate = query.FromDate,
+                                                  ToDate = query.ToDate,
+                                                  UserIds = userQuery.Select(u => u.UserId),
+                                                  ProjectIds = projectQuery.Select(p => p.ProjectId),
+                                                  TaskIds = taskQuery.Select(t => t.TaskId),
+                                                  LaborCodeIds = laborCodeQuery.Select(lc => lc.LaborCodeId)
+                                              };
+            return queries;
         }
 
         public TimeSlip[] QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody, HttpContext httpContext)
