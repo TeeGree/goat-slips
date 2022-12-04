@@ -36,6 +36,7 @@ import { DropdownOption } from '../../types/DropdownOption';
 import { Query } from '../../types/Query';
 import { ExportableTimeSlip, TimeSlip } from '../../types/TimeSlip';
 import { MultiSelect } from '../MultiSelect';
+import { EntityLabelWithIcon } from '../EntityLabelWithIcon';
 import { Toast } from '../Toast';
 import classes from './QueryTimeSlips.module.scss';
 
@@ -502,26 +503,100 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         );
     };
 
-    return (
-        <div className={classes.pageContainer}>
-            {getActionBar()}
-            {getInputs()}
-            <TableContainer component={Paper} className={classes.tableContainer}>
-                <Table aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>User</TableCell>
-                            <TableCell>Project</TableCell>
-                            <TableCell>Task</TableCell>
-                            <TableCell>Labor Code</TableCell>
-                            <TableCell>Date</TableCell>
-                            <TableCell>Hours</TableCell>
-                            <TableCell>Minutes</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>{getRows()}</TableBody>
-                </Table>
-            </TableContainer>
+    const getDatesForModal = () => {
+        const dateDivs: JSX.Element[] = [];
+        if (fromDate !== null) {
+            dateDivs.push(
+                <div className={classes.modalCodes}>
+                    <>From Date: {fromDate.toDate().toLocaleDateString('en')}</>
+                </div>,
+            );
+        }
+        if (toDate !== null) {
+            dateDivs.push(
+                <div className={classes.modalCodes}>
+                    <>To Date: {toDate.toDate().toLocaleDateString('en')}</>
+                </div>,
+            );
+        }
+
+        return dateDivs;
+    };
+
+    const getUsersForModal = () => {
+        if (!isAdmin || selectedUserIds.length === 0) {
+            return null;
+        }
+
+        const label = selectedUserIds
+            .map((uid) => {
+                return userMap.get(uid) ?? 'N/A';
+            })
+            .join(', ');
+
+        return (
+            <div className={classes.modalCodes}>
+                <EntityLabelWithIcon label={label} timeCodeType="user" />
+            </div>
+        );
+    };
+
+    const getProjectsForModal = () => {
+        if (selectedProjectIds.length === 0) {
+            return null;
+        }
+
+        const label = selectedProjectIds
+            .map((pid) => {
+                return projectMap.get(pid) ?? 'N/A';
+            })
+            .join(', ');
+
+        return (
+            <div className={classes.modalCodes}>
+                <EntityLabelWithIcon label={label} timeCodeType="project" />
+            </div>
+        );
+    };
+
+    const getTasksForModal = () => {
+        if (selectedTaskIds.length === 0) {
+            return null;
+        }
+
+        const label = selectedTaskIds
+            .map((tid) => {
+                return taskMap.get(tid) ?? 'N/A';
+            })
+            .join(', ');
+
+        return (
+            <div className={classes.modalCodes}>
+                <EntityLabelWithIcon label={label} timeCodeType="task" />
+            </div>
+        );
+    };
+
+    const getLaborCodesForModal = () => {
+        if (selectedLaborCodeIds.length === 0) {
+            return null;
+        }
+
+        const label = selectedLaborCodeIds
+            .map((lcid) => {
+                return laborCodeMap.get(lcid) ?? 'N/A';
+            })
+            .join(', ');
+
+        return (
+            <div className={classes.modalCodes}>
+                <EntityLabelWithIcon label={label} timeCodeType="laborCode" />
+            </div>
+        );
+    };
+
+    const getSaveQueryModal = () => {
+        return (
             <Modal open={isSavingQuery}>
                 <Box sx={modalStyle}>
                     <h2>Enter a name for this query:</h2>
@@ -531,6 +606,15 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                             value={queryName}
                             onChange={handleQueryNameChange}
                         />
+                    </div>
+                    <div className={classes.padded}>
+                        <>
+                            {getUsersForModal()}
+                            {getProjectsForModal()}
+                            {getTasksForModal()}
+                            {getLaborCodesForModal()}
+                            {getDatesForModal()}
+                        </>
                     </div>
                     <div className={classes.modalButtons}>
                         <Button
@@ -551,30 +635,58 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                     </div>
                 </Box>
             </Modal>
-            <Modal open={isDeletingQuery}>
-                <Box sx={modalStyle}>
-                    <h2>
-                        Are you sure you want to delete the {`"${getSelectedQueryName()}"`} query?
-                    </h2>
-                    <div className={classes.modalButtons}>
-                        <Button variant="contained" color="error" onClick={deleteSelectedQuery}>
-                            Delete
-                        </Button>
-                        <Button
-                            variant="contained"
-                            className={classes.cancelButton}
-                            onClick={() => setIsDeletingQuery(false)}
-                        >
-                            Cancel
-                        </Button>
-                    </div>
-                </Box>
-            </Modal>
-            <Toast
-                severity={alertMessage?.severity}
-                message={alertMessage?.message}
-                onClose={() => setAlertMessage(null)}
-            />
+        );
+    };
+
+    const getDeleteQueryModal = () => {
+        <Modal open={isDeletingQuery}>
+            <Box sx={modalStyle}>
+                <h2>Are you sure you want to delete the {`"${getSelectedQueryName()}"`} query?</h2>
+                <div className={classes.modalButtons}>
+                    <Button variant="contained" color="error" onClick={deleteSelectedQuery}>
+                        Delete
+                    </Button>
+                    <Button
+                        variant="contained"
+                        className={classes.cancelButton}
+                        onClick={() => setIsDeletingQuery(false)}
+                    >
+                        Cancel
+                    </Button>
+                </div>
+            </Box>
+        </Modal>;
+    };
+
+    return (
+        <div className={classes.pageContainer}>
+            <>
+                {getActionBar()}
+                {getInputs()}
+                <TableContainer component={Paper} className={classes.tableContainer}>
+                    <Table aria-label="simple table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>User</TableCell>
+                                <TableCell>Project</TableCell>
+                                <TableCell>Task</TableCell>
+                                <TableCell>Labor Code</TableCell>
+                                <TableCell>Date</TableCell>
+                                <TableCell>Hours</TableCell>
+                                <TableCell>Minutes</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>{getRows()}</TableBody>
+                    </Table>
+                </TableContainer>
+                {getSaveQueryModal()}
+                {getDeleteQueryModal()}
+                <Toast
+                    severity={alertMessage?.severity}
+                    message={alertMessage?.message}
+                    onClose={() => setAlertMessage(null)}
+                />
+            </>
         </div>
     );
 };
