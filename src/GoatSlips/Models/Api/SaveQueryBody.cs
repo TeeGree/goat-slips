@@ -1,8 +1,8 @@
 ﻿namespace GoatSlips.Models.Api
 {
-    public sealed class UpdateQueryBody
+    public sealed class SaveQueryBody
     {
-        public int QueryId { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int[]? UserIds { get; set; }
         public int[]? ProjectIds { get; set; }
         public int[]? TaskIds { get; set; }

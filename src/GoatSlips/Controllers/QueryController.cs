@@ -2,6 +2,7 @@
 using GoatSlips.Exceptions;
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
+using GoatSlips.Models.Database.Query;
 using GoatSlips.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -58,17 +59,17 @@ namespace GoatSlips.Controllers
             }
         }
 
-        [HttpPost("AddQuery", Name = "AddQuery")]
-        public IActionResult AddQuery(AddQueryBody addQueryBody)
+        [HttpPost("SaveQuery", Name = "SaveQuery")]
+        public IActionResult SaveQuery(SaveQueryBody addQueryBody)
         {
             try
             {
                 _queryService.AddQuery(
                     addQueryBody.Name,
-                    addQueryBody.UserId,
-                    addQueryBody.ProjectId,
-                    addQueryBody.TaskId,
-                    addQueryBody.LaborCodeId,
+                    addQueryBody.UserIds,
+                    addQueryBody.ProjectIds,
+                    addQueryBody.TaskIds,
+                    addQueryBody.LaborCodeIds,
                     addQueryBody.FromDate,
                     addQueryBody.ToDate,
                     HttpContext);
@@ -92,10 +93,10 @@ namespace GoatSlips.Controllers
             {
                 _queryService.UpdateQuery(
                     updateQueryBody.QueryId,
-                    updateQueryBody.UserId,
-                    updateQueryBody.ProjectId,
-                    updateQueryBody.TaskId,
-                    updateQueryBody.LaborCodeId,
+                    updateQueryBody.UserIds,
+                    updateQueryBody.ProjectIds,
+                    updateQueryBody.TaskIds,
+                    updateQueryBody.LaborCodeIds,
                     updateQueryBody.FromDate,
                     updateQueryBody.ToDate,
                     HttpContext);

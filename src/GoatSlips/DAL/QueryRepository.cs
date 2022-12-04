@@ -1,6 +1,8 @@
 ﻿using GoatSlips.Models.Database;
+using GoatSlips.Models.Database.Query;
 using System.Data.Entity;
 using System.Data.Entity.Migrations;
+using System.Threading.Tasks;
 
 namespace GoatSlips.DAL
 {
@@ -13,19 +15,19 @@ namespace GoatSlips.DAL
         void AddQuery(
             int ownerUserId,
             string name,
-            int? userId,
-            int? projectId,
-            int? taskId,
-            int? laborCodeId,
+            int[]? userIds,
+            int[]? projectIds,
+            int[]? taskIds,
+            int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate
         );
         void UpdateQuery(
             int queryId,
-            int? userId,
-            int? projectId,
-            int? taskId,
-            int? laborCodeId,
+            int[]? userIds,
+            int[]? projectIds,
+            int[]? taskIds,
+            int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate
         );
@@ -46,6 +48,58 @@ namespace GoatSlips.DAL
             }
         }
 
+        public DbSet<QueryUser> QueryUsers
+        {
+            get
+            {
+                DbSet<QueryUser>? queryUsers = _dbContext.QueryUsers;
+                if (queryUsers == null)
+                {
+                    throw new Exception("No query users found!");
+                }
+                return queryUsers;
+            }
+        }
+
+        public DbSet<QueryProject> QueryProjects
+        {
+            get
+            {
+                DbSet<QueryProject>? queryProjects = _dbContext.QueryProjects;
+                if (queryProjects == null)
+                {
+                    throw new Exception("No query projects found!");
+                }
+                return queryProjects;
+            }
+        }
+
+        public DbSet<QueryTask> QueryTasks
+        {
+            get
+            {
+                DbSet<QueryTask>? queryTasks = _dbContext.QueryTasks;
+                if (queryTasks == null)
+                {
+                    throw new Exception("No query tasks found!");
+                }
+                return queryTasks;
+            }
+        }
+
+        public DbSet<QueryLaborCode> QueryLaborCodes
+        {
+            get
+            {
+                DbSet<QueryLaborCode>? queryLaborCodes = _dbContext.QueryLaborCodes;
+                if (queryLaborCodes == null)
+                {
+                    throw new Exception("No query labor codes found!");
+                }
+                return queryLaborCodes;
+            }
+        }
+
         private readonly IGoatSlipsContext _dbContext;
         public QueryRepository(IGoatSlipsContext dbContext)
         {
@@ -54,50 +108,35 @@ namespace GoatSlips.DAL
 
         public void ReleaseProjectId(int projectId)
         {
-            Query[] matchingQueries = Queries.Where(q => q.ProjectId == projectId).ToArray();
+            QueryProject[] matchingQueryProjects = QueryProjects.Where(q => q.ProjectId == projectId).ToArray();
 
-            Array.ForEach(matchingQueries, query =>
-            {
-                query.ProjectId = null;
-            });
-
-            Queries.AddOrUpdate(matchingQueries);
+            QueryProjects.RemoveRange(matchingQueryProjects);
             _dbContext.SaveChanges();
         }
 
         public void ReleaseTaskId(int taskId)
         {
-            Query[] matchingQueries = Queries.Where(q => q.TaskId == taskId).ToArray();
+            QueryTask[] matchingQueryTasks = QueryTasks.Where(q => q.TaskId == taskId).ToArray();
 
-            Array.ForEach(matchingQueries, query =>
-            {
-                query.TaskId = null;
-            });
-
-            Queries.AddOrUpdate(matchingQueries);
+            QueryTasks.RemoveRange(matchingQueryTasks);
             _dbContext.SaveChanges();
         }
 
         public void ReleaseLaborCodeId(int laborCodeId)
         {
-            Query[] matchingQueries = Queries.Where(q => q.LaborCodeId == laborCodeId).ToArray();
+            QueryLaborCode[] matchingQueryLaborCodes = QueryLaborCodes.Where(q => q.LaborCodeId == laborCodeId).ToArray();
 
-            Array.ForEach(matchingQueries, query =>
-            {
-                query.LaborCodeId = null;
-            });
-
-            Queries.AddOrUpdate(matchingQueries);
+            QueryLaborCodes.RemoveRange(matchingQueryLaborCodes);
             _dbContext.SaveChanges();
         }
 
         public void AddQuery(
             int ownerUserId,
             string name,
-            int? userId,
-            int? projectId,
-            int? taskId,
-            int? laborCodeId,
+            int[]? userIds,
+            int[]? projectIds,
+            int[]? taskIds,
+            int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate
         )
@@ -106,24 +145,166 @@ namespace GoatSlips.DAL
             {
                 OwnerUserId = ownerUserId,
                 Name = name,
-                UserId = userId,
-                ProjectId = projectId,
-                TaskId = taskId,
-                LaborCodeId = laborCodeId,
                 FromDate = fromDate,
                 ToDate = toDate
             };
 
             Queries.AddOrUpdate(query);
             _dbContext.SaveChanges();
+
+            if (userIds != null && userIds.Length > 0)
+            {
+                QueryUser[] queryUsers = userIds.Select(uid => new QueryUser
+                {
+                    QueryId = query.Id,
+                    UserId = uid
+                }).ToArray();
+
+                QueryUsers.AddRange(queryUsers);
+            }
+
+            if (projectIds != null && projectIds.Length > 0)
+            {
+                QueryProject[] queryProjects = projectIds.Select(pid => new QueryProject
+                {
+                    QueryId = query.Id,
+                    ProjectId = pid
+                }).ToArray();
+
+                QueryProjects.AddRange(queryProjects);
+            }
+
+            if (taskIds != null && taskIds.Length > 0)
+            {
+                QueryTask[] queryTasks = taskIds.Select(tid => new QueryTask
+                {
+                    QueryId = query.Id,
+                    TaskId = tid
+                }).ToArray();
+
+                QueryTasks.AddRange(queryTasks);
+            }
+
+            if (laborCodeIds != null && laborCodeIds.Length > 0)
+            {
+                QueryLaborCode[] queryLaborCodes = laborCodeIds.Select(lcid => new QueryLaborCode
+                {
+                    QueryId = query.Id,
+                    LaborCodeId = lcid
+                }).ToArray();
+
+                QueryLaborCodes.AddRange(queryLaborCodes);
+            }
+
+            _dbContext.SaveChanges();
+        }
+
+        private void RemoveUsers(int queryId)
+        {
+            QueryUser[] queryUsersToRemove = QueryUsers.Where(qu => qu.QueryId == queryId).ToArray();
+
+            QueryUsers.RemoveRange(queryUsersToRemove);
+        }
+
+        private void RemoveUnusedUsers(int queryId, int[]? userIds)
+        {
+            if (userIds == null)
+            {
+                RemoveUsers(queryId);
+            }
+            else
+            {
+                var userIdsSet = userIds.ToHashSet();
+                QueryUser[] queryUsersToRemove = QueryUsers.Where(qu =>
+                    qu.QueryId == queryId &&
+                    !userIdsSet.Contains(qu.UserId)
+                ).ToArray();
+
+                QueryUsers.RemoveRange(queryUsersToRemove);
+            }
+        }
+
+        private void RemoveProjects(int queryId)
+        {
+            QueryProject[] queryProjectsToRemove = QueryProjects.Where(qp => qp.QueryId == queryId).ToArray();
+
+            QueryProjects.RemoveRange(queryProjectsToRemove);
+        }
+
+        private void RemoveUnusedProjects(int queryId, int[]? projectIds)
+        {
+            if (projectIds == null)
+            {
+                RemoveProjects(queryId);
+            }
+            else
+            {
+                var projectIdsSet = projectIds.ToHashSet();
+                QueryProject[] queryProjectsToRemove = QueryProjects.Where(qp =>
+                    qp.QueryId == queryId &&
+                    !projectIdsSet.Contains(qp.ProjectId)
+                ).ToArray();
+
+                QueryProjects.RemoveRange(queryProjectsToRemove);
+            }
+        }
+
+        private void RemoveTasks(int queryId)
+        {
+            QueryTask[] queryTasksToRemove = QueryTasks.Where(qt => qt.QueryId == queryId).ToArray();
+
+            QueryTasks.RemoveRange(queryTasksToRemove);
+        }
+
+        private void RemoveUnusedTasks(int queryId, int[]? taskIds)
+        {
+            if (taskIds == null)
+            {
+                RemoveTasks(queryId);
+            }
+            else
+            {
+                var taskIdsSet = taskIds.ToHashSet();
+                QueryTask[] queryTasksToRemove = QueryTasks.Where(qt =>
+                    qt.QueryId == queryId &&
+                    !taskIdsSet.Contains(qt.TaskId)
+                ).ToArray();
+
+                QueryTasks.RemoveRange(queryTasksToRemove);
+            }
+        }
+
+        private void RemoveLaborCodes(int queryId)
+        {
+            QueryLaborCode[] queryLaborCodesToRemove = QueryLaborCodes.Where(qlc => qlc.QueryId == queryId).ToArray();
+
+            QueryLaborCodes.RemoveRange(queryLaborCodesToRemove);
+        }
+
+        private void RemoveUnusedLaborCodes(int queryId, int[]? laborCodeIds)
+        {
+            if (laborCodeIds == null)
+            {
+                RemoveLaborCodes(queryId);
+            }
+            else
+            {
+                var laborCodesIdsSet = laborCodeIds.ToHashSet();
+                QueryLaborCode[] queryLaborCodesToRemove = QueryLaborCodes.Where(qlc =>
+                    qlc.QueryId == queryId &&
+                    !laborCodesIdsSet.Contains(qlc.LaborCodeId)
+                ).ToArray();
+
+                QueryLaborCodes.RemoveRange(queryLaborCodesToRemove);
+            }
         }
 
         public void UpdateQuery(
             int queryId,
-            int? userId,
-            int? projectId,
-            int? taskId,
-            int? laborCodeId,
+            int[]? userIds,
+            int[]? projectIds,
+            int[]? taskIds,
+            int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate
         )
@@ -135,10 +316,11 @@ namespace GoatSlips.DAL
                 throw new Exception("Query not found!");
             }
 
-            query.UserId = userId;
-            query.ProjectId = projectId;
-            query.TaskId = taskId;
-            query.LaborCodeId = laborCodeId;
+            RemoveUnusedUsers(queryId, userIds);
+            RemoveUnusedProjects(queryId, projectIds);
+            RemoveUnusedTasks(queryId, taskIds);
+            RemoveUnusedLaborCodes(queryId, laborCodeIds);
+
             query.FromDate = fromDate;
             query.ToDate = toDate;
 
@@ -154,6 +336,12 @@ namespace GoatSlips.DAL
             {
                 throw new Exception("Query not found!");
             }
+
+            RemoveUsers(queryId);
+            RemoveProjects(queryId);
+            RemoveTasks(queryId);
+            RemoveLaborCodes(queryId);
+            _dbContext.SaveChanges();
 
             Queries.Remove(query);
             _dbContext.SaveChanges();

@@ -1,5 +1,6 @@
 ﻿using GoatSlips.Models;
 using GoatSlips.Models.Database;
+using GoatSlips.Models.Database.Query;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 
@@ -17,6 +18,10 @@ namespace GoatSlips.DAL
         DbSet<UserAccessRight>? UserAccessRights { get; set; }
         DbSet<FavoriteTimeSlip>? FavoriteTimeSlips { get; set; }
         DbSet<Query>? Queries { get; set; }
+        DbSet<QueryUser>? QueryUsers { get; set; }
+        DbSet<QueryProject>? QueryProjects { get; set; }
+        DbSet<QueryTask>? QueryTasks { get; set; }
+        DbSet<QueryLaborCode>? QueryLaborCodes { get; set; }
         int SaveChanges();
     }
     public sealed class GoatSlipsContext : DbContext, IGoatSlipsContext
@@ -33,6 +38,10 @@ namespace GoatSlips.DAL
         public DbSet<UserAccessRight>? UserAccessRights { get; set; }
         public DbSet<FavoriteTimeSlip>? FavoriteTimeSlips { get; set; }
         public DbSet<Query>? Queries { get; set; }
+        public DbSet<QueryUser>? QueryUsers { get; set; }
+        public DbSet<QueryProject>? QueryProjects { get; set; }
+        public DbSet<QueryTask>? QueryTasks { get; set; }
+        public DbSet<QueryLaborCode>? QueryLaborCodes { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

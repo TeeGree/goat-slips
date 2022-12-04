@@ -66,6 +66,10 @@
     <None Include="AddAccessRights.sql" />
     <Build Include="Tables\FavoriteTimeSlip.sql" />
     <Build Include="Tables\Query.sql" />
+    <Build Include="Tables\QueryProject.sql" />
+    <Build Include="Tables\QueryTask.sql" />
+    <Build Include="Tables\QueryLaborCode.sql" />
+    <Build Include="Tables\QueryUser.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="GoatSlipsDb.refactorlog" />

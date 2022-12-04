@@ -2,6 +2,7 @@
 using GoatSlips.DAL;
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
+using GoatSlips.Models.Database.Query;
 using System.Data.Entity;
 
 namespace GoatSlips.Services
@@ -12,20 +13,20 @@ namespace GoatSlips.Services
         TimeSlip[] QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody, HttpContext httpContext);
         void AddQuery(
             string name,
-            int? userId,
-            int? projectId,
-            int? taskId,
-            int? laborCodeId,
+            int[]? userIds,
+            int[]? projectIds,
+            int[]? taskIds,
+            int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate,
             HttpContext httpContext
         );
         void UpdateQuery(
             int queryId,
-            int? userId,
-            int? projectId,
-            int? taskId,
-            int? laborCodeId,
+            int[]? userIds,
+            int[]? projectIds,
+            int[]? taskIds,
+            int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate,
             HttpContext httpContext
@@ -144,12 +145,48 @@ namespace GoatSlips.Services
             return timeSlipsQueryable.ToArray();
         }
 
+        private void ValidateUserIdsExist(int[]? userIds)
+        {
+            HashSet<int> userIdsSet = _userRepository.Users.Select(u => u.Id).ToHashSet();
+            if (userIds != null && userIds.Any(uid => !userIdsSet.Contains(uid)))
+            {
+                throw new Exception("User in query does not exist!");
+            }
+        }
+
+        private void ValidateProjectIdsExist(int[]? projectIds)
+        {
+            HashSet<int> projectIdsSet = _projectRepository.Projects.Select(p => p.Id).ToHashSet();
+            if (projectIds != null && projectIds.Any(pid => !projectIdsSet.Contains(pid)))
+            {
+                throw new Exception("Project in query does not exist!");
+            }
+        }
+
+        private void ValidateTaskIdsExist(int[]? taskIds)
+        {
+            HashSet<int> taskIdsSet = _taskRepository.Tasks.Select(t => t.Id).ToHashSet();
+            if (taskIds != null && taskIds.Any(tid => !taskIdsSet.Contains(tid)))
+            {
+                throw new Exception("Task in query does not exist!");
+            }
+        }
+
+        private void ValidateLaborCodeIdsExist(int[]? laborCodeIds)
+        {
+            HashSet<int> laborCodeIdsSet = _laborCodeRepository.LaborCodes.Select(lc => lc.Id).ToHashSet();
+            if (laborCodeIds != null && laborCodeIds.Any(lcid => !laborCodeIdsSet.Contains(lcid)))
+            {
+                throw new Exception("Labor code in query does not exist!");
+            }
+        }
+
         public void AddQuery(
             string name,
-            int? userId,
-            int? projectId,
-            int? taskId,
-            int? laborCodeId,
+            int[]? userIds,
+            int[]? projectIds,
+            int[]? taskIds,
+            int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate,
             HttpContext httpContext
@@ -166,35 +203,31 @@ namespace GoatSlips.Services
                 throw new Exception($"Query with the name \"{name}\" already exists!");
             }
 
-            if (userId.HasValue && !_userRepository.Users.Any(p => p.Id == userId.Value))
-            {
-                throw new Exception("User in query does not exist!");
-            }
+            ValidateUserIdsExist(userIds);
 
-            if (projectId.HasValue && !_projectRepository.Projects.Any(p => p.Id == projectId.Value))
-            {
-                throw new Exception("Project in query does not exist!");
-            }
+            ValidateProjectIdsExist(projectIds);
 
-            if (taskId.HasValue && !_taskRepository.Tasks.Any(p => p.Id == taskId.Value))
-            {
-                throw new Exception("Task in query does not exist!");
-            }
+            ValidateTaskIdsExist(taskIds);
 
-            if (laborCodeId.HasValue && !_laborCodeRepository.LaborCodes.Any(p => p.Id == laborCodeId.Value))
-            {
-                throw new Exception("Labor code in query does not exist!");
-            }
+            ValidateLaborCodeIdsExist(laborCodeIds);
 
-            _queryRepository.AddQuery(ownerUserId.Value, name, userId, projectId, taskId, laborCodeId, fromDate, toDate);
+            _queryRepository.AddQuery(
+                ownerUserId.Value,
+                name,
+                userIds,
+                projectIds,
+                taskIds,
+                laborCodeIds,
+                fromDate,
+                toDate);
         }
 
         public void UpdateQuery(
             int queryId,
-            int? userId,
-            int? projectId,
-            int? taskId,
-            int? laborCodeId,
+            int[]? userIds,
+            int[]? projectIds,
+            int[]? taskIds,
+            int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate,
             HttpContext httpContext
@@ -211,27 +244,15 @@ namespace GoatSlips.Services
                 throw new Exception($"Query does not belong to current user!");
             }
 
-            if (userId.HasValue && !_userRepository.Users.Any(p => p.Id == userId.Value))
-            {
-                throw new Exception("User in query does not exist!");
-            }
+            ValidateUserIdsExist(userIds);
 
-            if (projectId.HasValue && !_projectRepository.Projects.Any(p => p.Id == projectId.Value))
-            {
-                throw new Exception("Project in query does not exist!");
-            }
+            ValidateProjectIdsExist(projectIds);
 
-            if (taskId.HasValue && !_taskRepository.Tasks.Any(p => p.Id == taskId.Value))
-            {
-                throw new Exception("Task in query does not exist!");
-            }
+            ValidateTaskIdsExist(taskIds);
 
-            if (laborCodeId.HasValue && !_laborCodeRepository.LaborCodes.Any(p => p.Id == laborCodeId.Value))
-            {
-                throw new Exception("Labor code in query does not exist!");
-            }
+            ValidateLaborCodeIdsExist(laborCodeIds);
 
-            _queryRepository.UpdateQuery(queryId, userId, projectId, taskId, laborCodeId, fromDate, toDate);
+            _queryRepository.UpdateQuery(queryId, userIds, projectIds, taskIds, laborCodeIds, fromDate, toDate);
         }
 
         public void DeleteQuery(int queryId, HttpContext httpContext)
