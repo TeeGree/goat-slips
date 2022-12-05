@@ -76,6 +76,7 @@ namespace GoatSlips.Services
                 ProjectId = timeSlip.ProjectId,
                 TaskId = timeSlip.TaskId,
                 LaborCodeId = timeSlip.LaborCodeId,
+                Description = timeSlip.Description,
                 UserId = user.Id
             };
 
@@ -96,6 +97,7 @@ namespace GoatSlips.Services
             timeSlipFromDb.ProjectId = timeSlip.ProjectId;
             timeSlipFromDb.TaskId = timeSlip.TaskId;
             timeSlipFromDb.LaborCodeId = timeSlip.LaborCodeId;
+            timeSlipFromDb.Description = timeSlip.Description;
 
             _dbContext.SaveChanges();
         }
