@@ -147,6 +147,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         hours: number,
         minutes: number,
         date: Date,
+        description: string,
     ): Promise<Response> => {
         const response = await fetchPostResponse('TimeSlip/AddTimeSlip', {
             projectId,
@@ -155,6 +156,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
             hours,
             minutes,
             date: new Date(date.getTime() - date.getTimezoneOffset() * 60000),
+            description,
         });
 
         if (response.ok) {
@@ -171,6 +173,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        description: string,
     ): Promise<Response> => {
         const response = await fetchPostResponse('TimeSlip/UpdateTimeSlip', {
             timeSlipId,
@@ -179,6 +182,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
             laborCodeId,
             hours,
             minutes,
+            description,
         });
 
         if (response.ok) {
