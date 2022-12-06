@@ -25,12 +25,14 @@ interface EditableTimeSlipProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        description: string,
     ) => Promise<void>;
     projectId?: number;
     taskId?: number;
     laborCodeId?: number;
     hours?: number;
     minutes?: number;
+    description?: string;
     setMinutesDiff: (minutesDiff: number) => void;
 }
 
@@ -46,6 +48,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         laborCodeId,
         hours,
         minutes,
+        description,
         setMinutesDiff,
     } = props;
 
@@ -58,6 +61,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     const [selectedLaborCodeId, setSelectedLaborCodeId] = useState<number | ''>(laborCodeId ?? '');
     const [selectedHours, setSelectedHours] = useState<number | ''>(hours ?? '');
     const [selectedMinutes, setSelectedMinutes] = useState<number | ''>(minutes ?? '');
+    const [enteredDescription, setEnteredDescription] = useState(description ?? '');
 
     const totalInitialMinutes = getTotalMinutes(hours ?? '', minutes ?? '');
 
@@ -147,6 +151,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
             laborCodeIdForSubmit,
             selectedHours === '' ? 0 : selectedHours,
             selectedMinutes === '' ? 0 : selectedMinutes,
+            enteredDescription,
         );
     };
 
@@ -164,6 +169,10 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     const handleSave = () => {
         setMinutesDiff(0);
         submitTimeSlip();
+    };
+
+    const handleDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setEnteredDescription(event.target.value);
     };
 
     return (
@@ -198,6 +207,15 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                         {getLaborCodeOptions()}
                     </Select>
                 </FormControl>
+
+                <TextField
+                    className={classes.description}
+                    label="Description"
+                    value={enteredDescription}
+                    onChange={handleDescriptionChange}
+                    multiline
+                    maxRows={3}
+                />
 
                 <div className={classes.timeSection}>
                     <TextField

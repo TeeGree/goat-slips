@@ -86,6 +86,7 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
                     />
                     <EntityLabelWithIcon label={task} timeCodeType="task" />
                     <EntityLabelWithIcon label={laborCode} timeCodeType="laborCode" />
+                    <div className={classes.description}>{timeSlip.description}</div>
                     <div
                         className={classes.time}
                     >{`${timeSlip.hours} hr ${timeSlip.minutes} min`}</div>

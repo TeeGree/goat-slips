@@ -55,19 +55,6 @@ namespace GoatSlips.Services
                 throw new Exception("No user logged in!");
             }
 
-            DbSet<TimeSlip> timeSlips = _timeSlipRepository.TimeSlips;
-            bool isDuplicateTimeSlip = timeSlips.Any(ts =>
-                ts.UserId == user.Id &&
-                ts.ProjectId == timeSlip.ProjectId &&
-                ts.TaskId == timeSlip.TaskId &&
-                ts.LaborCodeId == timeSlip.LaborCodeId &&
-                ts.Date == timeSlip.Date.Date
-            );
-            if (isDuplicateTimeSlip)
-            {
-                throw new Exception("Time slip already exists for this date and combination of time codes!");
-            }
-
             var timeSlipToAdd = new TimeSlip
             {
                 Hours = timeSlip.Hours,
@@ -80,7 +67,7 @@ namespace GoatSlips.Services
                 UserId = user.Id
             };
 
-            timeSlips.Add(timeSlipToAdd);
+            _timeSlipRepository.TimeSlips.Add(timeSlipToAdd);
             _dbContext.SaveChanges();
         }
 

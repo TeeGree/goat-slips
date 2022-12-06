@@ -26,6 +26,7 @@ interface DayColumnProps {
         hours: number,
         minutes: number,
         date: Date,
+        description: string,
     ) => Promise<Response>;
     updateTimeSlip: (
         timeSlipId: number,
@@ -34,6 +35,7 @@ interface DayColumnProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        description: string,
     ) => Promise<Response>;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
     timeSlips: TimeSlip[];
@@ -107,8 +109,17 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        description: string,
     ) => {
-        const response = await saveTimeSlip(projectId, taskId, laborCodeId, hours, minutes, date);
+        const response = await saveTimeSlip(
+            projectId,
+            taskId,
+            laborCodeId,
+            hours,
+            minutes,
+            date,
+            description,
+        );
 
         if (response.ok) {
             setAddingTimeSlip(false);

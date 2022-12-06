@@ -20,6 +20,7 @@ interface ExistingTimeSlipProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        description: string,
     ) => Promise<Response>;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
     setMinutesDiff: (minutesDiff: number) => void;
@@ -49,6 +50,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        description: string,
     ) => {
         const response = await saveTimeSlip(
             timeSlip.id,
@@ -57,6 +59,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
             laborCodeId,
             hours,
             minutes,
+            description,
         );
         if (response.ok) {
             setIsEditing(false);
@@ -77,6 +80,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
                     laborCodeId={timeSlip.laborCodeId === null ? undefined : timeSlip.laborCodeId}
                     hours={timeSlip.hours}
                     minutes={timeSlip.minutes}
+                    description={timeSlip.description}
                     setMinutesDiff={setMinutesDiff}
                 />
             );
