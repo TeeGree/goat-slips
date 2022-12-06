@@ -15,6 +15,7 @@ export interface ExportableTimeSlip {
     project: string;
     task: string;
     laborCode: string;
+    description: string;
     date: string;
     hours: number;
     minutes: number;

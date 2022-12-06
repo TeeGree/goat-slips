@@ -212,6 +212,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                     <TableCell>{projectMap.get(ts.projectId)}</TableCell>
                     <TableCell>{getTask(ts.taskId)}</TableCell>
                     <TableCell>{getLaborCode(ts.laborCodeId)}</TableCell>
+                    <TableCell>{ts.description}</TableCell>
                     <TableCell>{new Date(ts.date).toLocaleDateString('en')}</TableCell>
                     <TableCell>{ts.hours}</TableCell>
                     <TableCell>{ts.minutes}</TableCell>
@@ -227,6 +228,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                 project: projectMap.get(ts.projectId) ?? 'Unknown',
                 task: getTask(ts.taskId),
                 laborCode: getLaborCode(ts.laborCodeId),
+                description: ts.description,
                 date: new Date(ts.date).toLocaleDateString('en'),
                 hours: ts.hours,
                 minutes: ts.minutes,
@@ -671,6 +673,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                                 <TableCell>Project</TableCell>
                                 <TableCell>Task</TableCell>
                                 <TableCell>Labor Code</TableCell>
+                                <TableCell>Description</TableCell>
                                 <TableCell>Date</TableCell>
                                 <TableCell>Hours</TableCell>
                                 <TableCell>Minutes</TableCell>
