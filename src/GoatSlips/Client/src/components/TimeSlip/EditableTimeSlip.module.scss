@@ -1,5 +1,11 @@
 .cardActions {
-    justify-content: right;
+    flex-direction: column;
+}
+
+.cardActionsBase {
+    justify-content: space-between;
+    display: flex;
+    width: 100%;
 }
 
 .cardInput {
@@ -18,4 +24,30 @@
 .description {
     margin-top: 0.3em !important;
     width: 100%;
+}
+
+.squareIconButton,
+.dayButton {
+    border-radius: 4px !important;
+}
+
+.cancelButton {
+    margin-left: 1em !important;
+}
+
+.cardButtons {
+    display: flex;
+}
+
+.dayButtonContainer {
+    margin: 0 !important;
+    display: flex;
+    width: 100%;
+    padding-top: 10px !important;
+}
+
+.dayButton {
+    padding: 0 !important;
+    font-size: 14px;
+    flex-basis: calc(100% / 7) !important;
 }

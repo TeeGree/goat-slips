@@ -6,13 +6,16 @@ import {
     CardActions,
     CardContent,
     FormControl,
+    IconButton,
     InputLabel,
     MenuItem,
     Select,
     SelectChangeEvent,
     TextField,
+    Tooltip,
 } from '@mui/material';
 import { DropdownOption } from '../../types/DropdownOption';
+import { DateRange, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 
 interface EditableTimeSlipProps {
     projectOptions: DropdownOption[];
@@ -62,6 +65,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     const [selectedHours, setSelectedHours] = useState<number | ''>(hours ?? '');
     const [selectedMinutes, setSelectedMinutes] = useState<number | ''>(minutes ?? '');
     const [enteredDescription, setEnteredDescription] = useState(description ?? '');
+    const [expandMultiDaySelect, setExpandMultiDaySelect] = useState(false);
 
     const totalInitialMinutes = getTotalMinutes(hours ?? '', minutes ?? '');
 
@@ -175,6 +179,44 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         setEnteredDescription(event.target.value);
     };
 
+    const getMultiAddButton = () => {
+        const tooltipTitle = expandMultiDaySelect
+            ? 'Stop adding time slip to multiple days at once'
+            : 'Add time slip to multiple days at once.';
+
+        const arrowIcon = expandMultiDaySelect ? <KeyboardArrowUp /> : <KeyboardArrowDown />;
+
+        return (
+            <Tooltip title={tooltipTitle} placement="left">
+                <IconButton
+                    className={classes.squareIconButton}
+                    onClick={() => setExpandMultiDaySelect((prev) => !prev)}
+                >
+                    {arrowIcon}
+                    <DateRange />
+                </IconButton>
+            </Tooltip>
+        );
+    };
+
+    const getMultiDaySelectOptions = () => {
+        if (expandMultiDaySelect) {
+            return (
+                <div className={classes.dayButtonContainer}>
+                    <IconButton className={classes.dayButton}>Su</IconButton>
+                    <IconButton className={classes.dayButton}>M</IconButton>
+                    <IconButton className={classes.dayButton}>Tu</IconButton>
+                    <IconButton className={classes.dayButton}>W</IconButton>
+                    <IconButton className={classes.dayButton}>Th</IconButton>
+                    <IconButton className={classes.dayButton}>F</IconButton>
+                    <IconButton className={classes.dayButton}>Sa</IconButton>
+                </div>
+            );
+        }
+
+        return <></>;
+    };
+
     return (
         <Card>
             <CardContent>
@@ -237,16 +279,27 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                 </div>
             </CardContent>
             <CardActions className={classes.cardActions}>
-                <Button
-                    disabled={!isSaveAllowed(selectedProjectId)}
-                    variant="contained"
-                    onClick={handleSave}
-                >
-                    Save
-                </Button>
-                <Button variant="contained" color="error" onClick={handleCancel}>
-                    Cancel
-                </Button>
+                <div className={classes.cardActionsBase}>
+                    {getMultiAddButton()}
+                    <span className={classes.cardButtons}>
+                        <Button
+                            disabled={!isSaveAllowed(selectedProjectId)}
+                            variant="contained"
+                            onClick={handleSave}
+                        >
+                            Save
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            className={classes.cancelButton}
+                            onClick={handleCancel}
+                        >
+                            Cancel
+                        </Button>
+                    </span>
+                </div>
+                {getMultiDaySelectOptions()}
             </CardActions>
         </Card>
     );
