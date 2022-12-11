@@ -4,8 +4,10 @@ import { DropdownOption } from '../../types/DropdownOption';
 import { ReadOnlyTimeSlip } from './ReadOnlyTimeSlip';
 import { EditableTimeSlip } from './EditableTimeSlip';
 import classes from './ExistingTimeSlip.module.scss';
+import { Day } from '../../types/Day';
 
 interface ExistingTimeSlipProps {
+    day: Day;
     timeSlip: TimeSlip;
     getProjectName: (projectId: number) => string;
     getTaskName: (taskId: number) => string;
@@ -20,6 +22,7 @@ interface ExistingTimeSlipProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        days: Day[],
         description: string,
     ) => Promise<Response>;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
@@ -29,6 +32,7 @@ interface ExistingTimeSlipProps {
 
 export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: ExistingTimeSlipProps) => {
     const {
+        day,
         timeSlip,
         getProjectName,
         getTaskName,
@@ -50,6 +54,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        days: Day[],
         description: string,
     ) => {
         const response = await saveTimeSlip(
@@ -59,6 +64,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
             laborCodeId,
             hours,
             minutes,
+            days,
             description,
         );
         if (response.ok) {
@@ -70,6 +76,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         if (isEditing) {
             return (
                 <EditableTimeSlip
+                    day={day}
                     projectOptions={projectOptions}
                     laborCodeOptions={laborCodeOptions}
                     getTaskOptionsForProject={getTaskOptionsForProject}
@@ -82,6 +89,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
                     minutes={timeSlip.minutes}
                     description={timeSlip.description}
                     setMinutesDiff={setMinutesDiff}
+                    isNewTimeSlip={false}
                 />
             );
         }

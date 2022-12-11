@@ -25,7 +25,7 @@ interface DayColumnProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-        date: Date,
+        days: Day[],
         description: string,
     ) => Promise<Response>;
     updateTimeSlip: (
@@ -109,6 +109,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        days: Day[],
         description: string,
     ) => {
         const response = await saveTimeSlip(
@@ -117,7 +118,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
             laborCodeId,
             hours,
             minutes,
-            date,
+            days,
             description,
         );
 
@@ -178,6 +179,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         if (addingTimeSlip) {
             return (
                 <EditableTimeSlip
+                    day={day}
                     setMinutesDiff={(m: number) => setMinutesDiff(-1, m)}
                     saveTimeSlip={saveTimeSlipAndStopAddingTimeSlip}
                     projectOptions={projectOptions}
@@ -187,6 +189,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     projectId={favoriteTimeSlipToAdd?.projectId}
                     taskId={favoriteTimeSlipToAdd?.taskId ?? undefined}
                     laborCodeId={favoriteTimeSlipToAdd?.laborCodeId ?? undefined}
+                    isNewTimeSlip
                 />
             );
         }
@@ -211,11 +214,35 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         );
     };
 
+    const saveExistingTimeSlip = async (
+        timeSlipId: number,
+        projectId: number,
+        taskId: number | null,
+        laborCodeId: number | null,
+        hours: number,
+        minutes: number,
+        _days: Day[],
+        description: string,
+    ) => {
+        const response = await updateTimeSlip(
+            timeSlipId,
+            projectId,
+            taskId,
+            laborCodeId,
+            hours,
+            minutes,
+            description,
+        );
+
+        return response;
+    };
+
     const getExistingTimeSlipCards = (): JSX.Element[] => {
         return timeSlips?.map((ts: TimeSlip) => {
             return (
                 <ExistingTimeSlip
                     key={ts.id}
+                    day={day}
                     setMinutesDiff={(m: number) => setMinutesDiff(ts.id, m)}
                     timeSlip={ts}
                     getProjectName={getProjectName}
@@ -224,7 +251,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     projectOptions={projectOptions}
                     laborCodeOptions={laborCodeOptions}
                     getTaskOptionsForProject={getTaskOptionsForProject}
-                    saveTimeSlip={updateTimeSlip}
+                    saveTimeSlip={saveExistingTimeSlip}
                     deleteTimeSlip={deleteTimeSlip}
                     fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
                 />

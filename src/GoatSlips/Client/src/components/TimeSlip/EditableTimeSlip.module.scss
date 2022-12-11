@@ -6,6 +6,7 @@
     justify-content: space-between;
     display: flex;
     width: 100%;
+    flex-direction: row-reverse;
 }
 
 .cardInput {
@@ -50,4 +51,10 @@
     padding: 0 !important;
     font-size: 14px;
     flex-basis: calc(100% / 7) !important;
+    text-decoration: line-through !important;
+}
+
+.selectedDay {
+    color: aqua !important;
+    text-decoration: none !important;
 }

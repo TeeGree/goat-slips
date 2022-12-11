@@ -28,6 +28,16 @@ const dayMap = new Map<DayIndex, Day>([
     [6, 'Saturday'],
 ]);
 
+const dayIndexMap = new Map<Day, DayIndex>([
+    ['Sunday', 0],
+    ['Monday', 1],
+    ['Tuesday', 2],
+    ['Wednesday', 3],
+    ['Thursday', 4],
+    ['Friday', 5],
+    ['Saturday', 6],
+]);
+
 interface WeekViewProps {
     projects: DropdownOption[];
     projectMap: Map<number, string>;
@@ -140,22 +150,29 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         setTimeSlipsPerDay(timeSlipMap);
     };
 
+    const getDateOfDayForApi = (day: Day) => {
+        const index = dayIndexMap.get(day) ?? 0;
+        const date = getDateOfDay(index);
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    };
+
     const saveNewTimeSlip = async (
         projectId: number,
         taskId: number | null,
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-        date: Date,
+        days: Day[],
         description: string,
     ): Promise<Response> => {
+        const dates = days.map((d) => getDateOfDayForApi(d));
         const response = await fetchPostResponse('TimeSlip/AddTimeSlip', {
             projectId,
             taskId,
             laborCodeId,
             hours,
             minutes,
-            date: new Date(date.getTime() - date.getTimezoneOffset() * 60000),
+            dates,
             description,
         });
 

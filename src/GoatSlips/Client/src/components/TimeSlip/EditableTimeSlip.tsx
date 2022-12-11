@@ -16,8 +16,20 @@ import {
 } from '@mui/material';
 import { DropdownOption } from '../../types/DropdownOption';
 import { DateRange, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import { Day } from '../../types/Day';
+
+const dayLabelMap = new Map<Day, string>([
+    ['Sunday', 'Su'],
+    ['Monday', 'M'],
+    ['Tuesday', 'Tu'],
+    ['Wednesday', 'W'],
+    ['Thursday', 'Th'],
+    ['Friday', 'F'],
+    ['Saturday', 'Sa'],
+]);
 
 interface EditableTimeSlipProps {
+    day: Day;
     projectOptions: DropdownOption[];
     laborCodeOptions: DropdownOption[];
     getTaskOptionsForProject: (projectId: number) => DropdownOption[];
@@ -28,6 +40,7 @@ interface EditableTimeSlipProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        days: Day[],
         description: string,
     ) => Promise<void>;
     projectId?: number;
@@ -37,10 +50,12 @@ interface EditableTimeSlipProps {
     minutes?: number;
     description?: string;
     setMinutesDiff: (minutesDiff: number) => void;
+    isNewTimeSlip: boolean;
 }
 
 export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: EditableTimeSlipProps) => {
     const {
+        day,
         getTaskOptionsForProject,
         laborCodeOptions,
         projectOptions,
@@ -53,6 +68,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         minutes,
         description,
         setMinutesDiff,
+        isNewTimeSlip,
     } = props;
 
     const getTotalMinutes = (h: number | '', m: number | '') => {
@@ -66,6 +82,18 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     const [selectedMinutes, setSelectedMinutes] = useState<number | ''>(minutes ?? '');
     const [enteredDescription, setEnteredDescription] = useState(description ?? '');
     const [expandMultiDaySelect, setExpandMultiDaySelect] = useState(false);
+
+    const [addToDayMap, setAddToDayMap] = useState<Map<Day, boolean>>(
+        new Map([
+            ['Sunday', day === 'Sunday'],
+            ['Monday', day === 'Monday'],
+            ['Tuesday', day === 'Tuesday'],
+            ['Wednesday', day === 'Wednesday'],
+            ['Thursday', day === 'Thursday'],
+            ['Friday', day === 'Friday'],
+            ['Saturday', day === 'Saturday'],
+        ]),
+    );
 
     const totalInitialMinutes = getTotalMinutes(hours ?? '', minutes ?? '');
 
@@ -149,12 +177,20 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
 
         const taskIdForSubmit = selectedTaskId === '' ? null : selectedTaskId;
         const laborCodeIdForSubmit = selectedLaborCodeId === '' ? null : selectedLaborCodeId;
+        const days: Day[] = [];
+
+        addToDayMap.forEach((addToDay, d) => {
+            if (addToDay) {
+                days.push(d);
+            }
+        });
         saveTimeSlip(
             selectedProjectId,
             taskIdForSubmit,
             laborCodeIdForSubmit,
             selectedHours === '' ? 0 : selectedHours,
             selectedMinutes === '' ? 0 : selectedMinutes,
+            days,
             enteredDescription,
         );
     };
@@ -180,6 +216,10 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     };
 
     const getMultiAddButton = () => {
+        if (!isNewTimeSlip) {
+            return <></>;
+        }
+
         const tooltipTitle = expandMultiDaySelect
             ? 'Stop adding time slip to multiple days at once'
             : 'Add time slip to multiple days at once.';
@@ -199,17 +239,42 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         );
     };
 
+    const toggleDaySelected = (buttonDay: Day) => {
+        setAddToDayMap((prev) => {
+            const newAddToDayMap = new Map(prev);
+            newAddToDayMap.set(buttonDay, !prev.get(buttonDay));
+            return newAddToDayMap;
+        });
+    };
+
+    const getDayButton = (buttonDay: Day) => {
+        const label = dayLabelMap.get(buttonDay);
+        let className = classes.dayButton;
+        if (addToDayMap.get(buttonDay)) {
+            className += ` ${classes.selectedDay}`;
+        }
+        return (
+            <IconButton
+                disabled={buttonDay === day}
+                className={className}
+                onClick={() => toggleDaySelected(buttonDay)}
+            >
+                {label}
+            </IconButton>
+        );
+    };
+
     const getMultiDaySelectOptions = () => {
         if (expandMultiDaySelect) {
             return (
                 <div className={classes.dayButtonContainer}>
-                    <IconButton className={classes.dayButton}>Su</IconButton>
-                    <IconButton className={classes.dayButton}>M</IconButton>
-                    <IconButton className={classes.dayButton}>Tu</IconButton>
-                    <IconButton className={classes.dayButton}>W</IconButton>
-                    <IconButton className={classes.dayButton}>Th</IconButton>
-                    <IconButton className={classes.dayButton}>F</IconButton>
-                    <IconButton className={classes.dayButton}>Sa</IconButton>
+                    {getDayButton('Sunday')}
+                    {getDayButton('Monday')}
+                    {getDayButton('Tuesday')}
+                    {getDayButton('Wednesday')}
+                    {getDayButton('Thursday')}
+                    {getDayButton('Friday')}
+                    {getDayButton('Saturday')}
                 </div>
             );
         }
@@ -280,7 +345,6 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
             </CardContent>
             <CardActions className={classes.cardActions}>
                 <div className={classes.cardActionsBase}>
-                    {getMultiAddButton()}
                     <span className={classes.cardButtons}>
                         <Button
                             disabled={!isSaveAllowed(selectedProjectId)}
@@ -298,6 +362,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                             Cancel
                         </Button>
                     </span>
+                    {getMultiAddButton()}
                 </div>
                 {getMultiDaySelectOptions()}
             </CardActions>

@@ -55,19 +55,20 @@ namespace GoatSlips.Services
                 throw new Exception("No user logged in!");
             }
 
-            var timeSlipToAdd = new TimeSlip
-            {
-                Hours = timeSlip.Hours,
-                Minutes = timeSlip.Minutes,
-                Date = timeSlip.Date,
-                ProjectId = timeSlip.ProjectId,
-                TaskId = timeSlip.TaskId,
-                LaborCodeId = timeSlip.LaborCodeId,
-                Description = timeSlip.Description,
-                UserId = user.Id
-            };
+            IEnumerable<TimeSlip> timeSlipsToAdd = from date in timeSlip.Dates
+                                  select new TimeSlip
+                                  {
+                                      Hours = timeSlip.Hours,
+                                      Minutes = timeSlip.Minutes,
+                                      Date = date,
+                                      ProjectId = timeSlip.ProjectId,
+                                      TaskId = timeSlip.TaskId,
+                                      LaborCodeId = timeSlip.LaborCodeId,
+                                      Description = timeSlip.Description,
+                                      UserId = user.Id
+                                  };
 
-            _timeSlipRepository.TimeSlips.Add(timeSlipToAdd);
+            _timeSlipRepository.TimeSlips.AddRange(timeSlipsToAdd);
             _dbContext.SaveChanges();
         }
 
