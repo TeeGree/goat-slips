@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import classes from './DayColumn.module.scss';
-import { Day } from '../../types/Day';
+import { Day, DayIndex } from '../../types/Day';
 import { Button, Menu, MenuItem, Tooltip } from '@mui/material';
 import { Add, Star } from '@mui/icons-material';
 import { EditableTimeSlip } from '../TimeSlip/EditableTimeSlip';
@@ -13,6 +13,7 @@ import { Toast } from '../Toast';
 import { ErrorDetails } from '../../types/ErrorDetails';
 
 interface DayColumnProps {
+    dayIndex: DayIndex;
     date: Date;
     day: Day;
     isCurrentDay: boolean;
@@ -78,6 +79,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
     }, [addingTimeSlip]);
 
     const {
+        dayIndex,
         date,
         day,
         isCurrentDay,
@@ -174,7 +176,10 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
             return (
                 <EditableTimeSlip
                     day={day}
-                    setMinutesDiff={(d: Day, m: number) => setNewDayMinuteDiffs(d, -1, m)}
+                    setMinutesDiff={(d: Day, m: number) =>
+                        // Use day index to ensure no overlap when adding multiple new time slips to same day at once.
+                        setNewDayMinuteDiffs(d, -1 * dayIndex, m)
+                    }
                     saveTimeSlip={saveTimeSlipAndStopAddingTimeSlip}
                     projectOptions={projectOptions}
                     laborCodeOptions={laborCodeOptions}

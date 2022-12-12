@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import classes from './WeekView.module.scss';
 import { DayColumn } from '../DayColumn/DayColumn';
-import { Day } from '../../types/Day';
+import { Day, DayIndex } from '../../types/Day';
 import { DropdownOption } from '../../types/DropdownOption';
 import { FavoriteTimeSlipData, TimeSlip } from '../../types/TimeSlip';
 import { IconButton, Tooltip } from '@mui/material';
@@ -15,8 +15,6 @@ import {
 } from '@mui/icons-material';
 import { fetchGet, fetchPostResponse } from '../../helpers/fetchFunctions';
 import { MultiSelect } from '../MultiSelect';
-
-type DayIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 const dayMap = new Map<DayIndex, Day>([
     [0, 'Sunday'],
@@ -337,6 +335,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
         return (
             <DayColumn
+                dayIndex={day}
                 fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
                 favoriteTimeSlipsOptions={favoriteTimeSlips}
                 getProjectName={getProjectName}
