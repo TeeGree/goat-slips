@@ -232,6 +232,31 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         setEnteredDescription(event.target.value);
     };
 
+    const resetSelectedDays = () => {
+        // Revert to only the current day being selected.
+        setAddToDayMap((prev) => {
+            const newMap = new Map(prev);
+
+            newMap.forEach((addToDay, d) => {
+                newMap.set(d, d === day);
+            });
+
+            return newMap;
+        });
+    };
+
+    const toggleMultiDaySelect = () => {
+        setExpandMultiDaySelect((prev) => {
+            const newValue = !prev;
+
+            // If collapsing multi select section, clear selected days
+            if (!newValue) {
+                resetSelectedDays();
+            }
+            return newValue;
+        });
+    };
+
     const getMultiAddButton = () => {
         if (!isNewTimeSlip) {
             return <></>;
@@ -245,10 +270,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
 
         return (
             <Tooltip title={tooltipTitle} placement="left">
-                <IconButton
-                    className={classes.squareIconButton}
-                    onClick={() => setExpandMultiDaySelect((prev) => !prev)}
-                >
+                <IconButton className={classes.squareIconButton} onClick={toggleMultiDaySelect}>
                     {arrowIcon}
                     <DateRange />
                 </IconButton>
