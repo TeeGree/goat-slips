@@ -26,7 +26,7 @@ interface ExistingTimeSlipProps {
         description: string,
     ) => Promise<Response>;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
-    setMinutesDiff: (minutesDiff: number) => void;
+    setMinutesDiff: (day: Day, minutesDiff: number) => void;
     fetchFavoriteTimeSlips: () => void;
 }
 

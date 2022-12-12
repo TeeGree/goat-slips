@@ -47,13 +47,12 @@ interface DayColumnProps {
     fetchFavoriteTimeSlips: () => Promise<void>;
     favoriteTimeSlipsOptions: FavoriteTimeSlipData[];
     isFiltered: boolean;
+    newDayMinuteDiffs: Map<Day, Map<number, number>>;
+    setNewDayMinuteDiffs: (day: Day, timeSlipId: number, minutes: number) => void;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
     const [addingTimeSlip, setAddingTimeSlip] = useState(false);
-    const [newMinuteDiffs, setNewMinuteDiffs] = useState<Map<number, number>>(
-        new Map<number, number>([]),
-    );
 
     const [favoriteTimeSlipToAdd, setFavoriteTimeSlipToAdd] = useState<FavoriteTimeSlipData>();
 
@@ -97,6 +96,8 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         fetchFavoriteTimeSlips,
         favoriteTimeSlipsOptions,
         isFiltered,
+        newDayMinuteDiffs,
+        setNewDayMinuteDiffs,
     } = props;
 
     const getDateString = () => {
@@ -128,13 +129,6 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
             const message: ErrorDetails = await response.json();
             setAlertMessage({ message: message.detail, severity: 'error' });
         }
-    };
-
-    const setMinutesDiff = (timeSlipId: number, minutes: number) => {
-        setNewMinuteDiffs((prev: Map<number, number>) => {
-            prev.set(timeSlipId, minutes);
-            return new Map(prev);
-        });
     };
 
     const handleNewBlankTimeSlipFromFavorite = (favoritetimeSlip: FavoriteTimeSlipData) => {
@@ -180,7 +174,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
             return (
                 <EditableTimeSlip
                     day={day}
-                    setMinutesDiff={(m: number) => setMinutesDiff(-1, m)}
+                    setMinutesDiff={(d: Day, m: number) => setNewDayMinuteDiffs(d, -1, m)}
                     saveTimeSlip={saveTimeSlipAndStopAddingTimeSlip}
                     projectOptions={projectOptions}
                     laborCodeOptions={laborCodeOptions}
@@ -243,7 +237,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                 <ExistingTimeSlip
                     key={ts.id}
                     day={day}
-                    setMinutesDiff={(m: number) => setMinutesDiff(ts.id, m)}
+                    setMinutesDiff={(d: Day, m: number) => setNewDayMinuteDiffs(d, ts.id, m)}
                     timeSlip={ts}
                     getProjectName={getProjectName}
                     getTaskName={getTaskName}
@@ -269,7 +263,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
             <TimeTotals
                 totalHours={totalHours}
                 totalMinutes={totalMinutes}
-                newMinuteDiffs={newMinuteDiffs}
+                newMinuteDiffs={newDayMinuteDiffs.get(day) ?? new Map<number, number>()}
                 isFiltered={isFiltered}
             />
             <div className={classes.dayBody}>

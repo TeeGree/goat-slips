@@ -92,6 +92,27 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         new Map<string, TimeSlip[]>([]),
     );
 
+    const [newDayMinuteDiffs, setNewDayMinuteDiffs] = useState<Map<Day, Map<number, number>>>(
+        new Map([
+            ['Sunday', new Map<number, number>()],
+            ['Monday', new Map<number, number>()],
+            ['Tuesday', new Map<number, number>()],
+            ['Wednesday', new Map<number, number>()],
+            ['Thursday', new Map<number, number>()],
+            ['Friday', new Map<number, number>()],
+            ['Saturday', new Map<number, number>()],
+        ]),
+    );
+
+    const setDayMinutesDiff = (day: Day, timeSlipId: number, minutes: number) => {
+        setNewDayMinuteDiffs((prev: Map<Day, Map<number, number>>) => {
+            const newMap = new Map(prev);
+            const dayNewMinutesMap = newMap.get(day) ?? new Map<number, number>();
+            dayNewMinutesMap.set(timeSlipId, minutes);
+            return newMap;
+        });
+    };
+
     const addInUseProjectId = (projectId: number) => {
         setProjectIdsInUse((prev) => {
             const newInUseProjectIds = new Set(prev);
@@ -334,6 +355,8 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 totalHours={hours}
                 totalMinutes={minutes}
                 isFiltered={isFiltered()}
+                newDayMinuteDiffs={newDayMinuteDiffs}
+                setNewDayMinuteDiffs={setDayMinutesDiff}
             />
         );
     };

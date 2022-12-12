@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classes from './EditableTimeSlip.module.scss';
 import {
     Button,
@@ -49,7 +49,7 @@ interface EditableTimeSlipProps {
     hours?: number;
     minutes?: number;
     description?: string;
-    setMinutesDiff: (minutesDiff: number) => void;
+    setMinutesDiff: (day: Day, minutesDiff: number) => void;
     isNewTimeSlip: boolean;
 }
 
@@ -94,6 +94,19 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
             ['Saturday', day === 'Saturday'],
         ]),
     );
+
+    useEffect(() => {
+        addToDayMap.forEach((addToDay, d) => {
+            if (addToDay) {
+                setMinutesDiff(
+                    d,
+                    getTotalMinutes(selectedHours, selectedMinutes) - totalInitialMinutes,
+                );
+            } else {
+                setMinutesDiff(d, 0);
+            }
+        });
+    }, [addToDayMap, selectedHours, selectedMinutes]);
 
     const totalInitialMinutes = getTotalMinutes(hours ?? '', minutes ?? '');
 
@@ -155,7 +168,6 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         }
 
         setSelectedHours(hrs);
-        setMinutesDiff(getTotalMinutes(hrs, selectedMinutes) - totalInitialMinutes);
     };
 
     const handleMinutesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -167,7 +179,6 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         }
 
         setSelectedMinutes(mins);
-        setMinutesDiff(getTotalMinutes(selectedHours, mins) - totalInitialMinutes);
     };
 
     const submitTimeSlip = () => {
@@ -202,12 +213,18 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     };
 
     const handleCancel = () => {
-        setMinutesDiff(0);
+        addToDayMap.forEach((_addToDay, d) => {
+            setMinutesDiff(d, 0);
+        });
+
         stopAddingTimeslip();
     };
 
     const handleSave = () => {
-        setMinutesDiff(0);
+        addToDayMap.forEach((_addToDay, d) => {
+            setMinutesDiff(d, 0);
+        });
+
         submitTimeSlip();
     };
 
