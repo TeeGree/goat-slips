@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classes from './EditableTimeSlip.module.scss';
 import {
     Button,
@@ -6,15 +6,30 @@ import {
     CardActions,
     CardContent,
     FormControl,
+    IconButton,
     InputLabel,
     MenuItem,
     Select,
     SelectChangeEvent,
     TextField,
+    Tooltip,
 } from '@mui/material';
 import { DropdownOption } from '../../types/DropdownOption';
+import { DateRange, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
+import { Day } from '../../types/Day';
+
+const dayLabelMap = new Map<Day, string>([
+    ['Sunday', 'Su'],
+    ['Monday', 'M'],
+    ['Tuesday', 'Tu'],
+    ['Wednesday', 'W'],
+    ['Thursday', 'Th'],
+    ['Friday', 'F'],
+    ['Saturday', 'Sa'],
+]);
 
 interface EditableTimeSlipProps {
+    day: Day;
     projectOptions: DropdownOption[];
     laborCodeOptions: DropdownOption[];
     getTaskOptionsForProject: (projectId: number) => DropdownOption[];
@@ -25,6 +40,7 @@ interface EditableTimeSlipProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
+        days: Day[],
         description: string,
     ) => Promise<void>;
     projectId?: number;
@@ -33,11 +49,13 @@ interface EditableTimeSlipProps {
     hours?: number;
     minutes?: number;
     description?: string;
-    setMinutesDiff: (minutesDiff: number) => void;
+    setMinutesDiff: (day: Day, minutesDiff: number) => void;
+    isNewTimeSlip: boolean;
 }
 
 export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: EditableTimeSlipProps) => {
     const {
+        day,
         getTaskOptionsForProject,
         laborCodeOptions,
         projectOptions,
@@ -50,6 +68,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         minutes,
         description,
         setMinutesDiff,
+        isNewTimeSlip,
     } = props;
 
     const getTotalMinutes = (h: number | '', m: number | '') => {
@@ -62,6 +81,32 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     const [selectedHours, setSelectedHours] = useState<number | ''>(hours ?? '');
     const [selectedMinutes, setSelectedMinutes] = useState<number | ''>(minutes ?? '');
     const [enteredDescription, setEnteredDescription] = useState(description ?? '');
+    const [expandMultiDaySelect, setExpandMultiDaySelect] = useState(false);
+
+    const [addToDayMap, setAddToDayMap] = useState<Map<Day, boolean>>(
+        new Map([
+            ['Sunday', day === 'Sunday'],
+            ['Monday', day === 'Monday'],
+            ['Tuesday', day === 'Tuesday'],
+            ['Wednesday', day === 'Wednesday'],
+            ['Thursday', day === 'Thursday'],
+            ['Friday', day === 'Friday'],
+            ['Saturday', day === 'Saturday'],
+        ]),
+    );
+
+    useEffect(() => {
+        addToDayMap.forEach((addToDay, d) => {
+            if (addToDay) {
+                setMinutesDiff(
+                    d,
+                    getTotalMinutes(selectedHours, selectedMinutes) - totalInitialMinutes,
+                );
+            } else {
+                setMinutesDiff(d, 0);
+            }
+        });
+    }, [addToDayMap, selectedHours, selectedMinutes]);
 
     const totalInitialMinutes = getTotalMinutes(hours ?? '', minutes ?? '');
 
@@ -123,7 +168,6 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         }
 
         setSelectedHours(hrs);
-        setMinutesDiff(getTotalMinutes(hrs, selectedMinutes) - totalInitialMinutes);
     };
 
     const handleMinutesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -135,7 +179,6 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         }
 
         setSelectedMinutes(mins);
-        setMinutesDiff(getTotalMinutes(selectedHours, mins) - totalInitialMinutes);
     };
 
     const submitTimeSlip = () => {
@@ -145,12 +188,20 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
 
         const taskIdForSubmit = selectedTaskId === '' ? null : selectedTaskId;
         const laborCodeIdForSubmit = selectedLaborCodeId === '' ? null : selectedLaborCodeId;
+        const days: Day[] = [];
+
+        addToDayMap.forEach((addToDay, d) => {
+            if (addToDay) {
+                days.push(d);
+            }
+        });
         saveTimeSlip(
             selectedProjectId,
             taskIdForSubmit,
             laborCodeIdForSubmit,
             selectedHours === '' ? 0 : selectedHours,
             selectedMinutes === '' ? 0 : selectedMinutes,
+            days,
             enteredDescription,
         );
     };
@@ -162,17 +213,112 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     };
 
     const handleCancel = () => {
-        setMinutesDiff(0);
+        addToDayMap.forEach((_addToDay, d) => {
+            setMinutesDiff(d, 0);
+        });
+
         stopAddingTimeslip();
     };
 
     const handleSave = () => {
-        setMinutesDiff(0);
+        addToDayMap.forEach((_addToDay, d) => {
+            setMinutesDiff(d, 0);
+        });
+
         submitTimeSlip();
     };
 
     const handleDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEnteredDescription(event.target.value);
+    };
+
+    const resetSelectedDays = () => {
+        // Revert to only the current day being selected.
+        setAddToDayMap((prev) => {
+            const newMap = new Map(prev);
+
+            newMap.forEach((addToDay, d) => {
+                newMap.set(d, d === day);
+            });
+
+            return newMap;
+        });
+    };
+
+    const toggleMultiDaySelect = () => {
+        setExpandMultiDaySelect((prev) => {
+            const newValue = !prev;
+
+            // If collapsing multi select section, clear selected days
+            if (!newValue) {
+                resetSelectedDays();
+            }
+            return newValue;
+        });
+    };
+
+    const getMultiAddButton = () => {
+        if (!isNewTimeSlip) {
+            return <></>;
+        }
+
+        const tooltipTitle = expandMultiDaySelect
+            ? 'Stop adding time slip to multiple days at once'
+            : 'Add time slip to multiple days at once.';
+
+        const arrowIcon = expandMultiDaySelect ? <KeyboardArrowUp /> : <KeyboardArrowDown />;
+
+        return (
+            <Tooltip title={tooltipTitle} placement="left">
+                <IconButton className={classes.squareIconButton} onClick={toggleMultiDaySelect}>
+                    {arrowIcon}
+                    <DateRange />
+                </IconButton>
+            </Tooltip>
+        );
+    };
+
+    const toggleDaySelected = (buttonDay: Day) => {
+        setAddToDayMap((prev) => {
+            const newAddToDayMap = new Map(prev);
+            newAddToDayMap.set(buttonDay, !prev.get(buttonDay));
+            return newAddToDayMap;
+        });
+    };
+
+    const getDayButton = (buttonDay: Day) => {
+        const label = dayLabelMap.get(buttonDay);
+        let className = classes.dayButton;
+        if (addToDayMap.get(buttonDay)) {
+            className += ` ${classes.selectedDay}`;
+        }
+        return (
+            <IconButton
+                disabled={buttonDay === day}
+                className={className}
+                onClick={() => toggleDaySelected(buttonDay)}
+            >
+                {label}
+            </IconButton>
+        );
+    };
+
+    const getMultiDaySelectOptions = () => {
+        if (expandMultiDaySelect) {
+            return (
+                <div className={classes.dayButtonContainer}>
+                    {getDayButton('Sunday')}
+                    {getDayButton('Monday')}
+                    {getDayButton('Tuesday')}
+                    {getDayButton('Wednesday')}
+                    {getDayButton('Thursday')}
+                    {getDayButton('Friday')}
+                    {getDayButton('Saturday')}
+                </div>
+            );
+        }
+
+        return <></>;
     };
 
     return (
@@ -237,16 +383,27 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                 </div>
             </CardContent>
             <CardActions className={classes.cardActions}>
-                <Button
-                    disabled={!isSaveAllowed(selectedProjectId)}
-                    variant="contained"
-                    onClick={handleSave}
-                >
-                    Save
-                </Button>
-                <Button variant="contained" color="error" onClick={handleCancel}>
-                    Cancel
-                </Button>
+                <div className={classes.cardActionsBase}>
+                    <span className={classes.cardButtons}>
+                        <Button
+                            disabled={!isSaveAllowed(selectedProjectId)}
+                            variant="contained"
+                            onClick={handleSave}
+                        >
+                            Save
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            className={classes.cancelButton}
+                            onClick={handleCancel}
+                        >
+                            Cancel
+                        </Button>
+                    </span>
+                    {getMultiAddButton()}
+                </div>
+                {getMultiDaySelectOptions()}
             </CardActions>
         </Card>
     );
