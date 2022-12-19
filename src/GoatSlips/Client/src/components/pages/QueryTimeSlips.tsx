@@ -198,7 +198,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         if (loadingResults) {
             return (
                 <TableRow>
-                    <TableCell colSpan={7}>
+                    <TableCell className={classes.emptyRow} colSpan={8}>
                         <CircularProgress />
                     </TableCell>
                 </TableRow>
@@ -641,23 +641,27 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     };
 
     const getDeleteQueryModal = () => {
-        <Modal open={isDeletingQuery}>
-            <Box sx={modalStyle}>
-                <h2>Are you sure you want to delete the {`"${getSelectedQueryName()}"`} query?</h2>
-                <div className={classes.modalButtons}>
-                    <Button variant="contained" color="error" onClick={deleteSelectedQuery}>
-                        Delete
-                    </Button>
-                    <Button
-                        variant="contained"
-                        className={classes.cancelButton}
-                        onClick={() => setIsDeletingQuery(false)}
-                    >
-                        Cancel
-                    </Button>
-                </div>
-            </Box>
-        </Modal>;
+        return (
+            <Modal open={isDeletingQuery}>
+                <Box sx={modalStyle}>
+                    <h2>
+                        Are you sure you want to delete the {`"${getSelectedQueryName()}"`} query?
+                    </h2>
+                    <div className={classes.modalButtons}>
+                        <Button variant="contained" color="error" onClick={deleteSelectedQuery}>
+                            Delete
+                        </Button>
+                        <Button
+                            variant="contained"
+                            className={classes.cancelButton}
+                            onClick={() => setIsDeletingQuery(false)}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </Box>
+            </Modal>
+        );
     };
 
     return (

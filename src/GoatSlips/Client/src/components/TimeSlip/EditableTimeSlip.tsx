@@ -161,9 +161,10 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
 
     const handleHoursChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = event.target.value;
+
         const hrs = value === '' ? '' : Number(value);
 
-        if (hrs !== '' && hrs < 0) {
+        if (hrs !== '' && (hrs < 0 || hrs > 24 || !Number.isInteger(hrs))) {
             return;
         }
 
@@ -174,7 +175,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         const value = event.target.value;
         const mins = value === '' ? '' : Number(value);
 
-        if (mins !== '' && (mins < 0 || mins >= 60)) {
+        if (mins !== '' && (mins < 0 || mins >= 60 || !Number.isInteger(mins))) {
             return;
         }
 
@@ -368,7 +369,6 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                         className={`${classes.cardInput} ${classes.timeTextField}`}
                         label="Hours"
                         variant="outlined"
-                        type="number"
                         value={selectedHours}
                         onChange={handleHoursChange}
                     />
@@ -376,7 +376,6 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                         className={`${classes.cardInput} ${classes.timeTextField}`}
                         label="Minutes"
                         variant="outlined"
-                        type="number"
                         value={selectedMinutes}
                         onChange={handleMinutesChange}
                     />
