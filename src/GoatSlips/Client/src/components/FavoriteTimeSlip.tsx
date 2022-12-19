@@ -7,7 +7,7 @@ import { fetchPostResponse } from '../helpers/fetchFunctions';
 import { ErrorDetails } from '../types/ErrorDetails';
 import { FavoriteTimeSlipData } from '../types/TimeSlip';
 import classes from './FavoriteTimeSlip.module.scss';
-import { TimeCodeLabelWithIcon } from './EntityLabelWithIcon';
+import { EntityLabelWithIcon } from './EntityLabelWithIcon';
 
 interface FavoriteTimeSlipProps {
     favoriteTimeSlip: FavoriteTimeSlipData;
@@ -95,9 +95,9 @@ export const FavoriteTimeSlip: React.FC<FavoriteTimeSlipProps> = (props: Favorit
             </Modal>
             <div className={classes.favoriteTimeSlipName}>
                 <span className={classes.underlined}>{favoriteTimeSlip.name}</span>
-                <TimeCodeLabelWithIcon label={getProjectName()} timeCodeType="project" />
-                <TimeCodeLabelWithIcon label={getTaskName()} timeCodeType="task" />
-                <TimeCodeLabelWithIcon label={getLaborCodeName()} timeCodeType="laborCode" />
+                <EntityLabelWithIcon label={getProjectName()} timeCodeType="project" />
+                <EntityLabelWithIcon label={getTaskName()} timeCodeType="task" />
+                <EntityLabelWithIcon label={getLaborCodeName()} timeCodeType="laborCode" />
             </div>
             <Button
                 className={classes.button}
