@@ -4,21 +4,12 @@ import { DayColumn } from '../DayColumn/DayColumn';
 import { Day, DayIndex } from '../../types/Day';
 import { DropdownOption } from '../../types/DropdownOption';
 import { FavoriteTimeSlipData, TimeSlip } from '../../types/TimeSlip';
-import { IconButton, styled, TextField, Tooltip } from '@mui/material';
-import {
-    FilterAlt,
-    FilterAltOff,
-    KeyboardArrowDown,
-    KeyboardArrowLeft,
-    KeyboardArrowRight,
-    KeyboardArrowUp,
-} from '@mui/icons-material';
+import { IconButton, Tooltip } from '@mui/material';
+import { FilterAlt, FilterAltOff, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { fetchGet, fetchPostResponse } from '../../helpers/fetchFunctions';
 import { MultiSelect } from '../MultiSelect';
-import { DatePicker, LocalizationProvider, PickersDay, PickersDayProps } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
-import 'dayjs/plugin/isBetween';
+import { getSundayDateForDate } from '../../helpers/dateHelpers';
+import { WeekChanger } from '../WeekChanger';
 
 const dayMap = new Map<DayIndex, Day>([
     [0, 'Sunday'],
@@ -57,34 +48,6 @@ interface HoursMinutesSplit {
     minutes: number;
 }
 
-interface CustomPickerDayProps extends PickersDayProps<Dayjs> {
-    dayIsBetween: boolean;
-    isFirstDay: boolean;
-    isLastDay: boolean;
-}
-
-const CustomPickersDay = styled(PickersDay, {
-    shouldForwardProp: (prop) =>
-        prop !== 'dayIsBetween' && prop !== 'isFirstDay' && prop !== 'isLastDay',
-})<CustomPickerDayProps>(({ theme, dayIsBetween, isFirstDay, isLastDay }) => ({
-    ...(dayIsBetween && {
-        borderRadius: 0,
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.common.white,
-        '&:hover, &:focus': {
-            backgroundColor: theme.palette.primary.dark,
-        },
-    }),
-    ...(isFirstDay && {
-        borderTopLeftRadius: '50%',
-        borderBottomLeftRadius: '50%',
-    }),
-    ...(isLastDay && {
-        borderTopRightRadius: '50%',
-        borderBottomRightRadius: '50%',
-    }),
-})) as React.ComponentType<CustomPickerDayProps>;
-
 export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     const {
         projects,
@@ -99,13 +62,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     } = props;
 
     const currentDate = new Date();
-
-    const getSundayDateForDate = (date: Date) => {
-        const currentDay = date.getDay();
-        const calculatedSundayDate = new Date(date);
-        calculatedSundayDate.setDate(calculatedSundayDate.getDate() - currentDay);
-        return calculatedSundayDate;
-    };
 
     const [sundayDate, setSundayDate] = useState<Date>(getSundayDateForDate(currentDate));
 
@@ -392,78 +348,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         );
     };
 
-    const changeToPreviousWeek = () => changeWeekByOne(false);
-
-    const changeToNextWeek = () => changeWeekByOne(true);
-
-    const changeToAnyWeek = (
-        newValue: dayjs.Dayjs | null,
-        _keyboardInputValue?: string | undefined,
-    ) => {
-        const newDate = newValue?.toDate();
-        if (newDate !== undefined) {
-            const newSundayDate = getSundayDateForDate(newDate);
-            setSundayDate(newSundayDate);
-        }
-    };
-
-    const changeWeekByOne = (forward: boolean) => {
-        const modifier = forward ? 1 : -1;
-        const newSundayDate = new Date(sundayDate.getTime() + 7 * modifier * 24 * 60 * 60 * 1000);
-        setSundayDate(newSundayDate);
-    };
-
-    const renderWeekPickerDay = (
-        date: Dayjs,
-        _selectedDates: Array<Dayjs | null>,
-        pickersDayProps: PickersDayProps<Dayjs>,
-    ) => {
-        if (!sundayDate) {
-            return <PickersDay {...pickersDayProps} />;
-        }
-
-        const sundayDayjs = dayjs(sundayDate);
-        const start = sundayDayjs.startOf('week');
-        const end = sundayDayjs.endOf('week');
-
-        const dayIsBetween = date.isBetween(start, end, null, '[]');
-        const isFirstDay = date.isSame(start, 'day');
-        const isLastDay = date.isSame(end, 'day');
-
-        return (
-            <CustomPickersDay
-                {...pickersDayProps}
-                disableMargin
-                dayIsBetween={dayIsBetween}
-                isFirstDay={isFirstDay}
-                isLastDay={isLastDay}
-            />
-        );
-    };
-
-    const getWeekChanger = () => {
-        return (
-            <div className={classes.weekChanger}>
-                <IconButton className={classes.squareIconButton} onClick={changeToPreviousWeek}>
-                    <KeyboardArrowLeft />
-                </IconButton>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                        className={classes.weekChangeInput}
-                        label="Week of"
-                        value={dayjs(sundayDate)}
-                        onChange={changeToAnyWeek}
-                        renderDay={renderWeekPickerDay}
-                        renderInput={(params) => <TextField {...params} />}
-                    />
-                </LocalizationProvider>
-                <IconButton className={classes.squareIconButton} onClick={changeToNextWeek}>
-                    <KeyboardArrowRight />
-                </IconButton>
-            </div>
-        );
-    };
-
     const splitHoursAndMinutes = (totalMinutes: number): HoursMinutesSplit => {
         const hours = Math.floor(totalMinutes / 60);
         const minutes = totalMinutes - hours * 60;
@@ -599,7 +483,9 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
             <div className={classes.weekHeader}>
                 <div className={classes.basicHeader}>
                     {getShowFilterButton()}
-                    <div className={classes.weekHeaderHalf}>{getWeekChanger()}</div>
+                    <div className={classes.weekHeaderHalf}>
+                        <WeekChanger sundayDate={sundayDate} setSundayDate={setSundayDate} />
+                    </div>
                     <div className={classes.weekHeaderHalf}>Week Total:{getWeekTotalText()}</div>
                 </div>
                 {getFilterSection()}

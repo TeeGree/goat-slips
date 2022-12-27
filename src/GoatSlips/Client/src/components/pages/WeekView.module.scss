@@ -19,18 +19,6 @@
     max-height: 100%;
 }
 
-.weekChanger {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.2em;
-    align-items: center;
-}
-
-.weekChangeInput {
-    margin-left: 0.2em !important;
-    margin-right: 0.2em !important;
-}
-
 .weekHeader,
 .basicHeader {
     width: 100%;
@@ -46,12 +34,6 @@
     width: 50%;
     display: flex;
     justify-content: center;
-}
-
-.squareIconButton {
-    width: $headerHeight;
-    height: $headerHeight;
-    border-radius: 4px !important;
 }
 
 .squareIconButtonLong {
