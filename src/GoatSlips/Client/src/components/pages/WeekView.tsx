@@ -5,16 +5,11 @@ import { Day, DayIndex } from '../../types/Day';
 import { DropdownOption } from '../../types/DropdownOption';
 import { FavoriteTimeSlipData, TimeSlip } from '../../types/TimeSlip';
 import { IconButton, Tooltip } from '@mui/material';
-import {
-    FilterAlt,
-    FilterAltOff,
-    KeyboardArrowDown,
-    KeyboardArrowLeft,
-    KeyboardArrowRight,
-    KeyboardArrowUp,
-} from '@mui/icons-material';
+import { FilterAlt, FilterAltOff, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { fetchGet, fetchPostResponse } from '../../helpers/fetchFunctions';
 import { MultiSelect } from '../MultiSelect';
+import { getSundayDateForDate } from '../../helpers/dateHelpers';
+import { WeekChanger } from '../WeekChanger';
 
 const dayMap = new Map<DayIndex, Day>([
     [0, 'Sunday'],
@@ -67,13 +62,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     } = props;
 
     const currentDate = new Date();
-
-    const getSundayDateForDate = (date: Date) => {
-        const currentDay = date.getDay();
-        const calculatedSundayDate = new Date();
-        calculatedSundayDate.setDate(calculatedSundayDate.getDate() - currentDay);
-        return calculatedSundayDate;
-    };
 
     const [sundayDate, setSundayDate] = useState<Date>(getSundayDateForDate(currentDate));
 
@@ -360,28 +348,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         );
     };
 
-    const changeWeek = (forward: boolean) => {
-        const modifier = forward ? 1 : -1;
-        const newSundayDate = new Date(sundayDate.getTime() + 7 * modifier * 24 * 60 * 60 * 1000);
-        setSundayDate(newSundayDate);
-    };
-
-    const getWeekChanger = () => {
-        return (
-            <div className={classes.weekChanger}>
-                <IconButton className={classes.squareIconButton} onClick={() => changeWeek(false)}>
-                    <KeyboardArrowLeft />
-                </IconButton>
-                Week of {sundayDateString}
-                <IconButton className={classes.squareIconButton} onClick={() => changeWeek(true)}>
-                    <KeyboardArrowRight />
-                </IconButton>
-            </div>
-        );
-    };
-
-    const sundayDateString = sundayDate.toLocaleDateString('en');
-
     const splitHoursAndMinutes = (totalMinutes: number): HoursMinutesSplit => {
         const hours = Math.floor(totalMinutes / 60);
         const minutes = totalMinutes - hours * 60;
@@ -517,7 +483,9 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
             <div className={classes.weekHeader}>
                 <div className={classes.basicHeader}>
                     {getShowFilterButton()}
-                    <div className={classes.weekHeaderHalf}>{getWeekChanger()}</div>
+                    <div className={classes.weekHeaderHalf}>
+                        <WeekChanger sundayDate={sundayDate} setSundayDate={setSundayDate} />
+                    </div>
                     <div className={classes.weekHeaderHalf}>Week Total:{getWeekTotalText()}</div>
                 </div>
                 {getFilterSection()}

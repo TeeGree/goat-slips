@@ -19,13 +19,6 @@
     max-height: 100%;
 }
 
-.weekChanger {
-    width: 13em;
-    display: flex;
-    justify-content: space-between;
-    padding: 0.2em;
-}
-
 .weekHeader,
 .basicHeader {
     width: 100%;
@@ -41,12 +34,6 @@
     width: 50%;
     display: flex;
     justify-content: center;
-}
-
-.squareIconButton {
-    width: $headerHeight;
-    height: $headerHeight;
-    border-radius: 4px !important;
 }
 
 .squareIconButtonLong {
