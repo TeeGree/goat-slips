@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import classes from './EditableTimeSlip.module.scss';
 import {
+    Autocomplete,
     Button,
     Card,
     CardActions,
     CardContent,
-    FormControl,
     IconButton,
-    InputLabel,
-    MenuItem,
-    Select,
-    SelectChangeEvent,
     TextField,
     Tooltip,
 } from '@mui/material';
@@ -32,7 +28,7 @@ interface EditableTimeSlipProps {
     day: Day;
     projectOptions: DropdownOption[];
     laborCodeOptions: DropdownOption[];
-    getTaskOptionsForProject: (projectId: number) => DropdownOption[];
+    getTaskOptionsForProject: (projectId: number | null) => DropdownOption[];
     stopAddingTimeslip: () => void;
     saveTimeSlip: (
         projectId: number,
@@ -51,6 +47,9 @@ interface EditableTimeSlipProps {
     description?: string;
     setMinutesDiff: (day: Day, minutesDiff: number) => void;
     isNewTimeSlip: boolean;
+    projectMap: Map<number, string>;
+    taskMap: Map<number, string>;
+    laborCodeMap: Map<number, string>;
 }
 
 export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: EditableTimeSlipProps) => {
@@ -69,19 +68,32 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         description,
         setMinutesDiff,
         isNewTimeSlip,
+        projectMap,
+        taskMap,
+        laborCodeMap,
     } = props;
 
     const getTotalMinutes = (h: number | '', m: number | '') => {
         return (h === '' ? 0 : h) * 60 + (m === '' ? 0 : m);
     };
 
-    const [selectedProjectId, setSelectedProjectId] = useState<number | ''>(projectId ?? '');
-    const [selectedTaskId, setSelectedTaskId] = useState<number | ''>(taskId ?? '');
-    const [selectedLaborCodeId, setSelectedLaborCodeId] = useState<number | ''>(laborCodeId ?? '');
+    const [selectedProjectId, setSelectedProjectId] = useState<number | null>(projectId ?? null);
+    const [selectedTaskId, setSelectedTaskId] = useState<number | null>(taskId ?? null);
+    const [selectedLaborCodeId, setSelectedLaborCodeId] = useState<number | null>(
+        laborCodeId ?? null,
+    );
     const [selectedHours, setSelectedHours] = useState<number | ''>(hours ?? '');
     const [selectedMinutes, setSelectedMinutes] = useState<number | ''>(minutes ?? '');
     const [enteredDescription, setEnteredDescription] = useState(description ?? '');
     const [expandMultiDaySelect, setExpandMultiDaySelect] = useState(false);
+
+    useEffect(() => {
+        const tasksForProject = getTaskOptionsForProject(selectedProjectId);
+        const taskIdsForProject = new Set(tasksForProject.map((t) => t.id));
+        if (selectedTaskId !== null && !taskIdsForProject.has(selectedTaskId)) {
+            setSelectedTaskId(null);
+        }
+    }, [selectedProjectId]);
 
     const [addToDayMap, setAddToDayMap] = useState<Map<Day, boolean>>(
         new Map([
@@ -110,55 +122,6 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
 
     const totalInitialMinutes = getTotalMinutes(hours ?? '', minutes ?? '');
 
-    const getProjectOptions = (): JSX.Element[] => {
-        return projectOptions.map((project: DropdownOption) => {
-            const { id, name } = project;
-            return (
-                <MenuItem key={`project${id}`} value={id}>
-                    {name}
-                </MenuItem>
-            );
-        });
-    };
-
-    const getTaskOptions = (): JSX.Element[] => {
-        if (selectedProjectId === '') {
-            return [];
-        }
-        const tasks = getTaskOptionsForProject(selectedProjectId);
-        return tasks.map((task: DropdownOption) => {
-            const { id, name } = task;
-            return (
-                <MenuItem key={`task${id}`} value={id}>
-                    {name}
-                </MenuItem>
-            );
-        });
-    };
-
-    const getLaborCodeOptions = (): JSX.Element[] => {
-        return laborCodeOptions.map((laborCode: DropdownOption) => {
-            const { id, name } = laborCode;
-            return (
-                <MenuItem key={`laborCode${id}`} value={id}>
-                    {name}
-                </MenuItem>
-            );
-        });
-    };
-
-    const handleProjectChange = (event: SelectChangeEvent<number>) => {
-        setSelectedProjectId(Number(event.target.value));
-    };
-
-    const handleTaskChange = (event: SelectChangeEvent<number>) => {
-        setSelectedTaskId(Number(event.target.value));
-    };
-
-    const handleLaborCodeChange = (event: SelectChangeEvent<number>) => {
-        setSelectedLaborCodeId(Number(event.target.value));
-    };
-
     const handleHoursChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = event.target.value;
 
@@ -183,12 +146,10 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
     };
 
     const submitTimeSlip = () => {
-        if (!isSaveAllowed(selectedProjectId)) {
+        if (selectedProjectId === null || !isSaveAllowed(selectedProjectId ?? '')) {
             return;
         }
 
-        const taskIdForSubmit = selectedTaskId === '' ? null : selectedTaskId;
-        const laborCodeIdForSubmit = selectedLaborCodeId === '' ? null : selectedLaborCodeId;
         const days: Day[] = [];
 
         addToDayMap.forEach((addToDay, d) => {
@@ -198,8 +159,8 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         });
         saveTimeSlip(
             selectedProjectId,
-            taskIdForSubmit,
-            laborCodeIdForSubmit,
+            selectedTaskId,
+            selectedLaborCodeId,
             selectedHours === '' ? 0 : selectedHours,
             selectedMinutes === '' ? 0 : selectedMinutes,
             days,
@@ -238,7 +199,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         setAddToDayMap((prev) => {
             const newMap = new Map(prev);
 
-            newMap.forEach((addToDay, d) => {
+            newMap.forEach((_addToDay, d) => {
                 newMap.set(d, d === day);
             });
 
@@ -322,38 +283,107 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         return <></>;
     };
 
+    const getSelectedAutocompleteProjectId = () => {
+        if (selectedProjectId === null) {
+            return null;
+        }
+
+        return { label: projectMap.get(selectedProjectId), id: selectedProjectId };
+    };
+
+    const getSelectedAutocompleteTaskId = () => {
+        if (selectedTaskId === null) {
+            return null;
+        }
+
+        return { label: taskMap.get(selectedTaskId), id: selectedTaskId };
+    };
+
+    const getSelectedAutocompleteLaborCodeId = () => {
+        if (selectedLaborCodeId === null) {
+            return null;
+        }
+
+        return { label: laborCodeMap.get(selectedLaborCodeId), id: selectedLaborCodeId };
+    };
+
+    const onProjectChange = (
+        _event: React.SyntheticEvent<Element, Event>,
+        value: {
+            label: string | undefined;
+            id: number;
+        } | null,
+    ) => {
+        if (value === null) {
+            setSelectedProjectId(null);
+        } else if (value !== null && projectMap.has(value.id)) {
+            setSelectedProjectId(value.id);
+        }
+    };
+
+    const onTaskChange = (
+        _event: React.SyntheticEvent<Element, Event>,
+        value: {
+            label: string | undefined;
+            id: number;
+        } | null,
+    ) => {
+        if (value === null) {
+            setSelectedTaskId(null);
+        } else if (value !== null && taskMap.has(value.id)) {
+            setSelectedTaskId(value.id);
+        }
+    };
+
+    const onLaborCodeChange = (
+        _event: React.SyntheticEvent<Element, Event>,
+        value: {
+            label: string | undefined;
+            id: number;
+        } | null,
+    ) => {
+        if (value === null) {
+            setSelectedLaborCodeId(null);
+        } else if (value !== null && laborCodeMap.has(value.id)) {
+            setSelectedLaborCodeId(value.id);
+        }
+    };
+
     return (
         <Card>
             <CardContent>
-                <FormControl fullWidth>
-                    <InputLabel>Project</InputLabel>
-                    <Select
-                        value={selectedProjectId}
-                        onChange={handleProjectChange}
-                        label="Project"
-                    >
-                        {getProjectOptions()}
-                    </Select>
-                </FormControl>
-
-                <FormControl fullWidth className={classes.cardInput}>
-                    <InputLabel>Task</InputLabel>
-                    <Select value={selectedTaskId} onChange={handleTaskChange} label="Task">
-                        {getTaskOptions()}
-                    </Select>
-                </FormControl>
-
-                <FormControl fullWidth className={classes.cardInput}>
-                    <InputLabel>Labor Code</InputLabel>
-                    <Select
-                        disabled={selectedProjectId === undefined}
-                        value={selectedLaborCodeId}
-                        label="Labor Code"
-                        onChange={handleLaborCodeChange}
-                    >
-                        {getLaborCodeOptions()}
-                    </Select>
-                </FormControl>
+                <Autocomplete
+                    disablePortal
+                    options={projectOptions.map((p) => {
+                        return { label: p.name, id: p.id };
+                    })}
+                    renderInput={(params) => <TextField {...params} label="Project" />}
+                    value={getSelectedAutocompleteProjectId()}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    onChange={onProjectChange}
+                />
+                <Autocomplete
+                    className={classes.cardInput}
+                    disablePortal
+                    options={getTaskOptionsForProject(selectedProjectId).map((t) => {
+                        return { label: t.name, id: t.id };
+                    })}
+                    renderInput={(params) => <TextField {...params} label="Task" />}
+                    value={getSelectedAutocompleteTaskId()}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    onChange={onTaskChange}
+                />
+                <Autocomplete
+                    className={classes.cardInput}
+                    disablePortal
+                    options={laborCodeOptions.map((t) => {
+                        return { label: t.name, id: t.id };
+                    })}
+                    renderInput={(params) => <TextField {...params} label="Labor Code" />}
+                    value={getSelectedAutocompleteLaborCodeId()}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    onChange={onLaborCodeChange}
+                />
 
                 <TextField
                     className={classes.description}
@@ -385,7 +415,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                 <div className={classes.cardActionsBase}>
                     <span className={classes.cardButtons}>
                         <Button
-                            disabled={!isSaveAllowed(selectedProjectId)}
+                            disabled={!isSaveAllowed(selectedProjectId ?? '')}
                             variant="contained"
                             onClick={handleSave}
                         >

@@ -19,7 +19,7 @@ interface DayColumnProps {
     isCurrentDay: boolean;
     projectOptions: DropdownOption[];
     laborCodeOptions: DropdownOption[];
-    getTaskOptionsForProject: (projectId: number) => DropdownOption[];
+    getTaskOptionsForProject: (projectId: number | null) => DropdownOption[];
     saveTimeSlip: (
         projectId: number,
         taskId: number | null,
@@ -50,6 +50,9 @@ interface DayColumnProps {
     isFiltered: boolean;
     newDayMinuteDiffs: Map<Day, Map<number, number>>;
     setNewDayMinuteDiffs: (day: Day, timeSlipId: number, minutes: number) => void;
+    projectMap: Map<number, string>;
+    taskMap: Map<number, string>;
+    laborCodeMap: Map<number, string>;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
@@ -100,6 +103,9 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         isFiltered,
         newDayMinuteDiffs,
         setNewDayMinuteDiffs,
+        projectMap,
+        taskMap,
+        laborCodeMap,
     } = props;
 
     const getDateString = () => {
@@ -189,6 +195,9 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     taskId={favoriteTimeSlipToAdd?.taskId ?? undefined}
                     laborCodeId={favoriteTimeSlipToAdd?.laborCodeId ?? undefined}
                     isNewTimeSlip
+                    projectMap={projectMap}
+                    taskMap={taskMap}
+                    laborCodeMap={laborCodeMap}
                 />
             );
         }
@@ -253,6 +262,9 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     saveTimeSlip={saveExistingTimeSlip}
                     deleteTimeSlip={deleteTimeSlip}
                     fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
+                    projectMap={projectMap}
+                    taskMap={taskMap}
+                    laborCodeMap={laborCodeMap}
                 />
             );
         });

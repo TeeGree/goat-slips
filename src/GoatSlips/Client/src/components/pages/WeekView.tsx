@@ -228,7 +228,11 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         getTimeSlips();
     }, [sundayDate]);
 
-    const getTaskOptionsForProject = (projectId: number): DropdownOption[] => {
+    const getTaskOptionsForProject = (projectId: number | null): DropdownOption[] => {
+        if (projectId === null) {
+            return tasks;
+        }
+
         const tasksForProject = tasksAllowedForProjects.get(projectId);
         if (tasksForProject === undefined) {
             throw Error('No tasks found for project!');
@@ -344,6 +348,9 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 isFiltered={isFiltered()}
                 newDayMinuteDiffs={newDayMinuteDiffs}
                 setNewDayMinuteDiffs={setDayMinutesDiff}
+                projectMap={projectMap}
+                taskMap={taskMap}
+                laborCodeMap={laborCodeMap}
             />
         );
     };
