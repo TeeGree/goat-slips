@@ -1,5 +1,5 @@
 import { Delete } from '@mui/icons-material';
-import { Box, Button, Modal } from '@mui/material';
+import { Box, Button, Modal, TableCell, TableRow } from '@mui/material';
 import React, { useState } from 'react';
 import { modalStyle } from '../constants/modalStyle';
 import { codeInUse } from '../constants/statusCodes';
@@ -7,9 +7,8 @@ import { fetchPostResponse } from '../helpers/fetchFunctions';
 import { ErrorDetails } from '../types/ErrorDetails';
 import { FavoriteTimeSlipData } from '../types/TimeSlip';
 import classes from './FavoriteTimeSlip.module.scss';
-import { EntityLabelWithIcon } from './EntityLabelWithIcon';
 
-interface FavoriteTimeSlipProps {
+interface FavoriteTimeSlipRowProps {
     favoriteTimeSlip: FavoriteTimeSlipData;
     fetchFavoriteTimeSlips: () => Promise<void>;
     setError: (message: string) => void;
@@ -19,7 +18,9 @@ interface FavoriteTimeSlipProps {
     laborCodeMap: Map<number, string>;
 }
 
-export const FavoriteTimeSlip: React.FC<FavoriteTimeSlipProps> = (props: FavoriteTimeSlipProps) => {
+export const FavoriteTimeSlipRow: React.FC<FavoriteTimeSlipRowProps> = (
+    props: FavoriteTimeSlipRowProps,
+) => {
     const {
         favoriteTimeSlip,
         setError,
@@ -75,7 +76,23 @@ export const FavoriteTimeSlip: React.FC<FavoriteTimeSlipProps> = (props: Favorit
     };
 
     return (
-        <div className={classes.favoriteTimeSlipContainer}>
+        <>
+            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell>{favoriteTimeSlip.name}</TableCell>
+                <TableCell>{getProjectName()}</TableCell>
+                <TableCell>{getTaskName()}</TableCell>
+                <TableCell>{getLaborCodeName()}</TableCell>
+                <TableCell>
+                    <Button
+                        className={classes.button}
+                        variant="contained"
+                        color="error"
+                        onClick={() => setIsBeingDeleted(true)}
+                    >
+                        <Delete />
+                    </Button>
+                </TableCell>
+            </TableRow>
             <Modal open={isBeingDeleted}>
                 <Box sx={modalStyle}>
                     <h2>Are you sure you want to delete {`"${favoriteTimeSlip.name}"`}?</h2>
@@ -93,20 +110,6 @@ export const FavoriteTimeSlip: React.FC<FavoriteTimeSlipProps> = (props: Favorit
                     </div>
                 </Box>
             </Modal>
-            <div className={classes.favoriteTimeSlipName}>
-                <span className={classes.underlined}>{favoriteTimeSlip.name}</span>
-                <EntityLabelWithIcon label={getProjectName()} timeCodeType="project" />
-                <EntityLabelWithIcon label={getTaskName()} timeCodeType="task" />
-                <EntityLabelWithIcon label={getLaborCodeName()} timeCodeType="laborCode" />
-            </div>
-            <Button
-                className={classes.button}
-                variant="contained"
-                color="error"
-                onClick={() => setIsBeingDeleted(true)}
-            >
-                <Delete />
-            </Button>
-        </div>
+        </>
     );
 };

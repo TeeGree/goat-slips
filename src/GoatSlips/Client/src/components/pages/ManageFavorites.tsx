@@ -1,9 +1,18 @@
-import { Alert } from '@mui/material';
+import {
+    Alert,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+} from '@mui/material';
 import React, { useState } from 'react';
 import { AlertMessage } from '../../types/AlertMessage';
 import { FavoriteTimeSlipData } from '../../types/TimeSlip';
-import { FavoriteTimeSlip } from '../FavoriteTimeSlip';
-import classes from './ManageTimeCodes.module.scss';
+import { FavoriteTimeSlipRow } from '../FavoriteTimeSlipRow';
+import classes from './ManageFavorites.module.scss';
 
 interface ManageFavoritesProps {
     favoriteTimeSlips: FavoriteTimeSlipData[];
@@ -18,11 +27,11 @@ export const ManageFavorites: React.FC<ManageFavoritesProps> = (props: ManageFav
 
     const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
 
-    const getFavoriteTimeSlipsList = () => {
+    const getFavoriteTimeSlipRows = () => {
         const existingLaborCodeElements = favoriteTimeSlips.map(
             (favoriteTimeSlip: FavoriteTimeSlipData) => {
                 return (
-                    <FavoriteTimeSlip
+                    <FavoriteTimeSlipRow
                         key={`favoriteTimeSlip-${favoriteTimeSlip.id}`}
                         favoriteTimeSlip={favoriteTimeSlip}
                         fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
@@ -40,7 +49,7 @@ export const ManageFavorites: React.FC<ManageFavoritesProps> = (props: ManageFav
             },
         );
 
-        return <div className={classes.projectsContainer}>{existingLaborCodeElements}</div>;
+        return existingLaborCodeElements;
     };
 
     const getAlert = () => {
@@ -53,9 +62,22 @@ export const ManageFavorites: React.FC<ManageFavoritesProps> = (props: ManageFav
 
     return (
         <div className={classes.pageContainer}>
-            <div className={classes.header}>Manage Favorite Time Slips</div>
+            <div className={classes.header}>Favorite Time Slips</div>
             {getAlert()}
-            <div>{getFavoriteTimeSlipsList()}</div>
+            <TableContainer component={Paper} className={classes.tableContainer}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Project</TableCell>
+                            <TableCell>Task</TableCell>
+                            <TableCell>Labor Code</TableCell>
+                            <TableCell className={classes.buttonCell} />
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>{getFavoriteTimeSlipRows()}</TableBody>
+                </Table>
+            </TableContainer>
         </div>
     );
 };

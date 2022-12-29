@@ -674,7 +674,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                 {getActionBar()}
                 {getInputs()}
                 <TableContainer component={Paper} className={classes.tableContainer}>
-                    <Table aria-label="simple table">
+                    <Table>
                         <TableHead>
                             <TableRow>
                                 <TableCell>User</TableCell>

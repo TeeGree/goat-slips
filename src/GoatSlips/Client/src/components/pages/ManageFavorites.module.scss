@@ -6,6 +6,11 @@
     align-items: center;
 }
 
+.tableContainer {
+    flex-grow: 1;
+    width: 70% !important;
+}
+
 .header {
     padding: 25px;
 }
@@ -16,4 +21,8 @@
 
 .codeTypeButtonGroup {
     margin-bottom: 25px;
+}
+
+.buttonCell {
+    width: 0;
 }
