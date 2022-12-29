@@ -1,12 +1,4 @@
-import {
-    Checkbox,
-    FormControl,
-    InputLabel,
-    ListItemText,
-    MenuItem,
-    Select,
-    SelectChangeEvent,
-} from '@mui/material';
+import { Autocomplete, TextField } from '@mui/material';
 import React from 'react';
 import { DropdownOption } from '../types/DropdownOption';
 import classes from './MultiSelect.module.scss';
@@ -20,6 +12,7 @@ interface MultiSelectProps {
     label: string;
     keyPrefix?: string;
     options: DropdownOption[];
+    className?: string;
 }
 
 export const MultiSelect: React.FC<MultiSelectProps> = (props: MultiSelectProps) => {
@@ -30,82 +23,62 @@ export const MultiSelect: React.FC<MultiSelectProps> = (props: MultiSelectProps)
         setIsDirty,
         getDisplayTextForId,
         label,
-        keyPrefix,
         options,
+        className,
     } = props;
 
-    const renderSelected = (selectedIdsToRender: number[]) => {
-        let displayText = '';
-        selectedIdsToRender.forEach((id: number, index: number) => {
-            displayText += getDisplayTextForId(id) ?? 'N/A';
-            if (index < selectedIdsToRender.length - 1) {
-                displayText += ', ';
-            }
-        });
+    const onTaskChange = (
+        _event: React.SyntheticEvent<Element, Event>,
+        value:
+            | {
+                  label: string | undefined;
+                  id: number;
+              }[]
+            | null,
+    ) => {
+        const values = value === null ? [] : value.map((v) => v.id);
 
-        return displayText;
+        checkIfDirty(values);
+
+        setSelectedIds(values);
     };
 
-    const handleSelectChange = (
-        event: SelectChangeEvent<number[]>,
-        setStateAction: (n: number[]) => void,
-    ) => {
-        const {
-            target: { value },
-        } = event;
-        const values = typeof value === 'string' ? value.split(',').map((v) => Number(v)) : value;
-
-        if (originalSelectedIds === undefined || originalSelectedIds.size !== values.length) {
+    const checkIfDirty = (newValues: number[]) => {
+        if (originalSelectedIds === undefined || originalSelectedIds.size !== newValues.length) {
             if (setIsDirty !== undefined) {
                 setIsDirty(true);
             }
-            setStateAction(values);
-            return;
-        }
-        let dirty = false;
-        values.forEach((v) => {
-            if (!originalSelectedIds.has(v)) {
-                dirty = true;
-                return;
+        } else {
+            let dirty = false;
+            newValues.forEach((v) => {
+                if (!originalSelectedIds.has(v)) {
+                    dirty = true;
+                    return;
+                }
+            });
+
+            if (setIsDirty !== undefined) {
+                setIsDirty(dirty);
             }
-        });
-
-        if (setIsDirty !== undefined) {
-            setIsDirty(dirty);
         }
-        setStateAction(values);
     };
 
-    const handleChange = (event: SelectChangeEvent<number[]>) => {
-        handleSelectChange(event, setSelectedIds);
-    };
-
-    const getTaskMenuItems = () => {
-        return options.map((task: DropdownOption) => {
-            const { id, name } = task;
-            const isChecked = selectedIds.indexOf(id) > -1;
-            const prefix = keyPrefix ?? '';
-            return (
-                <MenuItem key={`${prefix}${id}`} value={id}>
-                    <Checkbox checked={isChecked} />
-                    <ListItemText primary={name} />
-                </MenuItem>
-            );
-        });
-    };
+    const autoCompleteWidthClass = className ?? classes.dropdown;
 
     return (
-        <FormControl className={classes.dropdown}>
-            <InputLabel>{label}</InputLabel>
-            <Select
-                renderValue={(selected) => renderSelected(selected)}
-                multiple
-                value={selectedIds}
-                label={label}
-                onChange={handleChange}
-            >
-                {getTaskMenuItems()}
-            </Select>
-        </FormControl>
+        <Autocomplete
+            multiple
+            className={autoCompleteWidthClass}
+            disablePortal
+            options={options.map((o) => {
+                return { label: o.name, id: o.id };
+            })}
+            renderInput={(params) => <TextField {...params} label={label} />}
+            value={selectedIds.map((id) => {
+                return { id, label: getDisplayTextForId(id) };
+            })}
+            isOptionEqualToValue={(option, value) => option?.id === value?.id}
+            onChange={onTaskChange}
+        />
     );
 };

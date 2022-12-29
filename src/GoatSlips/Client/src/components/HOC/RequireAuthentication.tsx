@@ -26,16 +26,16 @@ export const RequireAuthentication: React.FC<RequireAuthenticationProps> = (
 
     useEffect(() => {
         if (
-            !isAuthenticationLoading &&
-            !isAccessRightsLoading &&
-            (!isAuthenticated ||
-                (requiredAccessRight !== undefined && !accessRights.has(requiredAccessRight)))
+            (!isAuthenticationLoading && !isAuthenticated) ||
+            (!isAccessRightsLoading &&
+                requiredAccessRight !== undefined &&
+                !accessRights.has(requiredAccessRight))
         ) {
             navigate('/');
         }
     }, [isAuthenticationLoading, requiredAccessRight, accessRights]);
 
-    if (isAuthenticationLoading) {
+    if (isAuthenticationLoading || isAccessRightsLoading) {
         return <CircularProgress />;
     }
 

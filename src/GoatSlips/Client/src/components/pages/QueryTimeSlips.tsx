@@ -259,12 +259,12 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         if (isAdmin) {
             return (
                 <MultiSelect
+                    className={classes.multiSelect}
                     selectedIds={selectedUserIds}
                     getDisplayTextForId={(id: number) => userMap.get(id) ?? 'N/A'}
                     setSelectedIds={setSelectedUserIds}
                     label="User"
                     options={users}
-                    keyPrefix="user-"
                 />
             );
         }
@@ -273,57 +273,61 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
 
     const getInputs = () => {
         return (
-            <div className={classes.inputContainer}>
-                {getUserInput()}
-                <MultiSelect
-                    selectedIds={selectedProjectIds}
-                    getDisplayTextForId={(id: number) => projectMap.get(id) ?? 'N/A'}
-                    setSelectedIds={setSelectedProjectIds}
-                    label="Project"
-                    options={projects}
-                    keyPrefix="project-"
-                />
-                <MultiSelect
-                    selectedIds={selectedTaskIds}
-                    getDisplayTextForId={(id: number) => taskMap.get(id) ?? 'N/A'}
-                    setSelectedIds={setSelectedTaskIds}
-                    label="Task"
-                    options={[emptyDropdownOption, ...tasks]}
-                    keyPrefix="task-"
-                />
-                <MultiSelect
-                    selectedIds={selectedLaborCodeIds}
-                    getDisplayTextForId={(id: number) => laborCodeMap.get(id) ?? 'N/A'}
-                    setSelectedIds={setSelectedLaborCodeIds}
-                    label="Labor Code"
-                    options={[emptyDropdownOption, ...laborCodes]}
-                    keyPrefix="laborCode-"
-                />
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                        label="From Date"
-                        value={fromDate}
-                        onChange={(newValue) => {
-                            setFromDate(newValue);
-                        }}
-                        renderInput={(params) => <TextField {...params} />}
+            <div>
+                <div className={classes.inputContainer}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                            label="From Date"
+                            value={fromDate}
+                            onChange={(newValue) => {
+                                setFromDate(newValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} />}
+                        />
+                    </LocalizationProvider>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                            label="To Date"
+                            value={toDate}
+                            onChange={(newValue) => {
+                                setToDate(newValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} />}
+                        />
+                    </LocalizationProvider>
+                    <Tooltip title="Export results as csv.">
+                        <Button variant="contained" onClick={download}>
+                            <FileDownload />
+                        </Button>
+                    </Tooltip>
+                </div>
+                <div className={classes.inputContainer}>
+                    {getUserInput()}
+                    <MultiSelect
+                        className={classes.multiSelect}
+                        selectedIds={selectedProjectIds}
+                        getDisplayTextForId={(id: number) => projectMap.get(id) ?? 'N/A'}
+                        setSelectedIds={setSelectedProjectIds}
+                        label="Project"
+                        options={projects}
                     />
-                </LocalizationProvider>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                        label="To Date"
-                        value={toDate}
-                        onChange={(newValue) => {
-                            setToDate(newValue);
-                        }}
-                        renderInput={(params) => <TextField {...params} />}
+                    <MultiSelect
+                        className={classes.multiSelect}
+                        selectedIds={selectedTaskIds}
+                        getDisplayTextForId={(id: number) => taskMap.get(id) ?? 'N/A'}
+                        setSelectedIds={setSelectedTaskIds}
+                        label="Task"
+                        options={[emptyDropdownOption, ...tasks]}
                     />
-                </LocalizationProvider>
-                <Tooltip title="Export results as csv.">
-                    <Button variant="contained" onClick={download}>
-                        <FileDownload />
-                    </Button>
-                </Tooltip>
+                    <MultiSelect
+                        className={classes.multiSelect}
+                        selectedIds={selectedLaborCodeIds}
+                        getDisplayTextForId={(id: number) => laborCodeMap.get(id) ?? 'N/A'}
+                        setSelectedIds={setSelectedLaborCodeIds}
+                        label="Labor Code"
+                        options={[emptyDropdownOption, ...laborCodes]}
+                    />
+                </div>
             </div>
         );
     };

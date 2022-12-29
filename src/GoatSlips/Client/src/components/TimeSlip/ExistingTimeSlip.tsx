@@ -14,7 +14,7 @@ interface ExistingTimeSlipProps {
     getLaborCodeName: (laborCodeId: number) => string;
     projectOptions: DropdownOption[];
     laborCodeOptions: DropdownOption[];
-    getTaskOptionsForProject: (projectId: number) => DropdownOption[];
+    getTaskOptionsForProject: (projectId: number | null) => DropdownOption[];
     saveTimeSlip: (
         timeSlipId: number,
         projectId: number,
@@ -28,6 +28,9 @@ interface ExistingTimeSlipProps {
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
     setMinutesDiff: (day: Day, minutesDiff: number) => void;
     fetchFavoriteTimeSlips: () => void;
+    projectMap: Map<number, string>;
+    taskMap: Map<number, string>;
+    laborCodeMap: Map<number, string>;
 }
 
 export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: ExistingTimeSlipProps) => {
@@ -44,6 +47,9 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         deleteTimeSlip,
         setMinutesDiff,
         fetchFavoriteTimeSlips,
+        projectMap,
+        taskMap,
+        laborCodeMap,
     } = props;
 
     const [isEditing, setIsEditing] = useState(false);
@@ -90,6 +96,9 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
                     description={timeSlip.description}
                     setMinutesDiff={setMinutesDiff}
                     isNewTimeSlip={false}
+                    projectMap={projectMap}
+                    taskMap={taskMap}
+                    laborCodeMap={laborCodeMap}
                 />
             );
         }
