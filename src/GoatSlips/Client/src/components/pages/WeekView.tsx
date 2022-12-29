@@ -420,7 +420,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 <div className={classes.basicHeader}>
                     <MultiSelect
                         label="Projects"
-                        keyPrefix="project-filter-"
                         options={getInUseProjectOptions()}
                         selectedIds={selectedFilterProjectIds}
                         setSelectedIds={setSelectedFilterProjectIds}
@@ -428,7 +427,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                     />
                     <MultiSelect
                         label="Tasks"
-                        keyPrefix="task-filter-"
                         options={getInUseTaskOptions()}
                         selectedIds={selectedFilterTaskIds}
                         setSelectedIds={setSelectedFilterTaskIds}
@@ -436,7 +434,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                     />
                     <MultiSelect
                         label="Labor Codes"
-                        keyPrefix="labor-code-filter-"
                         options={getInUseLaborCodeOptions()}
                         selectedIds={selectedFilterLaborCodeIds}
                         setSelectedIds={setSelectedFilterLaborCodeIds}

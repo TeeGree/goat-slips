@@ -91,7 +91,6 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
             <span className={classes.projectName}>{project.name}</span>
             <MultiSelect
                 label="Allowed Tasks"
-                keyPrefix={`project-${project.name}-`}
                 originalSelectedIds={originalTasks}
                 selectedIds={selectedTaskIds}
                 setSelectedIds={setSelectedTaskIds}
