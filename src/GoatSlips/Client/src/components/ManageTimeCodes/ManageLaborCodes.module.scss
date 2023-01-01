@@ -1,0 +1,31 @@
+$newLaborCodeHeight: 74px;
+$newLaborCodeMargin: 5px;
+
+.newLaborCodeContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: $newLaborCodeHeight;
+    margin-bottom: $newLaborCodeMargin;
+    border: 1px solid grey;
+    border-radius: 5px;
+}
+
+.laborCodeName {
+    width: 250px !important;
+}
+
+.addNewLaborCode {
+    margin-left: 0.7em !important;
+}
+
+.tableContainer {
+    $marginBottom: 20px;
+    height: calc(100% - $newLaborCodeHeight - $newLaborCodeMargin - $marginBottom);
+    margin-bottom: $marginBottom;
+    min-width: 500px;
+}
+
+.buttonCell {
+    width: 0;
+}

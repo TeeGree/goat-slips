@@ -1,15 +1,15 @@
 import { Delete, Save } from '@mui/icons-material';
-import { Box, Button, Modal } from '@mui/material';
+import { Box, Button, Modal, TableCell, TableRow } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { modalStyle } from '../constants/modalStyle';
-import { codeInUse } from '../constants/statusCodes';
-import { fetchDeleteResponse, fetchPostResponse } from '../helpers/fetchFunctions';
-import { DropdownOption } from '../types/DropdownOption';
-import { ErrorDetails } from '../types/ErrorDetails';
+import { modalStyle } from '../../constants/modalStyle';
+import { codeInUse } from '../../constants/statusCodes';
+import { fetchDeleteResponse, fetchPostResponse } from '../../helpers/fetchFunctions';
+import { DropdownOption } from '../../types/DropdownOption';
+import { ErrorDetails } from '../../types/ErrorDetails';
 import classes from './ExistingProject.module.scss';
-import { MultiSelect } from './MultiSelect';
+import { MultiSelect } from '../MultiSelect';
 
-interface ExistingProjectProps {
+interface ExistingProjectRowProps {
     project: DropdownOption;
     allTasks: DropdownOption[];
     tasksAllowed: number[];
@@ -20,7 +20,9 @@ interface ExistingProjectProps {
     fetchTasksAllowed: () => Promise<void>;
 }
 
-export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingProjectProps) => {
+export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
+    props: ExistingProjectRowProps,
+) => {
     const {
         project,
         allTasks,
@@ -70,7 +72,40 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
     };
 
     return (
-        <div className={classes.projectContainer}>
+        <>
+            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell>{project.name}</TableCell>
+                <TableCell>
+                    <MultiSelect
+                        label="Allowed Tasks"
+                        originalSelectedIds={originalTasks}
+                        selectedIds={selectedTaskIds}
+                        setSelectedIds={setSelectedTaskIds}
+                        setIsDirty={setIsDirty}
+                        getDisplayTextForId={(id: number) => taskMap.get(id) ?? ''}
+                        options={allTasks}
+                    />
+                </TableCell>
+                <TableCell>
+                    <Button
+                        className={classes.button}
+                        variant="contained"
+                        color="error"
+                        onClick={() => setIsBeingDeleted(true)}
+                    >
+                        <Delete />
+                    </Button>
+                    <Button
+                        disabled={!isDirty}
+                        className={classes.button}
+                        variant="contained"
+                        color="success"
+                        onClick={updateAllowedTasksForProject}
+                    >
+                        <Save />
+                    </Button>
+                </TableCell>
+            </TableRow>
             <Modal open={isBeingDeleted}>
                 <Box sx={modalStyle}>
                     <h2>Are you sure you want to delete project {`"${project.name}"`}?</h2>
@@ -88,33 +123,6 @@ export const ExistingProject: React.FC<ExistingProjectProps> = (props: ExistingP
                     </div>
                 </Box>
             </Modal>
-            <span className={classes.projectName}>{project.name}</span>
-            <MultiSelect
-                label="Allowed Tasks"
-                originalSelectedIds={originalTasks}
-                selectedIds={selectedTaskIds}
-                setSelectedIds={setSelectedTaskIds}
-                setIsDirty={setIsDirty}
-                getDisplayTextForId={(id: number) => taskMap.get(id) ?? ''}
-                options={allTasks}
-            />
-            <Button
-                className={classes.button}
-                variant="contained"
-                color="error"
-                onClick={() => setIsBeingDeleted(true)}
-            >
-                <Delete />
-            </Button>
-            <Button
-                disabled={!isDirty}
-                className={classes.button}
-                variant="contained"
-                color="success"
-                onClick={updateAllowedTasksForProject}
-            >
-                <Save />
-            </Button>
-        </div>
+        </>
     );
 };

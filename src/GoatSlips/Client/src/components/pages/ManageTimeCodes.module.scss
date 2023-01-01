@@ -1,3 +1,5 @@
+$headerHeight: 90px;
+
 .pageContainer {
     height: 100%;
     width: 100%;
@@ -7,32 +9,18 @@
 }
 
 .header {
-    padding: 25px;
-}
-
-.projectsContainer {
-    width: 500px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.projectContainer {
+    height: $headerHeight;
+    font-size: 30px;
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
-    width: 100%;
-    padding: 8px;
-    margin: 5px;
-    border: 1px solid grey;
-    border-radius: 5px;
-}
-
-.projectName {
-    width: 250px !important;
 }
 
 .codeTypeButtonGroup {
-    margin-bottom: 25px;
+    height: $headerHeight;
+    display: flex;
+    align-items: center;
+}
+
+.codesList {
+    max-height: calc(100% - ($headerHeight * 2));
 }

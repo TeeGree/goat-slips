@@ -1,0 +1,31 @@
+$newProjectHeight: 74px;
+$newProjectMargin: 5px;
+
+.newProjectContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: $newProjectHeight;
+    margin-bottom: $newProjectMargin;
+    border: 1px solid grey;
+    border-radius: 5px;
+}
+
+.projectName {
+    width: 250px !important;
+}
+
+.addNewProject {
+    margin-left: 0.7em !important;
+}
+
+.tableContainer {
+    $marginBottom: 20px;
+    height: calc(100% - $newProjectHeight - $newProjectMargin - $marginBottom);
+    margin-bottom: $marginBottom;
+    min-width: 500px;
+}
+
+.buttonCell {
+    width: 150px;
+}

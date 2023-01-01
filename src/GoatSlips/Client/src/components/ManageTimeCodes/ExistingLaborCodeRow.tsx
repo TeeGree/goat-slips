@@ -1,17 +1,17 @@
 import React from 'react';
-import { fetchDeleteResponse } from '../helpers/fetchFunctions';
-import { DropdownOption } from '../types/DropdownOption';
-import { ExistingTimeCode } from './ExistingTimeCode';
+import { fetchDeleteResponse } from '../../helpers/fetchFunctions';
+import { DropdownOption } from '../../types/DropdownOption';
+import { ExistingTimeCodeRow } from './ExistingTimeCodeRow';
 
-interface ExistingLaborCodeProps {
+interface ExistingLaborCodeRowProps {
     laborCode: DropdownOption;
     fetchLaborCodes: () => Promise<void>;
     setError: (message: string) => void;
     setSuccess: (message: string) => void;
 }
 
-export const ExistingLaborCode: React.FC<ExistingLaborCodeProps> = (
-    props: ExistingLaborCodeProps,
+export const ExistingLaborCodeRow: React.FC<ExistingLaborCodeRowProps> = (
+    props: ExistingLaborCodeRowProps,
 ) => {
     const { laborCode, setError, setSuccess, fetchLaborCodes } = props;
 
@@ -21,7 +21,7 @@ export const ExistingLaborCode: React.FC<ExistingLaborCodeProps> = (
     };
 
     return (
-        <ExistingTimeCode
+        <ExistingTimeCodeRow
             code={laborCode}
             fetchCodes={fetchLaborCodes}
             setError={setError}

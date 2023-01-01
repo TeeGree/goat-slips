@@ -1,13 +1,13 @@
 import { Delete } from '@mui/icons-material';
-import { Box, Button, Modal } from '@mui/material';
+import { Box, Button, Modal, TableCell, TableRow } from '@mui/material';
 import React, { useState } from 'react';
-import { modalStyle } from '../constants/modalStyle';
-import { codeInUse } from '../constants/statusCodes';
-import { DropdownOption } from '../types/DropdownOption';
-import { ErrorDetails } from '../types/ErrorDetails';
-import classes from './ExistingTimeCode.module.scss';
+import { modalStyle } from '../../constants/modalStyle';
+import { codeInUse } from '../../constants/statusCodes';
+import { DropdownOption } from '../../types/DropdownOption';
+import { ErrorDetails } from '../../types/ErrorDetails';
+import classes from './ExistingTimeCodeRow.module.scss';
 
-interface ExistingTimeCodeProps {
+interface ExistingTimeCodeRowProps {
     code: DropdownOption;
     fetchCodes: () => Promise<void>;
     setError: (message: string) => void;
@@ -16,7 +16,9 @@ interface ExistingTimeCodeProps {
     label: string;
 }
 
-export const ExistingTimeCode: React.FC<ExistingTimeCodeProps> = (props: ExistingTimeCodeProps) => {
+export const ExistingTimeCodeRow: React.FC<ExistingTimeCodeRowProps> = (
+    props: ExistingTimeCodeRowProps,
+) => {
     const { code, setError, setSuccess, fetchCodes, deleteApiCall, label } = props;
 
     const [isBeingDeleted, setIsBeingDeleted] = useState(false);
@@ -36,7 +38,20 @@ export const ExistingTimeCode: React.FC<ExistingTimeCodeProps> = (props: Existin
     };
 
     return (
-        <div className={classes.codeContainer}>
+        <>
+            <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell>{code.name}</TableCell>
+                <TableCell>
+                    <Button
+                        className={classes.button}
+                        variant="contained"
+                        color="error"
+                        onClick={() => setIsBeingDeleted(true)}
+                    >
+                        <Delete />
+                    </Button>
+                </TableCell>
+            </TableRow>
             <Modal open={isBeingDeleted}>
                 <Box sx={modalStyle}>
                     <h2>Are you sure you want to delete {`${label} "${code.name}"`}?</h2>
@@ -54,15 +69,6 @@ export const ExistingTimeCode: React.FC<ExistingTimeCodeProps> = (props: Existin
                     </div>
                 </Box>
             </Modal>
-            <span className={classes.codeName}>{code.name}</span>
-            <Button
-                className={classes.button}
-                variant="contained"
-                color="error"
-                onClick={() => setIsBeingDeleted(true)}
-            >
-                <Delete />
-            </Button>
-        </div>
+        </>
     );
 };
