@@ -1,7 +1,9 @@
-import { Replay, Search } from '@mui/icons-material';
+import { PersonAdd, Replay, Search } from '@mui/icons-material';
 import {
+    Box,
     Button,
     CircularProgress,
+    Modal,
     Paper,
     Table,
     TableBody,
@@ -13,19 +15,28 @@ import {
     Tooltip,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { fetchGet } from '../../helpers/fetchFunctions';
+import { fetchGet, fetchPostResponse } from '../../helpers/fetchFunctions';
 import { AccessRight } from '../../types/AccessRight';
 import { AlertMessage } from '../../types/AlertMessage';
 import { UserQueryResult } from '../../types/User';
 import { Toast } from '../Toast';
 import classes from './UserManagement.module.scss';
 import { UserRow } from '../UserRow';
+import { modalStyle } from '../../constants/modalStyle';
+import { passwordIsValid } from '../../helpers/passwordValidation';
 
 export const UserManagement: React.FC<{}> = () => {
     const [searchModified, setSearchModified] = useState(false);
     const [loadingResults, setLoadingResults] = useState(true);
     const [userFilterText, setUserFilterText] = useState('');
     const [users, setUsers] = useState<UserQueryResult[]>([]);
+    const [isCreatingNewUser, setIsCreatingNewUser] = useState(false);
+
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [password, setPassword] = useState('');
 
     const [accessRights, setAccessRights] = useState<AccessRight[]>([]);
     const [accessRightMap, setAccessRightMap] = useState<Map<number, string>>(
@@ -147,12 +158,71 @@ export const UserManagement: React.FC<{}> = () => {
                         </Button>
                     </span>
                 </Tooltip>
+                <Button
+                    className={classes.addNewUserButton}
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setIsCreatingNewUser(true)}
+                >
+                    <PersonAdd />
+                </Button>
             </div>
         );
     };
 
     const handleSnackbarClose = () => {
         setAlertMessage(null);
+    };
+
+    const createUser = async () => {
+        const response = await fetchPostResponse('User/CreateUser', {
+            username,
+            email,
+            firstName,
+            lastName,
+            password,
+        });
+
+        if (response.ok) {
+            setAlertMessage({
+                message: `Successfully created user "${username}"!`,
+                severity: 'success',
+            });
+            await getUsers(userFilterText);
+            return true;
+        }
+
+        setAlertMessage({ message: `Failed to create user "${username}"!`, severity: 'error' });
+        return false;
+    };
+
+    const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUsername(event.target.value);
+    };
+
+    const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(event.target.value);
+    };
+
+    const handleFirstNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFirstName(event.target.value);
+    };
+
+    const handleLastNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setLastName(event.target.value);
+    };
+
+    const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(event.target.value);
+    };
+
+    const stopCreatingNewUser = () => {
+        setUsername('');
+        setEmail('');
+        setFirstName('');
+        setLastName('');
+        setPassword('');
+        setIsCreatingNewUser(false);
     };
 
     return (
@@ -172,6 +242,74 @@ export const UserManagement: React.FC<{}> = () => {
                     <TableBody>{getRows()}</TableBody>
                 </Table>
             </TableContainer>
+            <Modal open={isCreatingNewUser}>
+                <Box sx={modalStyle}>
+                    <h2>Create new user</h2>
+                    <div>
+                        <div className={classes.newUserInputRow}>
+                            <TextField
+                                label="Username"
+                                variant="outlined"
+                                value={username}
+                                onChange={handleUsernameChange}
+                            />
+                            <TextField
+                                className={classes.secondInput}
+                                label="Email"
+                                variant="outlined"
+                                value={email}
+                                onChange={handleEmailChange}
+                            />
+                        </div>
+                        <div className={classes.newUserInputRow}>
+                            <TextField
+                                label="First Name"
+                                variant="outlined"
+                                value={firstName}
+                                onChange={handleFirstNameChange}
+                            />
+                            <TextField
+                                className={classes.secondInput}
+                                label="Last Name"
+                                variant="outlined"
+                                value={lastName}
+                                onChange={handleLastNameChange}
+                            />
+                        </div>
+                        <div className={classes.newUserInputRow}>
+                            <Tooltip
+                                placement="right"
+                                title="Password must contain at least 1 letter, one number, and be at least 8 characters long."
+                            >
+                                <TextField
+                                    label="Temporary Password"
+                                    variant="outlined"
+                                    type="password"
+                                    value={password}
+                                    onChange={handlePasswordChange}
+                                />
+                            </Tooltip>
+                        </div>
+                    </div>
+                    <div className={classes.modalButtons}>
+                        <Button
+                            variant="contained"
+                            color="success"
+                            disabled={!passwordIsValid(password)}
+                            onClick={createUser}
+                        >
+                            Create
+                        </Button>
+                        <Button
+                            variant="contained"
+                            className={classes.secondInput}
+                            onClick={stopCreatingNewUser}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </Box>
+            </Modal>
             <Toast
                 severity={alertMessage?.severity}
                 message={alertMessage?.message}

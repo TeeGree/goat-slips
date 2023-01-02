@@ -7,7 +7,6 @@ import { CircularProgress } from '@mui/material';
 import { fetchGet, fetchGetResponse } from './helpers/fetchFunctions';
 import { CreateFirstUser } from './components/pages/CreateUser/CreateFirstUser';
 import { AppHeader } from './components/AppHeader';
-import { CreateAdditionalUser } from './components/pages/CreateUser/CreateAdditionalUser';
 import { ChangePassword } from './components/pages/ChangePassword';
 import { User } from './types/User';
 import { QueryTimeSlips } from './components/pages/QueryTimeSlips';
@@ -17,7 +16,6 @@ import { TaskMap } from './types/TaskMap';
 import { RequireAuthentication } from './components/HOC/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';
 import {
-    addUser,
     adminAccessRight,
     manageTimeCodes,
     manageUsers,
@@ -256,21 +254,6 @@ export const App: React.FC<{}> = () => {
                                 requiredAccessRight={requiredAccessRights.get(manageUsers)}
                             >
                                 <UserManagement />
-                            </RequireAuthentication>
-                        }
-                    />
-                    <Route
-                        key="/create-user"
-                        path="/create-user"
-                        element={
-                            <RequireAuthentication
-                                isAuthenticated={canAccessGuardedRoutes}
-                                isAccessRightsLoading={isUserAccessRightsLoading}
-                                isAuthenticationLoading={isAuthenticationLoading}
-                                accessRights={userAccessRights}
-                                requiredAccessRight={requiredAccessRights.get(addUser)}
-                            >
-                                <CreateAdditionalUser />
                             </RequireAuthentication>
                         }
                     />

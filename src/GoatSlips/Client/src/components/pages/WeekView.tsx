@@ -459,7 +459,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         if (showFilterSection) {
             return (
                 <Tooltip title="Hide and clear the filters" placement="right">
-                    <IconButton className={classes.squareIconButtonLong} onClick={hideFilters}>
+                    <IconButton className={classes.weekFilterButton} onClick={hideFilters}>
                         <KeyboardArrowUp />
                         <FilterAltOff />
                     </IconButton>
@@ -472,7 +472,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 placement="right"
             >
                 <IconButton
-                    className={classes.squareIconButtonLong}
+                    className={classes.weekFilterButton}
                     onClick={() => setShowFilterSection(true)}
                 >
                     <KeyboardArrowDown />
