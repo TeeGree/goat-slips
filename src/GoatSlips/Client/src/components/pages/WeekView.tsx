@@ -417,7 +417,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     const getFilterSection = () => {
         if (showFilterSection) {
             return (
-                <div className={classes.basicHeader}>
+                <div className={classes.filterSection}>
                     <MultiSelect
                         label="Projects"
                         options={getInUseProjectOptions()}

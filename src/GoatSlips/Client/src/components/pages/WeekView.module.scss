@@ -24,10 +24,17 @@
     width: 100%;
 }
 
-.basicHeader {
+.basicHeader,
+.filterSection {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+.filterSection {
+    background-color: #444444;
 }
 
 .weekHeaderHalf {
