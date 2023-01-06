@@ -10,9 +10,12 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 const darkTheme = createTheme({ palette: { mode: 'dark' } });
 
+const baseUrl: string | undefined =
+    document.getElementsByTagName('base')[0].getAttribute('href') || undefined;
+
 root.render(
     <React.StrictMode>
-        <BrowserRouter>
+        <BrowserRouter basename={baseUrl}>
             <ThemeProvider theme={darkTheme}>
                 <App />
             </ThemeProvider>
