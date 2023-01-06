@@ -16,14 +16,17 @@ read -r server
 echo "Enter the name of the GoatSlips db: "
 read -r db
 
-echo "Enter the full url of the website where GoatSlips will be hosted (ie \"https://localhost\"): "
+echo "Enter the full url of the website where GoatSlips will be hosted (ie. \"https://localhost\"): "
 read -r url
+
+echo "Enter the application name for the site where GoatSlips will be hosted (ie. \"/GoatSlips\"): "
+read -r pubUrl
 
 # Replace the .env file so that it points to the app URL.
 envPath=$PWD/src/GoatSlips/Client/.env
 envContent=$(cat $envPath)
 rm -f -- $envPath
-echo "REACT_APP_API_ENDPOINT=$url" > $envPath
+echo -e "REACT_APP_API_ENDPOINT=$url\nPUBLIC_URL=$pubUrl" > $envPath
 
 basePath=$PWD/src/GoatSlips/bin/Release/net6.0/publish
 
