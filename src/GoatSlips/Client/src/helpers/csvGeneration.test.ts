@@ -9,6 +9,7 @@ describe('Get CSV of Time Slips Tests:', () => {
                 project: 'testProject',
                 task: 'testTask',
                 laborCode: 'testLaborCode',
+                description: 'testDescription',
                 date: '1/5/2011',
                 hours: 5,
                 minutes: 11,
@@ -16,15 +17,15 @@ describe('Get CSV of Time Slips Tests:', () => {
         ];
         const csv = getCsvOfTimeSlips(timeSlips);
         const expectedCsv =
-            'Username,Project,Task,Labor Code,Date,Hours,Minutes\n' +
-            'testUser,testProject,testTask,testLaborCode,1/5/2011,5,11\n';
+            'Username,Project,Task,Labor Code,Description,Date,Hours,Minutes\n' +
+            'testUser,testProject,testTask,testLaborCode,testDescription,1/5/2011,5,11\n';
         expect(csv).toEqual(expectedCsv);
     });
 
     it('Empty list just returns headers.', () => {
         const timeSlips: ExportableTimeSlip[] = [];
         const csv = getCsvOfTimeSlips(timeSlips);
-        const expectedCsv = 'Username,Project,Task,Labor Code,Date,Hours,Minutes\n';
+        const expectedCsv = 'Username,Project,Task,Labor Code,Description,Date,Hours,Minutes\n';
         expect(csv).toEqual(expectedCsv);
     });
 
@@ -35,6 +36,7 @@ describe('Get CSV of Time Slips Tests:', () => {
                 project: 'test',
                 task: 'test',
                 laborCode: 'test',
+                description: 'test',
                 date: '1/5/2011',
                 hours: 5,
                 minutes: 11,
@@ -44,6 +46,7 @@ describe('Get CSV of Time Slips Tests:', () => {
                 project: 'y',
                 task: 'z',
                 laborCode: 'w',
+                description: 'v',
                 date: '12/15/2099',
                 hours: 20,
                 minutes: 0,
@@ -51,9 +54,9 @@ describe('Get CSV of Time Slips Tests:', () => {
         ];
         const csv = getCsvOfTimeSlips(timeSlips);
         const expectedCsv =
-            'Username,Project,Task,Labor Code,Date,Hours,Minutes\n' +
-            'test,test,test,test,1/5/2011,5,11\n' +
-            'x,y,z,w,12/15/2099,20,0\n';
+            'Username,Project,Task,Labor Code,Description,Date,Hours,Minutes\n' +
+            'test,test,test,test,test,1/5/2011,5,11\n' +
+            'x,y,z,w,v,12/15/2099,20,0\n';
         expect(csv).toEqual(expectedCsv);
     });
 
@@ -64,13 +67,15 @@ describe('Get CSV of Time Slips Tests:', () => {
                 project: '',
                 task: '',
                 laborCode: '',
+                description: '',
                 date: '',
                 hours: 0,
                 minutes: 0,
             },
         ];
         const csv = getCsvOfTimeSlips(timeSlips);
-        const expectedCsv = 'Username,Project,Task,Labor Code,Date,Hours,Minutes\n,,,,,0,0\n';
+        const expectedCsv =
+            'Username,Project,Task,Labor Code,Description,Date,Hours,Minutes\n,,,,,,0,0\n';
         expect(csv).toEqual(expectedCsv);
     });
 
@@ -81,6 +86,7 @@ describe('Get CSV of Time Slips Tests:', () => {
                 project: 'test',
                 task: 'this one, too',
                 laborCode: '',
+                description: '',
                 date: '',
                 hours: 0,
                 minutes: 0,
@@ -88,8 +94,8 @@ describe('Get CSV of Time Slips Tests:', () => {
         ];
         const csv = getCsvOfTimeSlips(timeSlips);
         const expectedCsv =
-            'Username,Project,Task,Labor Code,Date,Hours,Minutes\n' +
-            '"test,trying a",test,"this one, too",,,0,0\n';
+            'Username,Project,Task,Labor Code,Description,Date,Hours,Minutes\n' +
+            '"test,trying a",test,"this one, too",,,,0,0\n';
         expect(csv).toEqual(expectedCsv);
     });
 
@@ -100,6 +106,7 @@ describe('Get CSV of Time Slips Tests:', () => {
                 project: 'test',
                 task: '"this one", too',
                 laborCode: 'nah, im good',
+                description: 'n/a',
                 date: '',
                 hours: 0,
                 minutes: 0,
@@ -107,8 +114,8 @@ describe('Get CSV of Time Slips Tests:', () => {
         ];
         const csv = getCsvOfTimeSlips(timeSlips);
         const expectedCsv =
-            'Username,Project,Task,Labor Code,Date,Hours,Minutes\n' +
-            '"test,trying ""a""",test,"""this one"", too","nah, im good",,0,0\n';
+            'Username,Project,Task,Labor Code,Description,Date,Hours,Minutes\n' +
+            '"test,trying ""a""",test,"""this one"", too","nah, im good",n/a,,0,0\n';
         expect(csv).toEqual(expectedCsv);
     });
 });
