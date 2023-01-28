@@ -10,6 +10,7 @@ import { fetchGet, fetchPostResponse } from '../../helpers/fetchFunctions';
 import { MultiSelect } from '../MultiSelect';
 import { getSundayDateForDate } from '../../helpers/dateHelpers';
 import { WeekChanger } from '../WeekChanger';
+import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 
 const dayMap = new Map<DayIndex, Day>([
     [0, 'Sunday'],
@@ -41,6 +42,7 @@ interface WeekViewProps {
     laborCodeMap: Map<number, string>;
     favoriteTimeSlips: FavoriteTimeSlipData[];
     fetchFavoriteTimeSlips: () => Promise<void>;
+    minutesPartition: AllowedMinutesPartition;
 }
 
 interface HoursMinutesSplit {
@@ -59,6 +61,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         laborCodeMap,
         favoriteTimeSlips,
         fetchFavoriteTimeSlips,
+        minutesPartition,
     } = props;
 
     const currentDate = new Date();
@@ -351,6 +354,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 projectMap={projectMap}
                 taskMap={taskMap}
                 laborCodeMap={laborCodeMap}
+                minutesPartition={minutesPartition}
             />
         );
     };

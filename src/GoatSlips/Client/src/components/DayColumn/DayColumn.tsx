@@ -11,6 +11,7 @@ import { TimeTotals } from './TimeTotals';
 import { AlertMessage } from '../../types/AlertMessage';
 import { Toast } from '../Toast';
 import { ErrorDetails } from '../../types/ErrorDetails';
+import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 
 interface DayColumnProps {
     dayIndex: DayIndex;
@@ -53,6 +54,7 @@ interface DayColumnProps {
     projectMap: Map<number, string>;
     taskMap: Map<number, string>;
     laborCodeMap: Map<number, string>;
+    minutesPartition: AllowedMinutesPartition;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
@@ -106,6 +108,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         projectMap,
         taskMap,
         laborCodeMap,
+        minutesPartition,
     } = props;
 
     const getDateString = () => {
@@ -198,6 +201,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     projectMap={projectMap}
                     taskMap={taskMap}
                     laborCodeMap={laborCodeMap}
+                    minutesPartition={minutesPartition}
                 />
             );
         }
@@ -265,6 +269,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     projectMap={projectMap}
                     taskMap={taskMap}
                     laborCodeMap={laborCodeMap}
+                    minutesPartition={minutesPartition}
                 />
             );
         });

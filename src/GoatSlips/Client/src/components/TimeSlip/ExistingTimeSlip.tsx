@@ -5,6 +5,7 @@ import { ReadOnlyTimeSlip } from './ReadOnlyTimeSlip';
 import { EditableTimeSlip } from './EditableTimeSlip';
 import classes from './ExistingTimeSlip.module.scss';
 import { Day } from '../../types/Day';
+import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 
 interface ExistingTimeSlipProps {
     day: Day;
@@ -31,6 +32,7 @@ interface ExistingTimeSlipProps {
     projectMap: Map<number, string>;
     taskMap: Map<number, string>;
     laborCodeMap: Map<number, string>;
+    minutesPartition: AllowedMinutesPartition;
 }
 
 export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: ExistingTimeSlipProps) => {
@@ -50,6 +52,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         projectMap,
         taskMap,
         laborCodeMap,
+        minutesPartition,
     } = props;
 
     const [isEditing, setIsEditing] = useState(false);
@@ -99,6 +102,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
                     projectMap={projectMap}
                     taskMap={taskMap}
                     laborCodeMap={laborCodeMap}
+                    minutesPartition={minutesPartition}
                 />
             );
         }
