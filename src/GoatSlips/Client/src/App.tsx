@@ -225,6 +225,7 @@ export const App: React.FC<{}> = () => {
                 tasksAllowedForProjects={tasksAllowedForProjects}
                 laborCodes={laborCodes}
                 laborCodeMap={laborCodeMap}
+                minutesPartition={minutesPartition}
             />
         );
     };

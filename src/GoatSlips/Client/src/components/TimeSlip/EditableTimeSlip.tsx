@@ -13,6 +13,8 @@ import {
 import { DropdownOption } from '../../types/DropdownOption';
 import { DateRange, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Day } from '../../types/Day';
+import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
+import { TimeSlipMinutesInput } from './TimeSlipMinutesInput';
 
 const dayLabelMap = new Map<Day, string>([
     ['Sunday', 'Su'],
@@ -50,6 +52,7 @@ interface EditableTimeSlipProps {
     projectMap: Map<number, string>;
     taskMap: Map<number, string>;
     laborCodeMap: Map<number, string>;
+    minutesPartition: AllowedMinutesPartition;
 }
 
 export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: EditableTimeSlipProps) => {
@@ -71,6 +74,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         projectMap,
         taskMap,
         laborCodeMap,
+        minutesPartition,
     } = props;
 
     const getTotalMinutes = (h: number | '', m: number | '') => {
@@ -134,10 +138,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         setSelectedHours(hrs);
     };
 
-    const handleMinutesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const value = event.target.value;
-        const mins = value === '' ? '' : Number(value);
-
+    const handleMinutesChange = (mins: number | '') => {
         if (mins !== '' && (mins < 0 || mins >= 60 || !Number.isInteger(mins))) {
             return;
         }
@@ -402,12 +403,10 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
                         value={selectedHours}
                         onChange={handleHoursChange}
                     />
-                    <TextField
-                        className={`${classes.cardInput} ${classes.timeTextField}`}
-                        label="Minutes"
-                        variant="outlined"
-                        value={selectedMinutes}
-                        onChange={handleMinutesChange}
+                    <TimeSlipMinutesInput
+                        minutesPartition={minutesPartition}
+                        selectedMinutes={selectedMinutes}
+                        setSelectedMinutes={handleMinutesChange}
                     />
                 </div>
             </CardContent>

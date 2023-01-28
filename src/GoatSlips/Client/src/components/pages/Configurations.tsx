@@ -12,7 +12,7 @@ import {
     TableHead,
     TableRow,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchGetResponse } from '../../helpers/fetchFunctions';
 import { AlertMessage } from '../../types/AlertMessage';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
@@ -33,6 +33,10 @@ export const Configurations: React.FC<ConfigurationsProps> = (props: Configurati
     const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
     const [newMinutesPartition, setNewMinutesPartition] =
         useState<AllowedMinutesPartition>(minutesPartition);
+
+    useEffect(() => {
+        setNewMinutesPartition(minutesPartition);
+    }, [minutesPartition]);
 
     const changeMinutesPartition = async () => {
         const response = await fetchGetResponse(
