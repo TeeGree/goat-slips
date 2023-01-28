@@ -17,6 +17,7 @@ import { RequireAuthentication } from './components/HOC/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';
 import {
     adminAccessRight,
+    manageConfigurations,
     manageTimeCodes,
     manageUsers,
     requiredAccessRights,
@@ -25,6 +26,8 @@ import { UserManagement } from './components/pages/UserManagement';
 import { FavoriteTimeSlipData } from './types/TimeSlip';
 import { ManageFavorites } from './components/pages/ManageFavorites';
 import { Query } from './types/Query';
+import { Configurations } from './components/pages/Configurations';
+import { AllowedMinutesPartition } from './types/AllowedMinutesPartition';
 
 const defaultUser: User = {
     userId: 0,
@@ -62,6 +65,8 @@ export const App: React.FC<{}> = () => {
     const [savedQueriesMap, setSavedQueriesMap] = useState<Map<number, Query>>(
         new Map<number, Query>([]),
     );
+
+    const [minutesPartition, setMinutesPartition] = useState<AllowedMinutesPartition>(1);
 
     const isAuthenticated = () => {
         return user.username !== '';
@@ -103,6 +108,7 @@ export const App: React.FC<{}> = () => {
             getAccessRights();
             getFavoriteTimeSlips();
             getSavedQueries();
+            getMinutesPartition();
         }
     }, [user]);
 
@@ -162,6 +168,13 @@ export const App: React.FC<{}> = () => {
         >('FavoriteTimeSlip/FavoriteTimeSlipsForCurrentUser');
 
         setFavoriteTimeSlips(favoriteTimeSlipsFromApi);
+    };
+
+    const getMinutesPartition = async () => {
+        const minutesPartitionFromApi: AllowedMinutesPartition =
+            await fetchGet<AllowedMinutesPartition>('TimeSlipConfiguration/GetMinutesPartition');
+
+        setMinutesPartition(minutesPartitionFromApi);
     };
 
     const getSavedQueries = async () => {
@@ -325,6 +338,24 @@ export const App: React.FC<{}> = () => {
                                     projectMap={projectMap}
                                     taskMap={taskMap}
                                     laborCodeMap={laborCodeMap}
+                                />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/configurations"
+                        path="/configurations"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                                requiredAccessRight={requiredAccessRights.get(manageConfigurations)}
+                            >
+                                <Configurations
+                                    minutesPartition={minutesPartition}
+                                    onChangeMinutesPartition={getMinutesPartition}
                                 />
                             </RequireAuthentication>
                         }

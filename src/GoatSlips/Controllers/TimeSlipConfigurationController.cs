@@ -21,7 +21,7 @@ namespace GoatSlips.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetMinutesPartition")]
+        [HttpGet("GetMinutesPartition", Name = "GetMinutesPartition")]
         public ActionResult<byte> GetMinutesPartition()
         {
             try
@@ -36,7 +36,7 @@ namespace GoatSlips.Controllers
             }
         }
 
-        [HttpGet(Name = "SetMinutesPartition/{partition}")]
+        [HttpGet("SetMinutesPartition/{partition}", Name = "SetMinutesPartition")]
         public IActionResult SetMinutesPartition(byte partition)
         {
             try

@@ -11,7 +11,7 @@ namespace GoatSlips.DAL
         void SetMinutesPartition(byte newMinutesPartition);
 
     }
-    public sealed class TimeSlipConfigurationRepository
+    public sealed class TimeSlipConfigurationRepository : ITimeSlipConfigurationRepository
     {
         private const byte DefaultMinutesPartition = 1;
 
@@ -39,7 +39,7 @@ namespace GoatSlips.DAL
                 {
                     throw new Exception("No time slips found!");
                 }
-                return timeSlipConfigurations?.First();
+                return timeSlipConfigurations?.FirstOrDefault();
             }
         }
 
@@ -58,7 +58,7 @@ namespace GoatSlips.DAL
         {
             if (!AllowedMinutesPartitions.Contains(newMinutesPartition))
             {
-                throw new Exception("New minutes partition is not allowed.");
+                throw new Exception("New minutes partition doesn't match one of the allowed values.");
             }
             var configuration = Configuration ?? new TimeSlipConfiguration();
             configuration.MinutesPartition = newMinutesPartition;
