@@ -51,6 +51,16 @@ Steps 1, 2, and 3 are handled by the `publish.sh` script. Run this interactive s
 
 In IIS, a website or application must be pointed to the folder location of the published files. The application pool used by that website should use an identity user with access to the GoatSlipsDb server. This can be found in the advanced settings of the application pool, under `Process Model` > `Identity`.
 
+# Configuration
+
+The application has some configurable functionality which is accessible from the "Manage Configurations" page.
+
+## Minutes Partition
+
+The selectable minutes on a new time slip is free entry between 0 and 60, by default, but it can be configured to only allow 15 or 30 minute increments. When 15 or 30 is selected, the minutes input is replaced with a dropdown with only the allowed values.
+
+![Minutes Partition](./documentation/minutesPartition.png)
+
 # License
 
 G.O.A.T. Slips is licensed under the [GNU GPLv3 License](https://github.com/TeeGree/goat-slips/blob/main/LICENSE.md).
