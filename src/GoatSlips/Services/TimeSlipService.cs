@@ -17,11 +17,17 @@ namespace GoatSlips.Services
     {
         private readonly IGoatSlipsContext _dbContext;
         private readonly ITimeSlipRepository _timeSlipRepository;
+        private readonly ITimeSlipConfigurationRepository _timeSlipConfigurationRepository;
 
-        public TimeSlipService(IGoatSlipsContext dbContext, ITimeSlipRepository timeSlipRepository)
+        public TimeSlipService(
+            IGoatSlipsContext dbContext,
+            ITimeSlipRepository timeSlipRepository,
+            ITimeSlipConfigurationRepository timeSlipConfigurationRepository
+        )
         {
             _dbContext = dbContext;
             _timeSlipRepository = timeSlipRepository;
+            _timeSlipConfigurationRepository = timeSlipConfigurationRepository;
         }
 
         public IEnumerable<TimeSlip> GetAllTimeSlips()
@@ -47,6 +53,15 @@ namespace GoatSlips.Services
             ).ToArray();
         }
 
+        private void ValidateMinutes(byte minutes)
+        {
+            byte minutesPartition = _timeSlipConfigurationRepository.GetMinutesPartition();
+            if (minutes % minutesPartition != 0)
+            {
+                throw new Exception("The minutes for the time slip is not valid according to the system's minute partition configuration.");
+            }
+        }
+
         public void AddTimeSlip(AddTimeSlipBody timeSlip, HttpContext httpContext)
         {
             User? user = httpContext.Items["User"] as User;
@@ -55,18 +70,20 @@ namespace GoatSlips.Services
                 throw new Exception("No user logged in!");
             }
 
+            ValidateMinutes(timeSlip.Minutes);
+
             IEnumerable<TimeSlip> timeSlipsToAdd = from date in timeSlip.Dates
-                                  select new TimeSlip
-                                  {
-                                      Hours = timeSlip.Hours,
-                                      Minutes = timeSlip.Minutes,
-                                      Date = date,
-                                      ProjectId = timeSlip.ProjectId,
-                                      TaskId = timeSlip.TaskId,
-                                      LaborCodeId = timeSlip.LaborCodeId,
-                                      Description = timeSlip.Description,
-                                      UserId = user.Id
-                                  };
+                                                   select new TimeSlip
+                                                   {
+                                                       Hours = timeSlip.Hours,
+                                                       Minutes = timeSlip.Minutes,
+                                                       Date = date,
+                                                       ProjectId = timeSlip.ProjectId,
+                                                       TaskId = timeSlip.TaskId,
+                                                       LaborCodeId = timeSlip.LaborCodeId,
+                                                       Description = timeSlip.Description,
+                                                       UserId = user.Id
+                                                   };
 
             _timeSlipRepository.TimeSlips.AddRange(timeSlipsToAdd);
             _dbContext.SaveChanges();
@@ -79,6 +96,8 @@ namespace GoatSlips.Services
             {
                 throw new Exception("Time slip not found!");
             }
+
+            ValidateMinutes(timeSlip.Minutes);
 
             timeSlipFromDb.Hours = timeSlip.Hours;
             timeSlipFromDb.Minutes = timeSlip.Minutes;
