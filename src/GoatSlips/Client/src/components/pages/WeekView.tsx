@@ -283,14 +283,17 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
             if (
                 filteredTaskIds.size > 0 &&
-                (timeSlip.taskId === null || !filteredTaskIds.has(timeSlip.taskId))
+                ((timeSlip.taskId !== null && !filteredTaskIds.has(timeSlip.taskId)) ||
+                    (timeSlip.taskId === null && !filteredTaskIds.has(-1)))
             ) {
                 return false;
             }
 
             if (
                 filteredLaborCodeIds.size > 0 &&
-                (timeSlip.laborCodeId === null || !filteredLaborCodeIds.has(timeSlip.laborCodeId))
+                ((timeSlip.laborCodeId !== null &&
+                    !filteredLaborCodeIds.has(timeSlip.laborCodeId)) ||
+                    (timeSlip.laborCodeId === null && !filteredLaborCodeIds.has(-1)))
             ) {
                 return false;
             }
@@ -408,14 +411,14 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         const tasksInUse = tasks.filter((task) => {
             return taskIdsInUse.has(task.id);
         });
-        return tasksInUse;
+        return [{ name: 'N/A', id: -1 }, ...tasksInUse];
     };
 
     const getInUseLaborCodeOptions = () => {
         const laborCodesInUse = laborCodes.filter((laborCode) => {
             return laborCodeIdsInUse.has(laborCode.id);
         });
-        return laborCodesInUse;
+        return [{ name: 'N/A', id: -1 }, ...laborCodesInUse];
     };
 
     const getFilterSection = () => {
@@ -434,14 +437,14 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                         options={getInUseTaskOptions()}
                         selectedIds={selectedFilterTaskIds}
                         setSelectedIds={setSelectedFilterTaskIds}
-                        getDisplayTextForId={(id: number) => taskMap.get(id) ?? ''}
+                        getDisplayTextForId={(id: number) => taskMap.get(id) ?? 'N/A'}
                     />
                     <MultiSelect
                         label="Labor Codes"
                         options={getInUseLaborCodeOptions()}
                         selectedIds={selectedFilterLaborCodeIds}
                         setSelectedIds={setSelectedFilterLaborCodeIds}
-                        getDisplayTextForId={(id: number) => laborCodeMap.get(id) ?? ''}
+                        getDisplayTextForId={(id: number) => laborCodeMap.get(id) ?? 'N/A'}
                     />
                 </div>
             );
