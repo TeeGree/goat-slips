@@ -2,6 +2,7 @@
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
 using GoatSlips.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoatSlips.Controllers
@@ -77,7 +78,12 @@ namespace GoatSlips.Controllers
         {
             try
             {
-                _timeSlipService.UpdateTimeSlip(timeSlip);
+                User? user = HttpContext.Items["User"] as User;
+                if (user == null)
+                {
+                    throw new Exception("No user logged in!");
+                }
+                _timeSlipService.UpdateTimeSlip(timeSlip, user.Id);
                 return Ok();
             }
             catch (Exception e)
@@ -92,7 +98,12 @@ namespace GoatSlips.Controllers
         {
             try
             {
-                _timeSlipService.DeleteTimeSlip(id);
+                User? user = HttpContext.Items["User"] as User;
+                if (user == null)
+                {
+                    throw new Exception("No user logged in!");
+                }
+                _timeSlipService.DeleteTimeSlip(id, user.Id);
                 return Ok();
             }
             catch (Exception e)

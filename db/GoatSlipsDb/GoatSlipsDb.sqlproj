@@ -57,7 +57,6 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="Tables" />
-    <Folder Include="Triggers" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\LaborCode.sql" />
@@ -73,9 +72,6 @@
     <Build Include="Tables\QueryUser.sql" />
     <Build Include="Tables\TimeSlipConfiguration.sql" />
     <Build Include="Tables\TimeSlipLog.sql" />
-    <Build Include="Triggers\OnTimeSlipCreate.sql" />
-    <Build Include="Triggers\OnTimeSlipDelete.sql" />
-    <Build Include="Triggers\OnTimeSlipUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="GoatSlipsDb.refactorlog" />

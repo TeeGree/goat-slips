@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[TimeSlipLog]
 (
 	[Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY, 
+    [TimeSlipId] INT NOT NULL,
     [UpdateType] VARCHAR(1) NOT NULL,
 	[OldHours] TINYINT NULL, 
     [OldMinutes] TINYINT NULL, 
@@ -19,5 +20,9 @@
     [NewLaborCodeId] INT NULL, 
     [NewDescription] VARCHAR(200) NULL,
 	[TimeStamp] DateTime2 NOT NULL DEFAULT(GETDATE()),
-    CONSTRAINT CK_UpdateType CHECK (UpdateType IN ('C', 'U', 'D'))
+    [UpdateUserId] INT NOT NULL,
+    CONSTRAINT CK_UpdateType CHECK (UpdateType IN ('C', 'U', 'D')),
+    CONSTRAINT [FK_TimeSlipLog_OldUser] FOREIGN KEY ([OldUserId]) REFERENCES [User]([Id]),
+    CONSTRAINT [FK_TimeSlipLog_NewUser] FOREIGN KEY ([NewUserId]) REFERENCES [User]([Id]),
+    CONSTRAINT [FK_TimeSlipLog_UpdateUser] FOREIGN KEY ([UpdateUserId]) REFERENCES [User]([Id])
 )

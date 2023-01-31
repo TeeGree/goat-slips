@@ -84,8 +84,13 @@ namespace GoatSlips.Controllers
         {
             try
             {
+                User? user = HttpContext.Items["User"] as User;
+                if (user == null)
+                {
+                    throw new Exception("No user logged in!");
+                }
                 _userService.ValidateAccess(AccessRights.Admin, HttpContext);
-                _projectService.SetAllowedTasksForProject(body.ProjectId, body.AllowedTaskIds);
+                _projectService.SetAllowedTasksForProject(body.ProjectId, body.AllowedTaskIds, user.Id);
                 return Ok();
             }
             catch (InsufficientAccessException e)

@@ -10,22 +10,19 @@ namespace GoatSlips.Services
         IEnumerable<TimeSlip> GetAllTimeSlips();
         TimeSlip[] GetWeekOfTimeSlipsForCurrentUser(DateTime weekDate, HttpContext httpContext);
         void AddTimeSlip(AddTimeSlipBody timeSlip, HttpContext httpContext);
-        void UpdateTimeSlip(UpdateTimeSlipBody timeSlip);
-        void DeleteTimeSlip(int id);
+        void UpdateTimeSlip(UpdateTimeSlipBody timeSlip, int userId);
+        void DeleteTimeSlip(int timeSlipId, int userId);
     }
     public class TimeSlipService : ITimeSlipService
     {
-        private readonly IGoatSlipsContext _dbContext;
         private readonly ITimeSlipRepository _timeSlipRepository;
         private readonly ITimeSlipConfigurationRepository _timeSlipConfigurationRepository;
 
         public TimeSlipService(
-            IGoatSlipsContext dbContext,
             ITimeSlipRepository timeSlipRepository,
             ITimeSlipConfigurationRepository timeSlipConfigurationRepository
         )
         {
-            _dbContext = dbContext;
             _timeSlipRepository = timeSlipRepository;
             _timeSlipConfigurationRepository = timeSlipConfigurationRepository;
         }
@@ -85,40 +82,19 @@ namespace GoatSlips.Services
                                                        UserId = user.Id
                                                    };
 
-            _timeSlipRepository.TimeSlips.AddRange(timeSlipsToAdd);
-            _dbContext.SaveChanges();
+            _timeSlipRepository.AddTimeSlips(timeSlipsToAdd.ToList(), user.Id);
         }
 
-        public void UpdateTimeSlip(UpdateTimeSlipBody timeSlip)
+        public void UpdateTimeSlip(UpdateTimeSlipBody timeSlip, int userId)
         {
-            TimeSlip? timeSlipFromDb = _dbContext.TimeSlips?.First(ts => ts.Id == timeSlip.TimeSlipId);
-            if (timeSlipFromDb == null)
-            {
-                throw new Exception("Time slip not found!");
-            }
-
             ValidateMinutes(timeSlip.Minutes);
 
-            timeSlipFromDb.Hours = timeSlip.Hours;
-            timeSlipFromDb.Minutes = timeSlip.Minutes;
-            timeSlipFromDb.ProjectId = timeSlip.ProjectId;
-            timeSlipFromDb.TaskId = timeSlip.TaskId;
-            timeSlipFromDb.LaborCodeId = timeSlip.LaborCodeId;
-            timeSlipFromDb.Description = timeSlip.Description;
-
-            _dbContext.SaveChanges();
+            _timeSlipRepository.UpdateTimeSlip(timeSlip, userId);
         }
 
-        public void DeleteTimeSlip(int id)
+        public void DeleteTimeSlip(int timeSlipId, int userId)
         {
-            TimeSlip? timeSlip = _dbContext.TimeSlips?.First(ts => ts.Id == id);
-            if (timeSlip == null)
-            {
-                throw new Exception("Time slip not found!");
-            }
-
-            _dbContext.TimeSlips?.Remove(timeSlip);
-            _dbContext.SaveChanges();
+            _timeSlipRepository.DeleteTimeSlip(timeSlipId, userId);
         }
     }
 }
