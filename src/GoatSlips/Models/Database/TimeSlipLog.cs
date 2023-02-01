@@ -24,7 +24,7 @@ namespace GoatSlips.Models.Database
         public int? NewLaborCodeId { get; set; }
         public string? NewDescription { get; set; }
         public DateTime TimeStamp { get; set; }
-        public string UpdateType { get; set; }
+        public string UpdateType { get; set; } = string.Empty;
         public int UpdateUserId { get; set; }
     }
 }

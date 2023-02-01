@@ -2,7 +2,6 @@
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
 using GoatSlips.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoatSlips.Controllers
