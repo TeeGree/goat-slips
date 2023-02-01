@@ -23,6 +23,7 @@ namespace GoatSlips.DAL
         DbSet<QueryTask>? QueryTasks { get; set; }
         DbSet<QueryLaborCode>? QueryLaborCodes { get; set; }
         DbSet<TimeSlipConfiguration>? TimeSlipConfigurations { get; set; }
+        DbSet<TimeSlipLog>? TimeSlipLogs { get; set; }
         int SaveChanges();
     }
     public sealed class GoatSlipsContext : DbContext, IGoatSlipsContext
@@ -44,6 +45,7 @@ namespace GoatSlips.DAL
         public DbSet<QueryTask>? QueryTasks { get; set; }
         public DbSet<QueryLaborCode>? QueryLaborCodes { get; set; }
         public DbSet<TimeSlipConfiguration>? TimeSlipConfigurations { get; set; }
+        public DbSet<TimeSlipLog>? TimeSlipLogs { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

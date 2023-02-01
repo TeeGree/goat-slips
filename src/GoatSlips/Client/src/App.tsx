@@ -28,6 +28,7 @@ import { ManageFavorites } from './components/pages/ManageFavorites';
 import { Query } from './types/Query';
 import { Configurations } from './components/pages/Configurations';
 import { AllowedMinutesPartition } from './types/AllowedMinutesPartition';
+import { TimeSlipLogView } from './components/pages/TimeSlipLogView';
 
 const defaultUser: User = {
     userId: 0,
@@ -357,6 +358,25 @@ export const App: React.FC<{}> = () => {
                                 <Configurations
                                     minutesPartition={minutesPartition}
                                     onChangeMinutesPartition={getMinutesPartition}
+                                />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/time-slip-log"
+                        path="/time-slip-log"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                                requiredAccessRight={requiredAccessRights.get(manageConfigurations)}
+                            >
+                                <TimeSlipLogView
+                                    projectMap={projectMap}
+                                    taskMap={taskMap}
+                                    laborCodeMap={laborCodeMap}
                                 />
                             </RequireAuthentication>
                         }

@@ -12,7 +12,7 @@ namespace GoatSlips.Services
         IEnumerable<Task> GetTasksForProject(int projectId);
         void CreateProject(string projectName);
         void DeleteProject(int projectId);
-        void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds);
+        void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds, int userId);
     }
     public sealed class ProjectService : IProjectService
     {
@@ -114,7 +114,7 @@ namespace GoatSlips.Services
             _dbContext.SaveChanges();
         }
 
-        private void RemoveAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds)
+        private void RemoveAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds, int userId)
         {
             DbSet<ProjectTask> projectTaskMapping = _projectTaskRepository.ProjectTasks;
 
@@ -125,12 +125,12 @@ namespace GoatSlips.Services
 
             DbSet<TimeSlip> timeSlips = _timeSlipRepository.TimeSlips;
 
-            _timeSlipRepository.ClearTaskIdsForTimeSlips(projectId, projectTasksToRemove.Select(pt => pt.TaskId));
+            _timeSlipRepository.ClearTaskIdsForTimeSlips(projectId, projectTasksToRemove.Select(pt => pt.TaskId), userId);
 
             projectTaskMapping.RemoveRange(projectTasksToRemove);
         }
 
-        public void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds)
+        public void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds, int userId)
         {
             DbSet<Project> projects = _projectRepository.Projects;
 
@@ -148,7 +148,7 @@ namespace GoatSlips.Services
 
             DbSet<ProjectTask> projectTaskMapping = _projectTaskRepository.ProjectTasks;
 
-            RemoveAllowedTasksForProject(projectId, allowedTaskIds);
+            RemoveAllowedTasksForProject(projectId, allowedTaskIds, userId);
 
             _projectTaskRepository.AddAllowedTasksForProject(projectId, allowedTaskIds);
         }

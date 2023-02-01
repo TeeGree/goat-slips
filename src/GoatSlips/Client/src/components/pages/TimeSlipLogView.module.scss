@@ -1,0 +1,43 @@
+@import '../../variables';
+
+.tableContainer {
+    flex-grow: 1;
+    width: 90% !important;
+}
+
+.emptyRow {
+    text-align: center !important;
+}
+
+.pageContainer {
+    width: 100%;
+    height: calc(100vh - $headerHeight);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.oldValue,
+.oldValueStrike {
+    color: lightcoral;
+}
+
+.oldValueStrike {
+    text-decoration: line-through;
+}
+
+.newValue,
+.newValuePadded {
+    color: lightgreen;
+}
+
+.newValuePadded {
+    margin-left: 5px;
+}

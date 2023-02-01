@@ -88,6 +88,7 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
                         {createLink('/', 'Week View')}
                         {createLink('/query-time-slips', 'Query Time Slips')}
                         {createLink('/manage-codes', 'Manage Time Codes')}
+                        {createLink('/time-slip-log', 'View Log')}
                     </Menu>
                 </>
             );
