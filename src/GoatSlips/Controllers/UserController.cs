@@ -1,10 +1,12 @@
 ﻿using GoatSlips.Attributes;
+using GoatSlips.DAL;
 using GoatSlips.Exceptions;
 using GoatSlips.Helpers;
 using GoatSlips.Models;
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
 using GoatSlips.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Authentication;
 
@@ -17,14 +19,20 @@ namespace GoatSlips.Controllers
     {
         private readonly ILogger<UserController> _logger;
         private readonly IUserService _userService;
+        private readonly IUserProjectRepository _userProjectRepository;
+        private readonly IJwtUtils _jwtUtils;
 
         public UserController(
             ILogger<UserController> logger,
-            IUserService userService
+            IUserService userService,
+            IUserProjectRepository userProjectRepository,
+            IJwtUtils jwtUtils
         )
         {
             _logger = logger;
             _userService = userService;
+            _userProjectRepository = userProjectRepository;
+            _jwtUtils = jwtUtils;
         }
 
         [HttpGet("QueryUsers/{searchText?}", Name = "QueryUsersForUserManagement")]
@@ -213,6 +221,58 @@ namespace GoatSlips.Controllers
             {
                 IEnumerable<AccessRight> accessRights = _userService.GetAccessRightsForUser(userId);
                 return Ok(accessRights);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("ProjectsForUser", Name = "GetUserProjects")]
+        public ActionResult<IEnumerable<UserProject>> GetUserProjects()
+        {
+            try
+            {
+                int? userId = _jwtUtils.GetUserIdFromContext(HttpContext);
+
+                if (userId == null)
+                {
+                    throw new Exception("No user in context.");
+                }
+
+                IEnumerable<UserProject> userProjects = _userProjectRepository.GetUserProjects(userId);
+                return Ok(userProjects);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("Projects", Name = "GetAllUserProjects")]
+        public ActionResult<IEnumerable<UserProject>> GetAllUserProjects()
+        {
+            try
+            {
+                IEnumerable<UserProject> userProjects = _userProjectRepository.GetUserProjects();
+                return Ok(userProjects);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpPost("SetProjectsForUser", Name = "SetProjectsForUser")]
+        public IActionResult SetProjectsForUser(SetUserProjectsBody body)
+        {
+            try
+            {
+                _userProjectRepository.SetUserProjects(body.UserId, body.ProjectIds);
+                return Ok();
             }
             catch (Exception e)
             {

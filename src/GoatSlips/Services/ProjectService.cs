@@ -23,6 +23,7 @@ namespace GoatSlips.Services
         private readonly IProjectTaskRepository _projectTaskRepository;
         private readonly IFavoriteTimeSlipRepository _favoriteTimeSlipRepository;
         private readonly IQueryRepository _queryRepository;
+        private readonly IUserProjectRepository _userProjectRepository;
 
         public ProjectService(
             IGoatSlipsContext dbContext,
@@ -31,7 +32,8 @@ namespace GoatSlips.Services
             ITimeSlipRepository timeSlipRepository,
             IProjectTaskRepository projectTaskRepository,
             IFavoriteTimeSlipRepository favoriteTimeSlipRepository,
-            IQueryRepository queryRepository
+            IQueryRepository queryRepository,
+            IUserProjectRepository userProjectRepository
         )
         {
             _dbContext = dbContext;
@@ -41,6 +43,7 @@ namespace GoatSlips.Services
             _projectTaskRepository = projectTaskRepository;
             _favoriteTimeSlipRepository = favoriteTimeSlipRepository;
             _queryRepository = queryRepository;
+            _userProjectRepository = userProjectRepository;
         }
 
         public IEnumerable<Project> GetAllProjects()
@@ -108,6 +111,8 @@ namespace GoatSlips.Services
             _dbContext.SaveChanges();
 
             _queryRepository.ReleaseProjectId(projectId);
+
+            _userProjectRepository.ReleaseProjectId(projectId);
 
             projects.Remove(project);
 

@@ -32,6 +32,7 @@ builder.Services.AddScoped<IFavoriteTimeSlipRepository, FavoriteTimeSlipReposito
 builder.Services.AddScoped<IQueryRepository, QueryRepository>();
 builder.Services.AddScoped<ITimeSlipConfigurationRepository, TimeSlipConfigurationRepository>();
 builder.Services.AddScoped<ITimeSlipLogRepository, TimeSlipLogRepository>();
+builder.Services.AddScoped<IUserProjectRepository, UserProjectRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ITimeSlipService, TimeSlipService>();
 builder.Services.AddScoped<IFavoriteTimeSlipService, FavoriteTimeSlipService>();
