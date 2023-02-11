@@ -74,6 +74,7 @@ export const App: React.FC<{}> = () => {
 
     const [minutesPartition, setMinutesPartition] = useState<AllowedMinutesPartition>(1);
 
+    const [isProjectsForUserLoading, setIsProjectsForUserLoading] = useState(false);
     const [userProjectIds, setUserProjectIds] = useState<Set<number>>(new Set<number>());
 
     const isAuthenticated = () => {
@@ -113,11 +114,10 @@ export const App: React.FC<{}> = () => {
             getTasks();
             getTasksAllowedForProjects();
             getLaborCodes();
-            getAccessRights();
+            getAccessRightsAndUserProjects();
             getFavoriteTimeSlips();
             getSavedQueries();
             getMinutesPartition();
-            getUserProjects();
         }
     }, [user]);
 
@@ -160,6 +160,11 @@ export const App: React.FC<{}> = () => {
         setLaborCodes(laborCodesFromApi);
     };
 
+    const getAccessRightsAndUserProjects = async () => {
+        await getUserProjects();
+        await getAccessRights();
+    };
+
     const getAccessRights = async () => {
         setIsUserAccessRightsLoading(true);
         const accessRightsFromApi: AccessRight[] = await fetchGet<AccessRight[]>(
@@ -172,13 +177,15 @@ export const App: React.FC<{}> = () => {
     };
 
     const getUserProjects = async () => {
+        setIsProjectsForUserLoading(true);
         const userProjectsFromApi: UserProject[] = await fetchGet<UserProject[]>(
-            'User/GetUserProjects',
+            'User/ProjectsForUser',
         );
 
         const projectIds = userProjectsFromApi.map((up) => up.projectId);
 
         setUserProjectIds(new Set(projectIds));
+        setIsProjectsForUserLoading(false);
     };
 
     const getFavoriteTimeSlips = async () => {
@@ -258,6 +265,9 @@ export const App: React.FC<{}> = () => {
                 username={user.username}
                 passwordChangeRequired={user.requiresPasswordChange}
                 accessRights={userAccessRights}
+                showManageProjects={
+                    userAccessRights.has(adminAccessRight) || userProjectIds.size > 0
+                }
             />
             <div className={classes.appContent}>
                 <Routes>
@@ -331,6 +341,7 @@ export const App: React.FC<{}> = () => {
                                 requiredAccessRight={requiredAccessRights.get(manageProjects)}
                                 // Show link if user manages any projects
                                 overrideAccessRightAndAllowAccess={userProjectIds.size > 0}
+                                overrideAccessRightLoading={isProjectsForUserLoading}
                             >
                                 <ManageProjects
                                     projects={projects}

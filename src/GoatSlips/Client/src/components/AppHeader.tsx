@@ -12,10 +12,11 @@ interface AppHeaderProps {
     username: string;
     passwordChangeRequired: boolean;
     accessRights: Set<string>;
+    showManageProjects: boolean;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
-    const { onLogout, username, passwordChangeRequired, accessRights } = props;
+    const { onLogout, username, passwordChangeRequired, accessRights, showManageProjects } = props;
 
     const [appMenuAnchorEl, setAppMenuAnchorEl] = React.useState<null | HTMLElement>(null);
     const appMenuOpen = Boolean(appMenuAnchorEl);
@@ -64,6 +65,17 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
         );
     };
 
+    const createManageProjectsLink = () => {
+        if (!showManageProjects) {
+            return null;
+        }
+        return (
+            <Link className={classes.link} to="/manage-projects">
+                <MenuItem onClick={handleAppMenuClose}>Manage Projects</MenuItem>
+            </Link>
+        );
+    };
+
     const isAuthenticated = () => {
         return username !== '';
     };
@@ -87,7 +99,7 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
                         {createLink('/manage-users', 'Manage Users')}
                         {createLink('/', 'Week View')}
                         {createLink('/query-time-slips', 'Query Time Slips')}
-                        {createLink('/manage-projects', 'Manage Projects')}
+                        {createManageProjectsLink()}
                         {createLink('/manage-tasks', 'Manage Tasks')}
                         {createLink('/manage-labor-codes', 'Manage Labor Codes')}
                         {createLink('/time-slip-log', 'View Log')}
