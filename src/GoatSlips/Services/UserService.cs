@@ -20,6 +20,7 @@ namespace GoatSlips.Services
         void ChangePassword(ChangePasswordBody changePasswordBody, HttpContext httpContext);
         IEnumerable<AccessRight> GetAccessRightsForUser(int userId);
         void ValidateAccess(string accessRightCode, HttpContext httpContext);
+        void ValidateAccessForProject(string accessRightCode, HttpContext httpContext, int projectId);
         IEnumerable<UserForManagement> QueryUsers(string? searchText);
         void SetUserAccessRights(int userId, HashSet<int> accessRightIds);
         void AddAdminAccessRightForUser(int userId);
@@ -31,13 +32,15 @@ namespace GoatSlips.Services
         private readonly IJwtUtils _jwtUtils;
         private readonly IAccessRightRepository _accessRightRepository;
         private readonly IUserAccessRightRepository _userAccessRightRepository;
+        private readonly IUserProjectRepository _userProjectRepository;
 
         public UserService(
             IUserRepository userRepository,
             ISecretService secretService,
             IJwtUtils jwtUtils,
             IAccessRightRepository accessRightRepository,
-            IUserAccessRightRepository userAccessRightRepository
+            IUserAccessRightRepository userAccessRightRepository,
+            IUserProjectRepository userProjectRepository
         )
         {
             _userRepository = userRepository;
@@ -45,6 +48,7 @@ namespace GoatSlips.Services
             _jwtUtils = jwtUtils;
             _accessRightRepository = accessRightRepository;
             _userAccessRightRepository = userAccessRightRepository;
+            _userProjectRepository = userProjectRepository;
         }
 
         public IEnumerable<UserForDropdown> GetAllUsersForDropdown()
@@ -280,6 +284,22 @@ namespace GoatSlips.Services
             if (!hasAccess)
             {
                 throw new InsufficientAccessException("User does not have the required access right.");
+            }
+        }
+
+        public void ValidateAccessForProject(string accessRightCode, HttpContext httpContext, int projectId)
+        {
+            int? userId = _jwtUtils.GetUserIdFromContext(httpContext);
+            if (!userId.HasValue)
+            {
+                throw new Exception("No user currently logged in!");
+            }
+
+            bool hasAccessRight = GetAccessRightsForUser(userId.Value).Any(ar => ar.Code == accessRightCode);
+            bool canManageProject = _userProjectRepository.UserProjects.Any(up => up.UserId == userId && up.ProjectId == projectId);
+            if (!hasAccessRight && !canManageProject)
+            {
+                throw new InsufficientAccessException("User does not have access to modify the project.");
             }
         }
 
