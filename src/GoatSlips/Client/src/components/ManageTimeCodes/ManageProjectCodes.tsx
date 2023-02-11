@@ -25,6 +25,8 @@ interface ManageProjectCodesProps {
     fetchTasksAllowed: () => Promise<void>;
     fetchFavorites: () => Promise<void>;
     setAlertMessage: (alertMessage: AlertMessage) => void;
+    isAdmin: boolean;
+    managedProjectIds: Set<number>;
 }
 
 export const ManageProjectCodes: React.FC<ManageProjectCodesProps> = (
@@ -39,6 +41,8 @@ export const ManageProjectCodes: React.FC<ManageProjectCodesProps> = (
         fetchTasksAllowed,
         fetchFavorites,
         setAlertMessage,
+        isAdmin,
+        managedProjectIds,
     } = props;
 
     const [newProjectName, setNewProjectName] = useState('');
@@ -62,6 +66,9 @@ export const ManageProjectCodes: React.FC<ManageProjectCodesProps> = (
     };
 
     const existingProjectElements = projects.map((project: DropdownOption) => {
+        if (!isAdmin && !managedProjectIds.has(project.id)) {
+            return null;
+        }
         return (
             <ExistingProjectRow
                 allTasks={tasks}

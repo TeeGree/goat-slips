@@ -11,16 +11,18 @@ import { ChangePassword } from './components/pages/ChangePassword';
 import { User } from './types/User';
 import { QueryTimeSlips } from './components/pages/QueryTimeSlips';
 import { DropdownOption } from './types/DropdownOption';
-import { ManageTimeCodes } from './components/pages/ManageTimeCodes';
+import { ManageLaborCodesContainer } from './components/pages/ManageLaborCodesContainer';
 import { TaskMap } from './types/TaskMap';
 import { RequireAuthentication } from './components/HOC/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';
 import {
     adminAccessRight,
     manageConfigurations,
-    manageTimeCodes,
+    manageProjects,
+    manageLaborCodes,
     manageUsers,
     requiredAccessRights,
+    manageTasks,
 } from './constants/requiredAccessRights';
 import { UserManagement } from './components/pages/UserManagement';
 import { FavoriteTimeSlipData } from './types/TimeSlip';
@@ -29,6 +31,9 @@ import { Query } from './types/Query';
 import { Configurations } from './components/pages/Configurations';
 import { AllowedMinutesPartition } from './types/AllowedMinutesPartition';
 import { TimeSlipLogView } from './components/pages/TimeSlipLogView';
+import { UserProject } from './types/UserProject';
+import { ManageProjects } from './components/pages/ManageProjects';
+import { ManageTasks } from './components/pages/ManageTasks';
 
 const defaultUser: User = {
     userId: 0,
@@ -68,6 +73,8 @@ export const App: React.FC<{}> = () => {
     );
 
     const [minutesPartition, setMinutesPartition] = useState<AllowedMinutesPartition>(1);
+
+    const [userProjectIds, setUserProjectIds] = useState<Set<number>>(new Set<number>());
 
     const isAuthenticated = () => {
         return user.username !== '';
@@ -110,6 +117,7 @@ export const App: React.FC<{}> = () => {
             getFavoriteTimeSlips();
             getSavedQueries();
             getMinutesPartition();
+            getUserProjects();
         }
     }, [user]);
 
@@ -161,6 +169,16 @@ export const App: React.FC<{}> = () => {
         const accessRightCodes = accessRightsFromApi.map((ar) => ar.code);
         setUserAccessRights(new Set(accessRightCodes));
         setIsUserAccessRightsLoading(false);
+    };
+
+    const getUserProjects = async () => {
+        const userProjectsFromApi: UserProject[] = await fetchGet<UserProject[]>(
+            'User/GetUserProjects',
+        );
+
+        const projectIds = userProjectsFromApi.map((up) => up.projectId);
+
+        setUserProjectIds(new Set(projectIds));
     };
 
     const getFavoriteTimeSlips = async () => {
@@ -302,25 +320,65 @@ export const App: React.FC<{}> = () => {
                         }
                     />
                     <Route
-                        key="/manage-codes"
-                        path="/manage-codes"
+                        key="/manage-projects"
+                        path="/manage-projects"
                         element={
                             <RequireAuthentication
                                 isAuthenticated={canAccessGuardedRoutes}
                                 isAccessRightsLoading={isUserAccessRightsLoading}
                                 isAuthenticationLoading={isAuthenticationLoading}
                                 accessRights={userAccessRights}
-                                requiredAccessRight={requiredAccessRights.get(manageTimeCodes)}
+                                requiredAccessRight={requiredAccessRights.get(manageProjects)}
+                                // Show link if user manages any projects
+                                overrideAccessRightAndAllowAccess={userProjectIds.size > 0}
                             >
-                                <ManageTimeCodes
+                                <ManageProjects
                                     projects={projects}
                                     tasks={tasks}
                                     taskMap={taskMap}
                                     tasksAllowedForProjects={tasksAllowedForProjects}
-                                    laborCodes={laborCodes}
                                     fetchProjects={getProjects}
                                     fetchTasksAllowed={getTasksAllowedForProjects}
+                                    fetchFavorites={getFavoriteTimeSlips}
+                                    isAdmin={userAccessRights.has(adminAccessRight)}
+                                    managedProjectIds={userProjectIds}
+                                />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/manage-tasks"
+                        path="/manage-tasks"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                                requiredAccessRight={requiredAccessRights.get(manageTasks)}
+                            >
+                                <ManageTasks
+                                    tasks={tasks}
+                                    fetchTasksAllowed={getTasksAllowedForProjects}
                                     fetchTasks={getTasks}
+                                    fetchFavorites={getFavoriteTimeSlips}
+                                />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/manage-labor-codes"
+                        path="/manage-labor-codes"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                                requiredAccessRight={requiredAccessRights.get(manageLaborCodes)}
+                            >
+                                <ManageLaborCodesContainer
+                                    laborCodes={laborCodes}
                                     fetchLaborCodes={getLaborCodes}
                                     fetchFavorites={getFavoriteTimeSlips}
                                 />

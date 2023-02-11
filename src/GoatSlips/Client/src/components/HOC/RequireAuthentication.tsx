@@ -9,6 +9,7 @@ interface RequireAuthenticationProps {
     children: React.ReactNode;
     accessRights: Set<string>;
     requiredAccessRight?: string;
+    overrideAccessRightAndAllowAccess?: boolean;
 }
 
 export const RequireAuthentication: React.FC<RequireAuthenticationProps> = (
@@ -21,6 +22,7 @@ export const RequireAuthentication: React.FC<RequireAuthenticationProps> = (
         children,
         accessRights,
         requiredAccessRight,
+        overrideAccessRightAndAllowAccess,
     } = props;
     const navigate = useNavigate();
 
@@ -29,11 +31,17 @@ export const RequireAuthentication: React.FC<RequireAuthenticationProps> = (
             (!isAuthenticationLoading && !isAuthenticated) ||
             (!isAccessRightsLoading &&
                 requiredAccessRight !== undefined &&
-                !accessRights.has(requiredAccessRight))
+                !accessRights.has(requiredAccessRight) &&
+                !overrideAccessRightAndAllowAccess)
         ) {
             navigate('/');
         }
-    }, [isAuthenticationLoading, requiredAccessRight, accessRights]);
+    }, [
+        isAuthenticationLoading,
+        requiredAccessRight,
+        accessRights,
+        overrideAccessRightAndAllowAccess,
+    ]);
 
     if (isAuthenticationLoading || isAccessRightsLoading) {
         return <CircularProgress />;

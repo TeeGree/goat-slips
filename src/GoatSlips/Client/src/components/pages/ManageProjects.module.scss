@@ -1,0 +1,20 @@
+$headerHeight: 90px;
+
+.pageContainer {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header {
+    height: $headerHeight;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.codesList {
+    max-height: calc(100% - ($headerHeight * 2));
+}
