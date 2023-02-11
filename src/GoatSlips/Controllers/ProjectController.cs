@@ -89,7 +89,7 @@ namespace GoatSlips.Controllers
                 {
                     throw new Exception("No user logged in!");
                 }
-                _userService.ValidateAccess(AccessRights.Admin, HttpContext);
+                _userService.ValidateAccessForProject(AccessRights.Admin, HttpContext, body.ProjectId);
                 _projectService.SetAllowedTasksForProject(body.ProjectId, body.AllowedTaskIds, user.Id);
                 return Ok();
             }

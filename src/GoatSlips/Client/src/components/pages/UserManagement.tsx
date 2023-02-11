@@ -21,11 +21,20 @@ import { AlertMessage } from '../../types/AlertMessage';
 import { UserQueryResult } from '../../types/User';
 import { Toast } from '../Toast';
 import classes from './UserManagement.module.scss';
-import { UserRow } from '../UserRow';
+import { UserRow } from '../UserRow/UserRow';
 import { modalStyle } from '../../constants/modalStyle';
 import { passwordIsValid } from '../../helpers/passwordValidation';
+import { UserProject } from '../../types/UserProject';
+import { DropdownOption } from '../../types/DropdownOption';
 
-export const UserManagement: React.FC<{}> = () => {
+interface UserManagementProps {
+    allProjects: DropdownOption[];
+    allProjectsMap: Map<number, string>;
+}
+
+export const UserManagement: React.FC<UserManagementProps> = (props: UserManagementProps) => {
+    const { allProjects, allProjectsMap } = props;
+
     const [searchModified, setSearchModified] = useState(false);
     const [loadingResults, setLoadingResults] = useState(true);
     const [userFilterText, setUserFilterText] = useState('');
@@ -42,11 +51,15 @@ export const UserManagement: React.FC<{}> = () => {
     const [accessRightMap, setAccessRightMap] = useState<Map<number, string>>(
         new Map<number, string>([]),
     );
+    const [userProjectsMap, setUserProjectsMap] = useState<Map<number, number[]>>(
+        new Map<number, number[]>([]),
+    );
     const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
 
     useEffect(() => {
         getUsers('');
         getAllAccessRights();
+        getUserProjects();
     }, []);
 
     const getUsers = async (searchText: string) => {
@@ -76,6 +89,21 @@ export const UserManagement: React.FC<{}> = () => {
 
         setAccessRightMap(map);
         setAccessRights(accessRightsFromApi);
+    };
+
+    const getUserProjects = async () => {
+        const userProjectsFromApi: UserProject[] = await fetchGet<UserProject[]>('User/Projects');
+
+        const map = new Map<number, number[]>([]);
+        userProjectsFromApi.forEach(({ userId, projectId }: UserProject) => {
+            if (map.has(userId)) {
+                map.get(userId)?.push(projectId);
+            } else {
+                map.set(userId, [projectId]);
+            }
+        });
+
+        setUserProjectsMap(map);
     };
 
     const handleUserFilterChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -118,6 +146,10 @@ export const UserManagement: React.FC<{}> = () => {
                     allAccessRights={accessRights}
                     accessRightMap={accessRightMap}
                     fetchUsers={() => getUsers(userFilterText)}
+                    fetchProjectsForUsers={getUserProjects}
+                    allProjects={allProjects}
+                    allProjectsMap={allProjectsMap}
+                    projectsForUser={userProjectsMap.get(user.id) ?? []}
                 />
             );
         });
@@ -237,6 +269,7 @@ export const UserManagement: React.FC<{}> = () => {
                             <TableCell>First Name</TableCell>
                             <TableCell>Last Name</TableCell>
                             <TableCell>Access Rights</TableCell>
+                            <TableCell>Projects</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>{getRows()}</TableBody>

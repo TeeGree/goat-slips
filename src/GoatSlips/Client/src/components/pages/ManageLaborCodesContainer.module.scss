@@ -15,12 +15,6 @@ $headerHeight: 90px;
     align-items: center;
 }
 
-.codeTypeButtonGroup {
-    height: $headerHeight;
-    display: flex;
-    align-items: center;
-}
-
 .codesList {
     max-height: calc(100% - ($headerHeight * 2));
 }
