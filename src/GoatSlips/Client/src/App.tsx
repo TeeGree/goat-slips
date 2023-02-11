@@ -268,7 +268,10 @@ export const App: React.FC<{}> = () => {
                                 accessRights={userAccessRights}
                                 requiredAccessRight={requiredAccessRights.get(manageUsers)}
                             >
-                                <UserManagement />
+                                <UserManagement
+                                    allProjects={projects}
+                                    allProjectsMap={projectMap}
+                                />
                             </RequireAuthentication>
                         }
                     />
