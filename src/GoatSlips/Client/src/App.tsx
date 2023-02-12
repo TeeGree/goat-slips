@@ -11,7 +11,7 @@ import { ChangePassword } from './components/pages/ChangePassword';
 import { User } from './types/User';
 import { QueryTimeSlips } from './components/pages/QueryTimeSlips';
 import { DropdownOption } from './types/DropdownOption';
-import { ManageLaborCodesContainer } from './components/pages/ManageLaborCodesContainer';
+import { ManageLaborCodesContainer } from './components/pages/ManageLaborCodes';
 import { TaskMap } from './types/TaskMap';
 import { RequireAuthentication } from './components/HOC/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';

@@ -14,47 +14,47 @@ import React, { useState } from 'react';
 import { fetchPostResponse } from '../../helpers/fetchFunctions';
 import { AlertMessage } from '../../types/AlertMessage';
 import { DropdownOption } from '../../types/DropdownOption';
-import { ExistingTaskRow } from '../ManageTimeCodes/ExistingTaskRow';
-import classes from './ManageTasks.module.scss';
+import { ExistingLaborCodeRow } from '../ManageTimeCodes/ExistingLaborCodeRow';
+import classes from './ManageLaborCodes.module.scss';
 
-interface ManageTasksProps {
-    tasks: DropdownOption[];
-    fetchTasksAllowed: () => Promise<void>;
-    fetchTasks: () => Promise<void>;
+interface ManageLaborCodesContainerProps {
+    laborCodes: DropdownOption[];
+    fetchLaborCodes: () => Promise<void>;
     fetchFavorites: () => Promise<void>;
 }
 
-export const ManageTasks: React.FC<ManageTasksProps> = (props: ManageTasksProps) => {
-    const { tasks, fetchTasksAllowed, fetchTasks, fetchFavorites } = props;
+export const ManageLaborCodesContainer: React.FC<ManageLaborCodesContainerProps> = (
+    props: ManageLaborCodesContainerProps,
+) => {
+    const { laborCodes, fetchLaborCodes, fetchFavorites } = props;
 
     const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
-    const [newTaskName, setNewTaskName] = useState('');
 
-    const handleNewTaskNameChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const [newLaborCodeName, setNewLaborCodeName] = useState('');
+
+    const handleNewLaborCodeNameChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = event.target.value;
 
-        setNewTaskName(value);
+        setNewLaborCodeName(value);
     };
 
-    const createTask = async () => {
-        await fetchPostResponse('Task/Create', { taskName: newTaskName });
-        setNewTaskName('');
-        await fetchTasks();
-        await fetchTasksAllowed();
-    };
-
-    const refetchTasks = async () => {
-        await fetchTasks();
-        await fetchTasksAllowed();
+    const fetchLaborCodesAndFavorites = async () => {
+        await fetchLaborCodes();
         await fetchFavorites();
     };
 
-    const existingTaskElements = tasks.map((task: DropdownOption) => {
+    const createLaborCode = async () => {
+        await fetchPostResponse('LaborCode/Create', { laborCodeName: newLaborCodeName });
+        setNewLaborCodeName('');
+        await fetchLaborCodes();
+    };
+
+    const existingLaborCodeElements = laborCodes.map((laborCode: DropdownOption) => {
         return (
-            <ExistingTaskRow
-                key={`task${task.id}`}
-                task={task}
-                fetchTasks={refetchTasks}
+            <ExistingLaborCodeRow
+                key={`laborCode${laborCode.id}`}
+                laborCode={laborCode}
+                fetchLaborCodes={fetchLaborCodesAndFavorites}
                 setError={(message: string) => setAlertMessage({ message, severity: 'error' })}
                 setSuccess={(message: string) => setAlertMessage({ message, severity: 'success' })}
             />
@@ -69,23 +69,23 @@ export const ManageTasks: React.FC<ManageTasksProps> = (props: ManageTasksProps)
         return <Alert severity={alertMessage.severity}>{alertMessage.message}</Alert>;
     };
 
-    const getTaskList = () => {
+    const getLaborCodesList = () => {
         return (
             <>
-                <div className={classes.newTaskContainer}>
+                <div className={classes.newLaborCodeContainer}>
                     <TextField
-                        className={classes.taskName}
-                        label="New Task"
+                        className={classes.laborCodeName}
+                        label="New Labor Code"
                         variant="outlined"
-                        value={newTaskName}
-                        onChange={handleNewTaskNameChange}
+                        value={newLaborCodeName}
+                        onChange={handleNewLaborCodeNameChange}
                     />
                     <Button
-                        className={classes.addNewTask}
+                        className={classes.addNewLaborCode}
                         variant="contained"
                         color="success"
-                        disabled={newTaskName === ''}
-                        onClick={createTask}
+                        disabled={newLaborCodeName === ''}
+                        onClick={createLaborCode}
                     >
                         Add
                     </Button>
@@ -98,7 +98,7 @@ export const ManageTasks: React.FC<ManageTasksProps> = (props: ManageTasksProps)
                                 <TableCell className={classes.buttonCell} />
                             </TableRow>
                         </TableHead>
-                        <TableBody>{existingTaskElements}</TableBody>
+                        <TableBody>{existingLaborCodeElements}</TableBody>
                     </Table>
                 </TableContainer>
             </>
@@ -107,9 +107,9 @@ export const ManageTasks: React.FC<ManageTasksProps> = (props: ManageTasksProps)
 
     return (
         <div className={classes.pageContainer}>
-            <div className={classes.header}>Manage Tasks</div>
+            <div className={classes.header}>Manage Labor Codes</div>
             {getAlert()}
-            <div className={classes.codesList}>{getTaskList()}</div>
+            <div className={classes.codesList}>{getLaborCodesList()}</div>
         </div>
     );
 };

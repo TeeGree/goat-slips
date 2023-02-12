@@ -1,4 +1,6 @@
 $headerHeight: 90px;
+$newTaskHeight: 74px;
+$newTaskMargin: 5px;
 
 .pageContainer {
     height: 100%;
@@ -17,4 +19,33 @@ $headerHeight: 90px;
 
 .codesList {
     max-height: calc(100% - ($headerHeight * 2));
+}
+
+.newTaskContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: $newTaskHeight;
+    margin-bottom: $newTaskMargin;
+    border: 1px solid grey;
+    border-radius: 5px;
+}
+
+.TaskName {
+    width: 250px !important;
+}
+
+.addNewTask {
+    margin-left: 0.7em !important;
+}
+
+.tableContainer {
+    $marginBottom: 20px;
+    height: calc(100% - $newTaskHeight - $newTaskMargin - $marginBottom);
+    margin-bottom: $marginBottom;
+    min-width: 500px;
+}
+
+.buttonCell {
+    width: 0;
 }
