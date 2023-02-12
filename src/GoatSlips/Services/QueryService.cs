@@ -11,7 +11,7 @@ namespace GoatSlips.Services
     public interface IQueryService
     {
         IEnumerable<QueryForUI> GetQueries(HttpContext httpContext);
-        TimeSlip[] QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody, HttpContext httpContext);
+        TimeSlipQueryResult[] QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody, HttpContext httpContext);
         void AddQuery(
             string name,
             int[]? userIds,
@@ -102,7 +102,7 @@ namespace GoatSlips.Services
             return queries;
         }
 
-        public TimeSlip[] QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody, HttpContext httpContext)
+        public TimeSlipQueryResult[] QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody, HttpContext httpContext)
         {
             // Allow querying for your own time slips if not admin.
             int[]? userIds = getTimeSlipsBody.UserIds;
@@ -114,7 +114,7 @@ namespace GoatSlips.Services
                 _userService.ValidateAccess(AccessRights.Admin, httpContext);
             }
 
-            TimeSlip[] timeSlips = GetTimeSlips(
+            TimeSlipQueryResult[] timeSlips = GetTimeSlips(
                 getTimeSlipsBody.UserIds,
                 getTimeSlipsBody.ProjectIds,
                 getTimeSlipsBody.TaskIds?.Select(t => t == -1 ? (int?)null : t).ToArray(),
@@ -125,7 +125,7 @@ namespace GoatSlips.Services
             return timeSlips;
         }
 
-        private TimeSlip[] GetTimeSlips(
+        private TimeSlipQueryResult[] GetTimeSlips(
             int[]? userIds,
             int[]? projectIds,
             int?[]? taskIds,
@@ -168,7 +168,13 @@ namespace GoatSlips.Services
                 timeSlipsQueryable = timeSlipsQueryable.Where(ts => ts.Date <= toDate);
             }
 
-            return timeSlipsQueryable.ToArray();
+            Dictionary<int, decimal> projectRates = _projectRepository.GetProjectRates();
+
+            return timeSlipsQueryable
+                // This .ToArray() is needed to prevent trying to use Linq to entity (entity framework) for the select.
+                .ToArray()
+                .Select(ts => new TimeSlipQueryResult(ts, projectRates[ts.ProjectId]))
+                .ToArray();
         }
 
         private void ValidateUserIdsExist(int[]? userIds)
