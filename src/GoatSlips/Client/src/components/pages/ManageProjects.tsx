@@ -2,11 +2,12 @@ import { Alert } from '@mui/material';
 import React, { useState } from 'react';
 import { AlertMessage } from '../../types/AlertMessage';
 import { DropdownOption } from '../../types/DropdownOption';
+import { Project } from '../../types/Project';
 import { ManageProjectCodes } from '../ManageTimeCodes/ManageProjectCodes';
 import classes from './ManageProjects.module.scss';
 
 interface ManageTimeCodesProps {
-    projects: DropdownOption[];
+    projects: Project[];
     tasks: DropdownOption[];
     taskMap: Map<number, string>;
     tasksAllowedForProjects: Map<number, number[]>;

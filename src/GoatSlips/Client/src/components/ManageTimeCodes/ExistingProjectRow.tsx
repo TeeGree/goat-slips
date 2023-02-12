@@ -1,5 +1,5 @@
 import { Delete, Save } from '@mui/icons-material';
-import { Box, Button, Modal, TableCell, TableRow } from '@mui/material';
+import { Box, Button, Modal, TableCell, TableRow, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { modalStyle } from '../../constants/modalStyle';
 import { codeInUse } from '../../constants/statusCodes';
@@ -8,9 +8,10 @@ import { DropdownOption } from '../../types/DropdownOption';
 import { ErrorDetails } from '../../types/ErrorDetails';
 import classes from './ExistingProject.module.scss';
 import { MultiSelect } from '../MultiSelect';
+import { Project } from '../../types/Project';
 
 interface ExistingProjectRowProps {
-    project: DropdownOption;
+    project: Project;
     allTasks: DropdownOption[];
     tasksAllowed: number[];
     taskMap: Map<number, string>;
@@ -38,6 +39,7 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
     const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>(tasksAllowed);
     const [isDirty, setIsDirty] = useState(false);
     const [originalTasks, setOriginalTasks] = useState(new Set(tasksAllowed));
+    const [rate, setRate] = useState<string>(project.rate.toString());
 
     useEffect(() => {
         setSelectedTaskIds(tasksAllowed);
@@ -59,15 +61,35 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
         setIsBeingDeleted(false);
     };
 
+    const handleRateChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const value = event.target.value;
+        const regex = /^\d*\.?(?:\d{0,2})$/;
+        if (!regex.test(value)) {
+            return;
+        }
+
+        const newRateNumeric = Number(value);
+
+        if (value !== '' && newRateNumeric < 0) {
+            return;
+        }
+
+        setIsDirty(newRateNumeric !== project.rate);
+
+        setRate(value);
+    };
+
     const updateAllowedTasksForProject = async () => {
-        const response = await fetchPostResponse('Project/SetAllowedTasks', {
+        const response = await fetchPostResponse('Project/Update', {
             projectId: project.id,
             allowedTaskIds: selectedTaskIds,
+            rate: rate === '' ? 0 : Number(rate),
         });
 
         if (response.ok) {
             await fetchTasksAllowed();
-            setSuccess(`Successfully updated allowed tasks for project ${project.name}!`);
+            await fetchProjects();
+            setSuccess(`Successfully updated project ${project.name}!`);
         }
     };
 
@@ -77,6 +99,7 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
                 <TableCell>{project.name}</TableCell>
                 <TableCell>
                     <MultiSelect
+                        className={classes.full}
                         label="Allowed Tasks"
                         originalSelectedIds={originalTasks}
                         selectedIds={selectedTaskIds}
@@ -84,6 +107,15 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
                         setIsDirty={setIsDirty}
                         getDisplayTextForId={(id: number) => taskMap.get(id) ?? ''}
                         options={allTasks}
+                    />
+                </TableCell>
+                <TableCell>
+                    <TextField
+                        className={classes.textField}
+                        label="Rate"
+                        variant="outlined"
+                        value={rate}
+                        onChange={handleRateChange}
                     />
                 </TableCell>
                 <TableCell>

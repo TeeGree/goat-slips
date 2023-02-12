@@ -13,11 +13,12 @@ import { useState } from 'react';
 import { fetchPostResponse } from '../../helpers/fetchFunctions';
 import { AlertMessage } from '../../types/AlertMessage';
 import { DropdownOption } from '../../types/DropdownOption';
+import { Project } from '../../types/Project';
 import { ExistingProjectRow } from './ExistingProjectRow';
 import classes from './ManageProjectCodes.module.scss';
 
 interface ManageProjectCodesProps {
-    projects: DropdownOption[];
+    projects: Project[];
     tasks: DropdownOption[];
     taskMap: Map<number, string>;
     tasksAllowedForProjects: Map<number, number[]>;
@@ -65,7 +66,7 @@ export const ManageProjectCodes: React.FC<ManageProjectCodesProps> = (
         await fetchFavorites();
     };
 
-    const existingProjectElements = projects.map((project: DropdownOption) => {
+    const existingProjectElements = projects.map((project: Project) => {
         if (!isAdmin && !managedProjectIds.has(project.id)) {
             return null;
         }
@@ -109,7 +110,8 @@ export const ManageProjectCodes: React.FC<ManageProjectCodesProps> = (
                     <TableHead>
                         <TableRow>
                             <TableCell>Name</TableCell>
-                            <TableCell>Allowed Tasks</TableCell>
+                            <TableCell className={classes.taskCell}>Allowed Tasks</TableCell>
+                            <TableCell>Rate</TableCell>
                             <TableCell className={classes.buttonCell} />
                         </TableRow>
                     </TableHead>

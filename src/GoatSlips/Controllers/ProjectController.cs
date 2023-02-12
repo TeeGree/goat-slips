@@ -79,8 +79,8 @@ namespace GoatSlips.Controllers
             }
         }
 
-        [HttpPost("SetAllowedTasks", Name = "SetAllowedTasks")]
-        public IActionResult SetAllowedTasks(SetAllowedTasksBody body)
+        [HttpPost("Update", Name = "UpdateProject")]
+        public IActionResult UpdateProject(UpdateProjectBody body)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace GoatSlips.Controllers
                     throw new Exception("No user logged in!");
                 }
                 _userService.ValidateAccessForProject(AccessRights.Admin, HttpContext, body.ProjectId);
-                _projectService.SetAllowedTasksForProject(body.ProjectId, body.AllowedTaskIds, user.Id);
+                _projectService.UpdateProject(body.ProjectId, body.AllowedTaskIds, user.Id, body.Rate);
                 return Ok();
             }
             catch (InsufficientAccessException e)

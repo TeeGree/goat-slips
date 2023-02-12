@@ -23,7 +23,11 @@ $newProjectMargin: 5px;
     $marginBottom: 20px;
     height: calc(100% - $newProjectHeight - $newProjectMargin - $marginBottom);
     margin-bottom: $marginBottom;
-    min-width: 500px;
+    min-width: 1000px;
+}
+
+.taskCell {
+    width: 300px;
 }
 
 .buttonCell {
