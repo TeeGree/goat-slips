@@ -6,6 +6,7 @@ namespace GoatSlips.DAL
     public interface IProjectRepository
     {
         DbSet<Project> Projects { get; }
+        Dictionary<int, decimal> GetProjectRates();
     }
     public sealed class ProjectRepository : IProjectRepository
     {
@@ -26,6 +27,11 @@ namespace GoatSlips.DAL
         public ProjectRepository(IGoatSlipsContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public Dictionary<int, decimal> GetProjectRates()
+        {
+            return Projects.ToDictionary(p => p.Id, p => p.Rate);
         }
     }
 }

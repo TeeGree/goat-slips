@@ -2,6 +2,7 @@
 using GoatSlips.Exceptions;
 using GoatSlips.Models.Database;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using Task = GoatSlips.Models.Database.Task;
 
 namespace GoatSlips.Services
@@ -12,7 +13,7 @@ namespace GoatSlips.Services
         IEnumerable<Task> GetTasksForProject(int projectId);
         void CreateProject(string projectName);
         void DeleteProject(int projectId);
-        void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds, int userId);
+        void UpdateProject(int projectId, HashSet<int> allowedTaskIds, int userId, decimal rate);
     }
     public sealed class ProjectService : IProjectService
     {
@@ -135,15 +136,24 @@ namespace GoatSlips.Services
             projectTaskMapping.RemoveRange(projectTasksToRemove);
         }
 
-        public void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds, int userId)
+        public void UpdateProject(int projectId, HashSet<int> allowedTaskIds, int userId, decimal rate)
         {
-            DbSet<Project> projects = _projectRepository.Projects;
+            Project? project = _projectRepository.Projects.Where(p => p.Id == projectId).FirstOrDefault();
 
-            if (!projects.Any(p => p.Id == projectId))
+            if (project == null)
             {
                 throw new Exception("Project does not exist!");
             }
 
+            project.Rate = rate;
+
+            _projectRepository.Projects.AddOrUpdate(project);
+
+            SetAllowedTasksForProject(projectId, allowedTaskIds, userId);
+        }
+
+        private void SetAllowedTasksForProject(int projectId, HashSet<int> allowedTaskIds, int userId)
+        {
             DbSet<Task> tasks = _taskRepository.Tasks;
 
             if (allowedTaskIds.Any(at => !tasks.Any(t => t.Id == at)))

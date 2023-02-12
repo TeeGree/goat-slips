@@ -42,11 +42,11 @@ namespace GoatSlips.Controllers
         }
 
         [HttpPost("QueryTimeSlips", Name = "QueryTimeSlips")]
-        public ActionResult<TimeSlip[]> QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody)
+        public ActionResult<TimeSlipQueryResult[]> QueryTimeSlips(GetTimeSlipsBody getTimeSlipsBody)
         {
             try
             {
-                TimeSlip[] timeSlips = _queryService.QueryTimeSlips(getTimeSlipsBody, HttpContext);
+                TimeSlipQueryResult[] timeSlips = _queryService.QueryTimeSlips(getTimeSlipsBody, HttpContext);
                 return Ok(timeSlips);
             }
             catch (InsufficientAccessException e)

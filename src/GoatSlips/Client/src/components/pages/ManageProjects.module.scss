@@ -1,4 +1,6 @@
 $headerHeight: 90px;
+$newProjectHeight: 74px;
+$newProjectMargin: 5px;
 
 .pageContainer {
     height: 100%;
@@ -17,4 +19,37 @@ $headerHeight: 90px;
 
 .codesList {
     max-height: calc(100% - ($headerHeight * 2));
+}
+
+.newProjectContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: $newProjectHeight;
+    margin-bottom: $newProjectMargin;
+    border: 1px solid grey;
+    border-radius: 5px;
+}
+
+.projectName {
+    width: 250px !important;
+}
+
+.addNewProject {
+    margin-left: 0.7em !important;
+}
+
+.tableContainer {
+    $marginBottom: 20px;
+    height: calc(100% - $newProjectHeight - $newProjectMargin - $marginBottom);
+    margin-bottom: $marginBottom;
+    min-width: 1000px;
+}
+
+.taskCell {
+    width: 300px;
+}
+
+.buttonCell {
+    width: 150px;
 }

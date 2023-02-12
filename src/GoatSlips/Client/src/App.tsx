@@ -11,7 +11,7 @@ import { ChangePassword } from './components/pages/ChangePassword';
 import { User } from './types/User';
 import { QueryTimeSlips } from './components/pages/QueryTimeSlips';
 import { DropdownOption } from './types/DropdownOption';
-import { ManageLaborCodesContainer } from './components/pages/ManageLaborCodesContainer';
+import { ManageLaborCodesContainer } from './components/pages/ManageLaborCodes';
 import { TaskMap } from './types/TaskMap';
 import { RequireAuthentication } from './components/HOC/RequireAuthentication';
 import { AccessRight } from './types/AccessRight';
@@ -34,6 +34,7 @@ import { TimeSlipLogView } from './components/pages/TimeSlipLogView';
 import { UserProject } from './types/UserProject';
 import { ManageProjects } from './components/pages/ManageProjects';
 import { ManageTasks } from './components/pages/ManageTasks';
+import { Project } from './types/Project';
 
 const defaultUser: User = {
     userId: 0,
@@ -50,7 +51,7 @@ export const App: React.FC<{}> = () => {
     const [anyUsers, setAnyUsers] = useState(false);
     const [isAnyUsersLoading, setAnyUsersLoading] = useState(true);
 
-    const [projects, setProjects] = useState<DropdownOption[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [projectMap, setProjectMap] = useState<Map<number, string>>(new Map<number, string>([]));
 
     const [tasks, setTasks] = useState<DropdownOption[]>([]);
@@ -122,10 +123,10 @@ export const App: React.FC<{}> = () => {
     }, [user]);
 
     const getProjects = async () => {
-        const projectsFromApi: DropdownOption[] = await fetchGet<DropdownOption[]>('Project');
+        const projectsFromApi: Project[] = await fetchGet<Project[]>('Project');
 
         const map = new Map<number, string>([]);
-        projectsFromApi.forEach((project: DropdownOption) => map.set(project.id, project.name));
+        projectsFromApi.forEach((project: Project) => map.set(project.id, project.name));
         setProjectMap(map);
         setProjects(projectsFromApi);
     };

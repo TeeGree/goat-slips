@@ -34,7 +34,7 @@ import {
 import { AlertMessage } from '../../types/AlertMessage';
 import { DropdownOption } from '../../types/DropdownOption';
 import { Query } from '../../types/Query';
-import { ExportableTimeSlip, TimeSlip } from '../../types/TimeSlip';
+import { ExportableTimeSlip, TimeSlipQueryResult } from '../../types/TimeSlip';
 import { MultiSelect } from '../MultiSelect';
 import { EntityLabelWithIcon } from '../EntityLabelWithIcon';
 import { Toast } from '../Toast';
@@ -87,7 +87,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         fetchSavedQueries,
     } = props;
     const [loadingResults, setLoadingResults] = useState(true);
-    const [timeSlips, setTimeSlips] = useState<TimeSlip[]>([]);
+    const [timeSlips, setTimeSlips] = useState<TimeSlipQueryResult[]>([]);
 
     const defaultSelectedUserIds = isAdmin ? [] : [currentUserId];
     const [selectedUserIds, setSelectedUserIds] = useState<number[]>(defaultSelectedUserIds);
@@ -159,7 +159,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
 
         const queryBody: QueryBody = buildQueryBody();
 
-        const results = await fetchPost<TimeSlip[]>('Query/QueryTimeSlips', queryBody);
+        const results = await fetchPost<TimeSlipQueryResult[]>('Query/QueryTimeSlips', queryBody);
         setTimeSlips(results);
 
         setLoadingResults(false);
@@ -205,7 +205,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
             );
         }
 
-        return timeSlips.map((ts: TimeSlip) => {
+        return timeSlips.map((ts: TimeSlipQueryResult) => {
             return (
                 <TableRow key={ts.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell>{userMap.get(ts.userId)}</TableCell>
@@ -216,24 +216,28 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                     <TableCell>{new Date(ts.date).toLocaleDateString('en')}</TableCell>
                     <TableCell>{ts.hours}</TableCell>
                     <TableCell>{ts.minutes}</TableCell>
+                    <TableCell>{`$${ts.cost.toFixed(2)}`}</TableCell>
                 </TableRow>
             );
         });
     };
 
     const getCsvOfSearchResults = (): string => {
-        const exportableTimeSlips: ExportableTimeSlip[] = timeSlips.map((ts: TimeSlip) => {
-            return {
-                username: userMap.get(ts.userId) ?? 'Unknown',
-                project: projectMap.get(ts.projectId) ?? 'Unknown',
-                task: getTask(ts.taskId),
-                laborCode: getLaborCode(ts.laborCodeId),
-                description: ts.description,
-                date: new Date(ts.date).toLocaleDateString('en'),
-                hours: ts.hours,
-                minutes: ts.minutes,
-            };
-        });
+        const exportableTimeSlips: ExportableTimeSlip[] = timeSlips.map(
+            (ts: TimeSlipQueryResult) => {
+                return {
+                    username: userMap.get(ts.userId) ?? 'Unknown',
+                    project: projectMap.get(ts.projectId) ?? 'Unknown',
+                    task: getTask(ts.taskId),
+                    laborCode: getLaborCode(ts.laborCodeId),
+                    description: ts.description,
+                    date: new Date(ts.date).toLocaleDateString('en'),
+                    hours: ts.hours,
+                    minutes: ts.minutes,
+                    cost: `$${ts.cost.toFixed(2)}`,
+                };
+            },
+        );
         return getCsvOfTimeSlips(exportableTimeSlips);
     };
 
@@ -685,6 +689,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                                 <TableCell>Date</TableCell>
                                 <TableCell>Hours</TableCell>
                                 <TableCell>Minutes</TableCell>
+                                <TableCell>Cost</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>{getRows()}</TableBody>
