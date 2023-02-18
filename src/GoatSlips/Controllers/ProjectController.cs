@@ -90,7 +90,21 @@ namespace GoatSlips.Controllers
                     throw new Exception("No user logged in!");
                 }
                 _userService.ValidateAccessForProject(AccessRights.Admin, HttpContext, body.ProjectId);
-                _projectService.UpdateProject(body.ProjectId, body.AllowedTaskIds, user.Id, body.Rate);
+                _projectService.UpdateProject(
+                    body.ProjectId,
+                    body.AllowedTaskIds,
+                    user.Id,
+                    body.Rate,
+                    body.FirstName,
+                    body.LastName,
+                    body.BusinessName,
+                    body.Email,
+                    body.Address1,
+                    body.Address2,
+                    body.City,
+                    body.State,
+                    body.Zip,
+                    body.ZipExtension);
                 return Ok();
             }
             catch (InsufficientAccessException e)

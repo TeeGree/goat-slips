@@ -25,3 +25,36 @@
 .full {
     width: 100%;
 }
+
+.verticalInputContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.verticalCenter {
+    display: flex;
+    align-items: center;
+}
+
+.zip {
+    flex-basis: 59%;
+}
+
+.zipExt {
+    flex-basis: 39%;
+}
+
+.state {
+    width: 73px;
+    margin-right: 10px;
+}
+
+.address3 {
+    display: flex;
+}
+
+.textField,
+.address3 {
+    margin-top: 2.5px !important;
+    margin-bottom: 2.5px !important;
+}

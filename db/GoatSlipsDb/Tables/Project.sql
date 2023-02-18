@@ -11,5 +11,9 @@
 	[Address2] VARCHAR(100) NULL,
 	[City] VARCHAR(50) NULL,
 	[State] VARCHAR(2) NULL,
-	CONSTRAINT [CK_Project_Name] CHECK (([FirstName] IS NULL AND [LastName] IS NULL) OR [BusinessName] IS NULL)
+	[Zip] INT NULL,
+	[ZipExtension] INT NULL,
+	CONSTRAINT [CK_Project_Name] CHECK (([FirstName] IS NULL AND [LastName] IS NULL) OR [BusinessName] IS NULL),
+	CONSTRAINT [CK_Project_Zip] CHECK (LEN([Zip]) <= 5),
+	CONSTRAINT [CK_Project_ZipExtension] CHECK (LEN([ZipExtension]) <= 4)
 )

@@ -13,7 +13,22 @@ namespace GoatSlips.Services
         IEnumerable<Task> GetTasksForProject(int projectId);
         void CreateProject(string projectName);
         void DeleteProject(int projectId);
-        void UpdateProject(int projectId, HashSet<int> allowedTaskIds, int userId, decimal rate);
+        void UpdateProject(
+            int projectId,
+            HashSet<int> allowedTaskIds,
+            int userId,
+            decimal rate,
+            string? firstName,
+            string? lastName,
+            string? businessName,
+            string? email,
+            string? address1,
+            string? address2,
+            string? city,
+            string? state,
+            int? zip,
+            int? zipExtension
+        );
     }
     public sealed class ProjectService : IProjectService
     {
@@ -136,7 +151,22 @@ namespace GoatSlips.Services
             projectTaskMapping.RemoveRange(projectTasksToRemove);
         }
 
-        public void UpdateProject(int projectId, HashSet<int> allowedTaskIds, int userId, decimal rate)
+        public void UpdateProject(
+            int projectId,
+            HashSet<int> allowedTaskIds,
+            int userId,
+            decimal rate,
+            string? firstName,
+            string? lastName,
+            string? businessName,
+            string? email,
+            string? address1,
+            string? address2,
+            string? city,
+            string? state,
+            int? zip,
+            int? zipExtension
+        )
         {
             Project? project = _projectRepository.Projects.Where(p => p.Id == projectId).FirstOrDefault();
 
@@ -146,6 +176,16 @@ namespace GoatSlips.Services
             }
 
             project.Rate = rate;
+            project.FirstName = firstName;
+            project.LastName = lastName;
+            project.BusinessName = businessName;
+            project.Email = email;
+            project.Address1 = address1;
+            project.Address2 = address2;
+            project.City = city;
+            project.State = state;
+            project.Zip = zip;
+            project.ZipExtension = zipExtension;
 
             _projectRepository.Projects.AddOrUpdate(project);
 
