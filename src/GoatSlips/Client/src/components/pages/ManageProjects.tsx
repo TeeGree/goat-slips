@@ -111,6 +111,9 @@ export const ManageProjects: React.FC<ManageProjectsProps> = (props: ManageProje
                                 <TableCell>Name</TableCell>
                                 <TableCell className={classes.taskCell}>Allowed Tasks</TableCell>
                                 <TableCell>Rate</TableCell>
+                                <TableCell>Contact Name</TableCell>
+                                <TableCell>Email</TableCell>
+                                <TableCell>Mailing Address</TableCell>
                                 <TableCell className={classes.buttonCell} />
                             </TableRow>
                         </TableHead>

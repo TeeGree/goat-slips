@@ -1,14 +1,24 @@
 import { Delete, Save } from '@mui/icons-material';
-import { Box, Button, Modal, TableCell, TableRow, TextField } from '@mui/material';
+import {
+    Box,
+    Button,
+    MenuItem,
+    Modal,
+    Select,
+    TableCell,
+    TableRow,
+    TextField,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { modalStyle } from '../../constants/modalStyle';
 import { codeInUse } from '../../constants/statusCodes';
 import { fetchDeleteResponse, fetchPostResponse } from '../../helpers/fetchFunctions';
 import { DropdownOption } from '../../types/DropdownOption';
 import { ErrorDetails } from '../../types/ErrorDetails';
-import classes from './ExistingProject.module.scss';
+import classes from './ExistingProjectRow.module.scss';
 import { MultiSelect } from '../MultiSelect';
 import { Project } from '../../types/Project';
+import { unitedStates } from '../../constants/unitedStates';
 
 interface ExistingProjectRowProps {
     project: Project;
@@ -37,14 +47,24 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
 
     const [isBeingDeleted, setIsBeingDeleted] = useState(false);
     const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>(tasksAllowed);
-    const [isDirty, setIsDirty] = useState(false);
+    const [haveTasksChanged, setHaveTasksChanged] = useState(false);
     const [originalTasks, setOriginalTasks] = useState(new Set(tasksAllowed));
     const [rate, setRate] = useState<string>(project.rate.toString());
+    const [firstName, setFirstName] = useState(project.firstName ?? '');
+    const [lastName, setLastName] = useState(project.lastName ?? '');
+    const [businessName, setBusinessName] = useState(project.businessName ?? '');
+    const [email, setEmail] = useState(project.email ?? '');
+    const [address1, setAddress1] = useState(project.address1 ?? '');
+    const [address2, setAddress2] = useState(project.address2 ?? '');
+    const [city, setCity] = useState(project.city ?? '');
+    const [state, setState] = useState(project.state ?? '');
+    const [zip, setZip] = useState<number | ''>(project.zip ?? '');
+    const [zipExt, setZipExt] = useState<number | ''>(project.zipExtension ?? '');
 
     useEffect(() => {
         setSelectedTaskIds(tasksAllowed);
         setOriginalTasks(new Set(tasksAllowed));
-        setIsDirty(false);
+        setHaveTasksChanged(false);
     }, [tasksAllowed]);
 
     const deleteProject = async () => {
@@ -74,16 +94,70 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
             return;
         }
 
-        setIsDirty(newRateNumeric !== project.rate);
-
         setRate(value);
     };
 
-    const updateAllowedTasksForProject = async () => {
+    const handleZipChange = (
+        event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+        setStateAction: (value: React.SetStateAction<number | ''>) => void,
+        maxDigits: number,
+    ) => {
+        const value = event.target.value;
+        if (value === '') {
+            setStateAction('');
+        }
+
+        const newRateNumeric = Number(value);
+        if (
+            value === '' ||
+            Number.isNaN(newRateNumeric) ||
+            newRateNumeric < 0 ||
+            value.length > maxDigits
+        ) {
+            return;
+        }
+
+        setStateAction(newRateNumeric);
+    };
+
+    const getIsDirty = () => {
+        return (
+            haveTasksChanged ||
+            Number(rate) !== (project.rate ?? '') ||
+            firstName !== (project.firstName ?? '') ||
+            lastName !== (project.lastName ?? '') ||
+            businessName !== (project.businessName ?? '') ||
+            email !== (project.email ?? '') ||
+            address1 !== (project.address1 ?? '') ||
+            address2 !== (project.address2 ?? '') ||
+            city !== (project.city ?? '') ||
+            state !== (project.state ?? '') ||
+            zip !== (project.zip ?? '') ||
+            zipExt !== (project.zipExtension ?? '')
+        );
+    };
+
+    const updateProject = async () => {
+        const regex = /^.+@.+\..+$/;
+        if (!regex.test(email)) {
+            setError('Invalid email!');
+            return;
+        }
+
         const response = await fetchPostResponse('Project/Update', {
             projectId: project.id,
             allowedTaskIds: selectedTaskIds,
             rate: rate === '' ? 0 : Number(rate),
+            firstName: firstName === '' ? null : firstName,
+            lastName: lastName === '' ? null : lastName,
+            businessName: businessName === '' ? null : businessName,
+            email: email === '' ? null : email,
+            address1: address1 === '' ? null : address1,
+            address2: address2 === '' ? null : address2,
+            city: city === '' ? null : city,
+            state: state === '' ? null : state,
+            zip: zip === '' ? null : zip,
+            zipExtension: zipExt === '' ? null : zipExt,
         });
 
         if (response.ok) {
@@ -104,7 +178,7 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
                         originalSelectedIds={originalTasks}
                         selectedIds={selectedTaskIds}
                         setSelectedIds={setSelectedTaskIds}
-                        setIsDirty={setIsDirty}
+                        setIsDirty={setHaveTasksChanged}
                         getDisplayTextForId={(id: number) => taskMap.get(id) ?? ''}
                         options={allTasks}
                     />
@@ -119,6 +193,97 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
                     />
                 </TableCell>
                 <TableCell>
+                    <div className={classes.verticalInputContainer}>
+                        <TextField
+                            className={classes.textField}
+                            label="First"
+                            variant="outlined"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                        />
+                        <TextField
+                            className={classes.textField}
+                            label="Last"
+                            variant="outlined"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                        />
+                        <TextField
+                            className={classes.textField}
+                            label="Business"
+                            variant="outlined"
+                            value={businessName}
+                            onChange={(e) => setBusinessName(e.target.value)}
+                        />
+                    </div>
+                </TableCell>
+                <TableCell>
+                    <TextField
+                        className={classes.textField}
+                        label="Email"
+                        variant="outlined"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </TableCell>
+                <TableCell>
+                    <div className={classes.verticalInputContainer}>
+                        <TextField
+                            className={classes.textField}
+                            label="Address1"
+                            variant="outlined"
+                            value={address1}
+                            onChange={(e) => setAddress1(e.target.value)}
+                        />
+                        <TextField
+                            className={classes.textField}
+                            label="Address2"
+                            variant="outlined"
+                            value={address2}
+                            onChange={(e) => setAddress2(e.target.value)}
+                        />
+                        <TextField
+                            className={classes.textField}
+                            label="City"
+                            variant="outlined"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                        />
+                        <span className={classes.address3}>
+                            <Select
+                                className={classes.state}
+                                value={state}
+                                onChange={(e) => setState(e.target.value)}
+                                MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
+                            >
+                                <MenuItem value="" />
+                                {unitedStates.map((us) => (
+                                    <MenuItem key={us} value={us}>
+                                        {us}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                            <span className={classes.verticalCenter}>
+                                <TextField
+                                    className={classes.zip}
+                                    label="Zip"
+                                    variant="outlined"
+                                    value={zip}
+                                    onChange={(e) => handleZipChange(e, setZip, 5)}
+                                />
+                                -
+                                <TextField
+                                    className={classes.zipExt}
+                                    label="Zip Ext"
+                                    variant="outlined"
+                                    value={zipExt}
+                                    onChange={(e) => handleZipChange(e, setZipExt, 4)}
+                                />
+                            </span>
+                        </span>
+                    </div>
+                </TableCell>
+                <TableCell>
                     <Button
                         className={classes.button}
                         variant="contained"
@@ -128,11 +293,11 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
                         <Delete />
                     </Button>
                     <Button
-                        disabled={!isDirty}
+                        disabled={!getIsDirty()}
                         className={classes.button}
                         variant="contained"
                         color="success"
-                        onClick={updateAllowedTasksForProject}
+                        onClick={updateProject}
                     >
                         <Save />
                     </Button>
