@@ -97,6 +97,29 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
         setRate(value);
     };
 
+    const handleZipChange = (
+        event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+        setStateAction: (value: React.SetStateAction<number | ''>) => void,
+        maxDigits: number,
+    ) => {
+        const value = event.target.value;
+        if (value === '') {
+            setStateAction('');
+        }
+
+        const newRateNumeric = Number(value);
+        if (
+            value === '' ||
+            Number.isNaN(newRateNumeric) ||
+            newRateNumeric < 0 ||
+            value.length > maxDigits
+        ) {
+            return;
+        }
+
+        setStateAction(newRateNumeric);
+    };
+
     const getIsDirty = () => {
         return (
             haveTasksChanged ||
@@ -114,7 +137,13 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
         );
     };
 
-    const updateAllowedTasksForProject = async () => {
+    const updateProject = async () => {
+        const regex = /^.+@.+\..+$/;
+        if (!regex.test(email)) {
+            setError('Invalid email!');
+            return;
+        }
+
         const response = await fetchPostResponse('Project/Update', {
             projectId: project.id,
             allowedTaskIds: selectedTaskIds,
@@ -136,18 +165,6 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
             await fetchProjects();
             setSuccess(`Successfully updated project ${project.name}!`);
         }
-    };
-
-    const transformNewZipValue = (
-        event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-    ) => {
-        const value = event.target.value;
-
-        if (value === '') {
-            return value;
-        }
-
-        return Number(value);
     };
 
     return (
@@ -252,7 +269,7 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
                                     label="Zip"
                                     variant="outlined"
                                     value={zip}
-                                    onChange={(e) => setZip(transformNewZipValue(e))}
+                                    onChange={(e) => handleZipChange(e, setZip, 5)}
                                 />
                                 -
                                 <TextField
@@ -260,7 +277,7 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
                                     label="Zip Ext"
                                     variant="outlined"
                                     value={zipExt}
-                                    onChange={(e) => setZipExt(transformNewZipValue(e))}
+                                    onChange={(e) => handleZipChange(e, setZipExt, 4)}
                                 />
                             </span>
                         </span>
@@ -280,7 +297,7 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
                         className={classes.button}
                         variant="contained"
                         color="success"
-                        onClick={updateAllowedTasksForProject}
+                        onClick={updateProject}
                     >
                         <Save />
                     </Button>
