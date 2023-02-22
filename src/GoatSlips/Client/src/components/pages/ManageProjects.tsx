@@ -71,6 +71,7 @@ export const ManageProjects: React.FC<ManageProjectsProps> = (props: ManageProje
         return (
             <ExistingProjectRow
                 allTasks={tasks}
+                allProjects={projects}
                 tasksAllowed={tasksAllowedForProjects.get(project.id) ?? []}
                 taskMap={taskMap}
                 key={`project${project.id}`}

@@ -53,8 +53,30 @@
     display: flex;
 }
 
+.rate,
 .textField,
 .address3 {
     margin-top: 2.5px !important;
     margin-bottom: 2.5px !important;
+}
+
+.rate {
+    min-width: 80px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    div {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+}
+
+.rateContainer {
+    display: flex;
+    align-items: center;
+}
+
+.rateDropdownMore {
+    height: 56px;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
 }

@@ -1,15 +1,21 @@
-import { Delete, Save } from '@mui/icons-material';
+import { ArrowDropDown, Delete, Save } from '@mui/icons-material';
 import {
     Box,
     Button,
+    ClickAwayListener,
+    Grow,
     MenuItem,
+    MenuList,
     Modal,
+    Paper,
+    Popper,
     Select,
     TableCell,
     TableRow,
     TextField,
+    Tooltip,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { modalStyle } from '../../constants/modalStyle';
 import { codeInUse } from '../../constants/statusCodes';
 import { fetchDeleteResponse, fetchPostResponse } from '../../helpers/fetchFunctions';
@@ -22,6 +28,7 @@ import { unitedStates } from '../../constants/unitedStates';
 
 interface ExistingProjectRowProps {
     project: Project;
+    allProjects: Project[];
     allTasks: DropdownOption[];
     tasksAllowed: number[];
     taskMap: Map<number, string>;
@@ -36,6 +43,7 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
 ) => {
     const {
         project,
+        allProjects,
         allTasks,
         tasksAllowed,
         taskMap,
@@ -44,6 +52,8 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
         fetchProjects,
         fetchTasksAllowed,
     } = props;
+
+    const anchorRef = useRef<HTMLDivElement>(null);
 
     const [isBeingDeleted, setIsBeingDeleted] = useState(false);
     const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>(tasksAllowed);
@@ -60,6 +70,8 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
     const [state, setState] = useState(project.state ?? '');
     const [zip, setZip] = useState<number | ''>(project.zip ?? '');
     const [zipExt, setZipExt] = useState<number | ''>(project.zipExtension ?? '');
+
+    const [isRateDropdownOpen, setIsRateDropdownOpen] = useState(false);
 
     useEffect(() => {
         setSelectedTaskIds(tasksAllowed);
@@ -139,7 +151,7 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
 
     const updateProject = async () => {
         const regex = /^.+@.+\..+$/;
-        if (!regex.test(email)) {
+        if (email !== '' && !regex.test(email)) {
             setError('Invalid email!');
             return;
         }
@@ -167,6 +179,28 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
         }
     };
 
+    const getRateOptions = () => {
+        const ratesUsed = new Set<number>();
+        return allProjects.map((p: Project) => {
+            if (p.id === project.id || ratesUsed.has(p.rate)) {
+                return null;
+            }
+
+            ratesUsed.add(p.rate);
+
+            const label = `${p.name} ($${p.rate.toFixed(2)})`;
+
+            return (
+                <MenuItem
+                    key={`${project.name}-${p.rate}`}
+                    onClick={() => setRate(p.rate.toString())}
+                >
+                    {label}
+                </MenuItem>
+            );
+        });
+    };
+
     return (
         <>
             <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
@@ -184,13 +218,53 @@ export const ExistingProjectRow: React.FC<ExistingProjectRowProps> = (
                     />
                 </TableCell>
                 <TableCell>
-                    <TextField
-                        className={classes.textField}
-                        label="Rate"
-                        variant="outlined"
-                        value={rate}
-                        onChange={handleRateChange}
-                    />
+                    <span ref={anchorRef} className={classes.rateContainer}>
+                        <TextField
+                            className={classes.rate}
+                            label="Rate"
+                            variant="outlined"
+                            value={rate}
+                            onChange={handleRateChange}
+                        />
+                        <Tooltip title="Copy rate from another project" placement="top">
+                            <Button
+                                className={classes.rateDropdownMore}
+                                variant="contained"
+                                onClick={() => setIsRateDropdownOpen((prev) => !prev)}
+                            >
+                                <ArrowDropDown />
+                            </Button>
+                        </Tooltip>
+                        <Popper
+                            style={{
+                                zIndex: 5,
+                            }}
+                            open={isRateDropdownOpen}
+                            anchorEl={anchorRef.current}
+                            role={undefined}
+                            placement="bottom-start"
+                            transition
+                            disablePortal
+                        >
+                            {({ TransitionProps, placement }) => (
+                                <Grow
+                                    {...TransitionProps}
+                                    style={{
+                                        transformOrigin:
+                                            placement === 'bottom' ? 'center top' : 'center bottom',
+                                    }}
+                                >
+                                    <Paper>
+                                        <ClickAwayListener
+                                            onClickAway={() => setIsRateDropdownOpen(false)}
+                                        >
+                                            <MenuList autoFocusItem>{getRateOptions()}</MenuList>
+                                        </ClickAwayListener>
+                                    </Paper>
+                                </Grow>
+                            )}
+                        </Popper>
+                    </span>
                 </TableCell>
                 <TableCell>
                     <div className={classes.verticalInputContainer}>
