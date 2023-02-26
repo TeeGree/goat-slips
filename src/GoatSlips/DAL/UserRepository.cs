@@ -1,6 +1,8 @@
 ﻿using GoatSlips.Models;
 using GoatSlips.Models.Database;
+using GoatSlips.Services;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 
 namespace GoatSlips.DAL
 {
@@ -12,6 +14,8 @@ namespace GoatSlips.DAL
         IEnumerable<UserForDropdown> GetAllUsersForDropdown();
         int CreateUser(User userToAdd);
         void UpdatePassword(int userId, string newPassword);
+        Guid GenerateApiKey(int userId);
+        User? GetUserForApiKey(string apiKey);
     }
     public sealed class UserRepository : IUserRepository
     {
@@ -29,9 +33,12 @@ namespace GoatSlips.DAL
         }
 
         private readonly IGoatSlipsContext _dbContext;
-        public UserRepository(IGoatSlipsContext dbContext)
+        private readonly ISecretService _secretService;
+
+        public UserRepository(IGoatSlipsContext dbContext, ISecretService secretService)
         {
             _dbContext = dbContext;
+            _secretService = secretService;
         }
 
         public User? GetById(int id)
@@ -77,6 +84,31 @@ namespace GoatSlips.DAL
             userFromDb.RequirePasswordChange = false;
 
             _dbContext.SaveChanges();
+        }
+
+        public Guid GenerateApiKey(int userId)
+        {
+            User? userFromDb = _dbContext.Users?.First(u => u.Id == userId);
+            if (userFromDb == null)
+            {
+                throw new Exception("User not found!");
+            }
+
+            Guid apiKey = Guid.NewGuid();
+            string apiKeyHash = _secretService.Hash(apiKey.ToString());
+            userFromDb.ApiKey = apiKeyHash;
+            Users.AddOrUpdate(userFromDb);
+
+            _dbContext.SaveChanges();
+
+            return apiKey;
+        }
+
+        public User? GetUserForApiKey(string apiKey)
+        {
+            User? user = Users.ToArray().FirstOrDefault(u => u.ApiKey != null && _secretService.Verify(apiKey, u.ApiKey));
+
+            return user;
         }
     }
 }

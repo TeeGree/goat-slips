@@ -11,6 +11,7 @@ namespace GoatSlips.Services
     {
         public string GenerateToken(User user);
         public int? GetUserIdFromToken(string? token);
+        int? GetUserIdFromCookie(HttpContext context);
         int? GetUserIdFromContext(HttpContext context);
     }
     public sealed class JwtUtils : IJwtUtils
@@ -71,10 +72,16 @@ namespace GoatSlips.Services
             }
         }
 
-        public int? GetUserIdFromContext(HttpContext context)
+        public int? GetUserIdFromCookie(HttpContext context)
         {
             var token = context.Request.Cookies["Authorization"]?.Split(" ").Last();
             return GetUserIdFromToken(token);
+        }
+
+        public int? GetUserIdFromContext(HttpContext context)
+        {
+            User? user = (User?)context.Items["User"];
+            return user?.Id;
         }
     }
 }

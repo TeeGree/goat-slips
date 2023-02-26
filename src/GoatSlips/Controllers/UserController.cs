@@ -6,7 +6,6 @@ using GoatSlips.Models;
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
 using GoatSlips.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Authentication;
 
@@ -293,6 +292,21 @@ namespace GoatSlips.Controllers
             catch (InsufficientAccessException e)
             {
                 return Problem(e.Message, statusCode: InsufficientAccessException.StatusCode);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("GenerateApiKey", Name = "GenerateApiKey")]
+        public ActionResult<Guid> GenerateApiKey()
+        {
+            try
+            {
+                Guid apiKey = _userService.GenerateApiKey(HttpContext);
+                return Ok(apiKey);
             }
             catch (Exception e)
             {

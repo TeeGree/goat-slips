@@ -7,5 +7,6 @@
 	[FirstName] VARCHAR(50) NOT NULL,
 	[LastName] VARCHAR(50) NOT NULL,
 	[RequirePasswordChange] BIT NOT NULL DEFAULT 0,
+	[ApiKey] VARCHAR(111) NULL, 
 	CONSTRAINT [UC_Username] UNIQUE ([Username])
 )

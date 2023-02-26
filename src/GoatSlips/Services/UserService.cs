@@ -5,6 +5,7 @@ using GoatSlips.Models;
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Security.Authentication;
 
 namespace GoatSlips.Services
@@ -12,6 +13,7 @@ namespace GoatSlips.Services
     public interface IUserService
     {
         IEnumerable<UserForDropdown> GetAllUsersForDropdown();
+        Guid GenerateApiKey(HttpContext httpContext);
         void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext);
         int CreateUser(CreateUserBody createUserBody, bool requirePasswordChange);
         UserForUI? GetUserFromContext(HttpContext httpContext);
@@ -103,6 +105,20 @@ namespace GoatSlips.Services
             });
             
             return userResults;
+        }
+
+        public Guid GenerateApiKey(HttpContext httpContext)
+        {
+            int? userId = _jwtUtils.GetUserIdFromContext(httpContext);
+
+            if (userId == null)
+            {
+                throw new Exception("No user in context.");
+            }
+
+            Guid apiKey = _userRepository.GenerateApiKey(userId.Value);
+
+            return apiKey;
         }
 
         public void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext)

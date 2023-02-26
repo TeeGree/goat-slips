@@ -12,5 +12,6 @@ namespace GoatSlips.Models.Database
         public string? FirstName { get; set; } = string.Empty;
         public string? LastName { get; set; } = string.Empty;
         public bool RequirePasswordChange { get; set; } = false;
+        public string? ApiKey { get; set; }
     }
 }

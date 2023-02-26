@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classes from './AppHeader.module.scss';
-import { Button, IconButton, Menu, MenuItem, Paper } from '@mui/material';
+import { Box, Button, IconButton, Menu, MenuItem, Modal, Paper, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Person } from '@mui/icons-material';
-import { fetchGetResponse } from '../helpers/fetchFunctions';
+import { ContentCopy, Person } from '@mui/icons-material';
+import { fetchGet, fetchGetResponse } from '../helpers/fetchFunctions';
 import { Link } from 'react-router-dom';
 import { ComponentName, requiredAccessRights } from '../constants/requiredAccessRights';
+import { modalStyle } from '../constants/modalStyle';
 
 interface AppHeaderProps {
     onLogout: () => void;
@@ -18,7 +19,7 @@ interface AppHeaderProps {
 export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
     const { onLogout, username, passwordChangeRequired, accessRights, showManageProjects } = props;
 
-    const [appMenuAnchorEl, setAppMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [appMenuAnchorEl, setAppMenuAnchorEl] = useState<null | HTMLElement>(null);
     const appMenuOpen = Boolean(appMenuAnchorEl);
 
     const handleAppMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -29,8 +30,11 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
         setAppMenuAnchorEl(null);
     };
 
-    const [userMenuAnchorEl, setUserMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(null);
     const userMenuOpen = Boolean(userMenuAnchorEl);
+
+    const [isGenerateApiKeyOpen, setIsGenerateApiKeyOpen] = useState(false);
+    const [apiKey, setApiKey] = useState('');
 
     const handleUserMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setUserMenuAnchorEl(event.currentTarget);
@@ -48,6 +52,12 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
         if (response.ok) {
             onLogout();
         }
+    };
+
+    const generateApiKey = async () => {
+        const generatedApiKey: string = await fetchGet<string>('User/GenerateApiKey');
+
+        setApiKey(generatedApiKey);
     };
 
     const createLink = (path: string, label: ComponentName) => {
@@ -127,6 +137,7 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
                             'aria-labelledby': 'basic-button',
                         }}
                     >
+                        <MenuItem onClick={() => setIsGenerateApiKeyOpen(true)}>API Key</MenuItem>
                         {createLink('/manage-favorites', 'Manage Favorites')}
                         {createLink('/change-password', 'Change Password')}
                         <MenuItem onClick={handleLogout}>Logout</MenuItem>
@@ -138,11 +149,60 @@ export const AppHeader: React.FC<AppHeaderProps> = (props: AppHeaderProps) => {
         return <></>;
     };
 
+    const getApiKeyElements = () => {
+        if (apiKey === '') {
+            return <></>;
+        }
+
+        return (
+            <div className={classes.apiKeySection}>
+                <div>
+                    <span>{apiKey}</span>
+                    <Tooltip title="Copy to clipboard" placement="right">
+                        <IconButton
+                            className={classes.button}
+                            onClick={() => navigator.clipboard.writeText(apiKey)}
+                        >
+                            <ContentCopy />
+                        </IconButton>
+                    </Tooltip>
+                </div>
+                Please copy this key, as it will no longer be visible once you leave this dialog.
+            </div>
+        );
+    };
+
     return (
         <Paper className={classes.header}>
             {getAppMenuIcon()}
             G.O.A.T. Slips
             {getUserMenuIcon()}
+            <Modal open={isGenerateApiKeyOpen}>
+                <Box sx={modalStyle}>
+                    <h2>Would you like to generate an API key?</h2>
+                    <div className={classes.apiKeySection}>
+                        Please note that this will overwrite any API key you may have generated
+                        before.
+                    </div>
+                    {getApiKeyElements()}
+                    <div className={classes.modalButtons}>
+                        <Button
+                            variant="contained"
+                            className={classes.button}
+                            onClick={() => setIsGenerateApiKeyOpen(false)}
+                        >
+                            Close
+                        </Button>
+                        <Button
+                            variant="contained"
+                            className={classes.button}
+                            onClick={generateApiKey}
+                        >
+                            Generate
+                        </Button>
+                    </div>
+                </Box>
+            </Modal>
         </Paper>
     );
 };
