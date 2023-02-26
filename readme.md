@@ -61,6 +61,22 @@ The selectable minutes on a new time slip is free entry between 0 and 60, by def
 
 ![Minutes Partition](./documentation/minutesPartition.png)
 
+## Make API calls programmatically
+
+To make API calls for a specific user from external programs, you can generate an API key from the G.O.A.T. Slips application.
+
+From the user (top right) menu, click "API Key" to open a modal that will provide you with the option to generate an API key.
+
+![API Key Menu Option](./documentation/apiKeyMenu.png)
+
+![API Key Menu Option](./documentation/apiKeyGeneration.png)
+
+There is only one API key for each user, and it is only saved as a hash, so it will not be retrievable after its initial generation. This means that each time an API key is generated, the prior key for that user will be decommissioned and it will no longer work.
+
+To use the key, just add a header with they key "api-key" and the value of the generated API key. Here is an example using [Postman](https://www.postman.com/):
+
+![API Key Menu Option](./documentation/apiKeyHeader.png)
+
 # License
 
 G.O.A.T. Slips is licensed under the [GNU GPLv3 License](https://github.com/TeeGree/goat-slips/blob/main/LICENSE.md).
