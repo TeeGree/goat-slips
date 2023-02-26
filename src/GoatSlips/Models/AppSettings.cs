@@ -8,12 +8,11 @@
     public sealed class AppSettings : IAppSettings
     {
         public string ConnectionString { get; }
-        public string Secret { get; }
+        public string Secret { get; } = "GoatSlipsJwtTokenSecretString";
 
-        public AppSettings(string connectionString, string secret)
+        public AppSettings(string connectionString)
         {
             ConnectionString = connectionString;
-            Secret = secret;
         }
     }
 }

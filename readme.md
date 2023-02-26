@@ -22,7 +22,6 @@ Open the .NET 6 Web API solution (`src/GoatSlips.sln`).
 
 Edit the `src/GoastSlips/appsettings.Development.json` file.
 
-- Set the "Secret" configuration with any string that is at least 25 characters long. This is used to sign the JWT security token. _It is **not** used to hash the user passwords._
 - Set the `ConnectionStrings/ConnectionString` configuration to a connection string pointing to the database created in the steps outlined above. A sample connection string is `"Server=localhost\\SQLEXPRESS;Database=GoatSlipsDb;Trusted=Connection=True"`.
 
 Begin debugging the `GoatSlips` project.

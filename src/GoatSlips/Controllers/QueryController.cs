@@ -2,7 +2,6 @@
 using GoatSlips.Exceptions;
 using GoatSlips.Models;
 using GoatSlips.Models.Api;
-using GoatSlips.Models.Database;
 using GoatSlips.Models.Database.Query;
 using GoatSlips.Services;
 using Microsoft.AspNetCore.Mvc;

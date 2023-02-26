@@ -2,14 +2,6 @@ echo "Enter name of target folder path for the published application: "
 
 read -r path
 
-echo "Enter secret string that will be used to sign the JWT security token. It must be at least 25 characters long: "
-read -r secret
-while [ ${#secret} -lt 25 ]
-do
-    echo "Secret must be at least 25 characters! Enter the secret key: "
-    read -r secret
-done
-
 echo "Enter target SQL Server instance that is hosting the GoatSlips db: "
 read -r server
 
@@ -44,10 +36,6 @@ echo $envContent > $envPath
 
 # Remove the appsettings.Development.json file
 rm -f -- $basePath/appsettings.Development.json
-
-# Replace the secret text in the published appsettings.json
-toReplace="<SECRET>"
-sed -i "s/${toReplace}/${secret}/g" $basePath/appsettings.json
 
 # Create the connection string and replace it in the published appsettings.json
 connectionString="Server=$server;Database=$db;Trusted_Connection=True"

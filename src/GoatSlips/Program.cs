@@ -18,7 +18,7 @@ IConfigurationRoot config = configuration.Build();
 string connectionString = config.GetConnectionString("ConnectionString");
 
 // Add services to the container.
-builder.Services.AddSingleton<IAppSettings>(new AppSettings(connectionString, config["Secret"]));
+builder.Services.AddSingleton<IAppSettings>(new AppSettings(connectionString));
 builder.Services.AddScoped<IGoatSlipsContext, GoatSlipsContext>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
