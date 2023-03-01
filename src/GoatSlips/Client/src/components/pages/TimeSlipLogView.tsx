@@ -177,6 +177,10 @@ export const TimeSlipLogView: React.FC<TimeSlipLogProps> = (props: TimeSlipLogPr
             );
         }
 
+        if (oldValue !== '' && oldValue !== null && oldValue !== undefined) {
+            return newValue;
+        }
+
         return <span className={classes.newValue}>{newValue}</span>;
     };
 
