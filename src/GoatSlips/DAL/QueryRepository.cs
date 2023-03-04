@@ -25,7 +25,8 @@ namespace GoatSlips.DAL
             int[]? taskIds,
             int[]? laborCodeIds,
             DateTime? fromDate,
-            DateTime? toDate
+            DateTime? toDate,
+            string? description
         );
         void UpdateQuery(
             int queryId,
@@ -34,7 +35,8 @@ namespace GoatSlips.DAL
             int[]? taskIds,
             int[]? laborCodeIds,
             DateTime? fromDate,
-            DateTime? toDate
+            DateTime? toDate,
+            string? description
         );
         void DeleteQuery(int queryId);
     }
@@ -143,7 +145,8 @@ namespace GoatSlips.DAL
             int[]? taskIds,
             int[]? laborCodeIds,
             DateTime? fromDate,
-            DateTime? toDate
+            DateTime? toDate,
+            string? description
         )
         {
             var query = new Query
@@ -151,7 +154,8 @@ namespace GoatSlips.DAL
                 OwnerUserId = ownerUserId,
                 Name = name,
                 FromDate = fromDate,
-                ToDate = toDate
+                ToDate = toDate,
+                Description = description
             };
 
             Queries.AddOrUpdate(query);
@@ -311,7 +315,8 @@ namespace GoatSlips.DAL
             int[]? taskIds,
             int[]? laborCodeIds,
             DateTime? fromDate,
-            DateTime? toDate
+            DateTime? toDate,
+            string? description
         )
         {
             Query? query = Queries.FirstOrDefault(q => q.Id == queryId);
@@ -328,6 +333,7 @@ namespace GoatSlips.DAL
 
             query.FromDate = fromDate;
             query.ToDate = toDate;
+            query.Description = description;
 
             Queries.AddOrUpdate(query);
             _dbContext.SaveChanges();

@@ -7,4 +7,5 @@ export interface Query {
     laborCodeIds: number[];
     fromDate: string;
     toDate: string;
+    description: string;
 }

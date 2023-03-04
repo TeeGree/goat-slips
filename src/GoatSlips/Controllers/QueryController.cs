@@ -72,6 +72,7 @@ namespace GoatSlips.Controllers
                     addQueryBody.LaborCodeIds,
                     addQueryBody.FromDate,
                     addQueryBody.ToDate,
+                    addQueryBody.DescriptionSearchText,
                     HttpContext);
                 return Ok();
             }
@@ -99,6 +100,7 @@ namespace GoatSlips.Controllers
                     updateQueryBody.LaborCodeIds,
                     updateQueryBody.FromDate,
                     updateQueryBody.ToDate,
+                    updateQueryBody.Description,
                     HttpContext);
                 return Ok();
             }

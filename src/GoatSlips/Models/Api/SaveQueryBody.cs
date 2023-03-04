@@ -9,5 +9,6 @@
         public int[]? LaborCodeIds { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+        public string? DescriptionSearchText { get; set; }
     }
 }

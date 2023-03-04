@@ -10,5 +10,6 @@ namespace GoatSlips.Models.Database.Query
         public string Name { get; set; } = string.Empty;
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+        public string? Description { get; set; } = string.Empty;
     }
 }

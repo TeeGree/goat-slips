@@ -20,6 +20,7 @@ namespace GoatSlips.Services
             int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate,
+            string? description,
             HttpContext httpContext
         );
         void UpdateQuery(
@@ -30,6 +31,7 @@ namespace GoatSlips.Services
             int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate,
+            string? description,
             HttpContext httpContext
         );
         void DeleteQuery(int queryId, HttpContext httpContext);
@@ -97,7 +99,8 @@ namespace GoatSlips.Services
                                                   UserIds = userQuery.Select(u => u.UserId),
                                                   ProjectIds = projectQuery.Select(p => p.ProjectId),
                                                   TaskIds = taskQuery.Select(t => t.TaskId),
-                                                  LaborCodeIds = laborCodeQuery.Select(lc => lc.LaborCodeId)
+                                                  LaborCodeIds = laborCodeQuery.Select(lc => lc.LaborCodeId),
+                                                  Description = query.Description ?? string.Empty
                                               };
             return queries;
         }
@@ -120,7 +123,8 @@ namespace GoatSlips.Services
                 getTimeSlipsBody.TaskIds?.Select(t => t == -1 ? (int?)null : t).ToArray(),
                 getTimeSlipsBody.LaborCodeIds?.Select(l => l == -1 ? (int?)null : l).ToArray(),
                 getTimeSlipsBody.FromDate,
-                getTimeSlipsBody.ToDate);
+                getTimeSlipsBody.ToDate,
+                getTimeSlipsBody.DescriptionSearchText);
 
             return timeSlips;
         }
@@ -131,7 +135,8 @@ namespace GoatSlips.Services
             int?[]? taskIds,
             int?[]? laborCodeIds,
             DateTime? fromDate,
-            DateTime? toDate
+            DateTime? toDate,
+            string descriptionSearchText
         )
         {
             DbSet<TimeSlip> timeSlips = _timeSlipRepository.TimeSlips;
@@ -166,6 +171,11 @@ namespace GoatSlips.Services
             if (toDate.HasValue)
             {
                 timeSlipsQueryable = timeSlipsQueryable.Where(ts => ts.Date <= toDate);
+            }
+
+            if (!string.IsNullOrEmpty(descriptionSearchText))
+            {
+                timeSlipsQueryable = timeSlipsQueryable.Where(ts => ts.Description != null && ts.Description.Contains(descriptionSearchText));
             }
 
             Dictionary<int, decimal> projectRates = _projectRepository.GetProjectRates();
@@ -221,6 +231,7 @@ namespace GoatSlips.Services
             int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate,
+            string? description,
             HttpContext httpContext
         )
         {
@@ -251,7 +262,8 @@ namespace GoatSlips.Services
                 taskIds,
                 laborCodeIds,
                 fromDate,
-                toDate);
+                toDate,
+                description);
         }
 
         public void UpdateQuery(
@@ -262,6 +274,7 @@ namespace GoatSlips.Services
             int[]? laborCodeIds,
             DateTime? fromDate,
             DateTime? toDate,
+            string? description,
             HttpContext httpContext
         )
         {
@@ -284,7 +297,7 @@ namespace GoatSlips.Services
 
             ValidateLaborCodeIdsExist(laborCodeIds);
 
-            _queryRepository.UpdateQuery(queryId, userIds, projectIds, taskIds, laborCodeIds, fromDate, toDate);
+            _queryRepository.UpdateQuery(queryId, userIds, projectIds, taskIds, laborCodeIds, fromDate, toDate, description);
         }
 
         public void DeleteQuery(int queryId, HttpContext httpContext)

@@ -10,5 +10,6 @@
         public IEnumerable<int> LaborCodeIds { get; set; } = new int[0];
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
+        public string Description { get; set; } = string.Empty;
     }
 }

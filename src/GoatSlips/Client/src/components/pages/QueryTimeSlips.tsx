@@ -39,6 +39,7 @@ import { MultiSelect } from '../MultiSelect';
 import { EntityLabelWithIcon } from '../EntityLabelWithIcon';
 import { Toast } from '../Toast';
 import classes from './QueryTimeSlips.module.scss';
+import { useDebounce } from '../../helpers/debounce';
 
 interface QueryTimeSlipsProps {
     projects: DropdownOption[];
@@ -66,6 +67,7 @@ interface QueryBody {
     laborCodeIds?: number[];
     fromDate?: string;
     toDate?: string;
+    descriptionSearchText: string;
 }
 
 interface SaveQueryBody extends QueryBody {
@@ -94,6 +96,14 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
     const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([]);
     const [selectedLaborCodeIds, setSelectedLaborCodeIds] = useState<number[]>([]);
+
+    // There are two separate states for description to prevent the debounce when loading a query.
+    const [descriptionSearchText, setDescriptionSearchText] = useState('');
+    const [inputDescriptionSearchText, setInputDescriptionSearchText] = useState('');
+
+    // Wait 1 second after last user input to search using description search text.
+    const debouncedDescription = useDebounce(inputDescriptionSearchText, 1000);
+
     const [fromDate, setFromDate] = React.useState<Dayjs | null>(null);
     const [toDate, setToDate] = React.useState<Dayjs | null>(null);
     const [users, setUsers] = useState<DropdownOption[]>([]);
@@ -118,6 +128,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         selectedLaborCodeIds,
         fromDate,
         toDate,
+        debouncedDescription,
     ]);
 
     useEffect(() => {
@@ -126,8 +137,16 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         }
     }, [isAdmin]);
 
+    const onDescriptionChange = (
+        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => {
+        const description = event.target.value;
+        setInputDescriptionSearchText(description);
+        setDescriptionSearchText(description);
+    };
+
     const buildQueryBody = () => {
-        const newQueryBody: QueryBody = {};
+        const newQueryBody: QueryBody = { descriptionSearchText };
         if (selectedUserIds.length !== 0) {
             newQueryBody.userIds = selectedUserIds;
         }
@@ -151,6 +170,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         if (toDate !== null) {
             newQueryBody.toDate = toDate.format('YYYY-MM-DD');
         }
+
         return newQueryBody;
     };
 
@@ -279,6 +299,12 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         return (
             <div>
                 <div className={classes.inputContainer}>
+                    <TextField
+                        label="Description Contains"
+                        variant="outlined"
+                        value={descriptionSearchText}
+                        onChange={onDescriptionChange}
+                    />
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                             label="From Date"
@@ -404,6 +430,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
             selectedLaborCodeIds.length > 0 ||
             fromDate !== null ||
             toDate !== null ||
+            descriptionSearchText !== '' ||
             (isAdmin && selectedUserIds.length > 0)
         );
     };
@@ -463,6 +490,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const loadSelectedQuery = () => {
         const query = getSelectedQuery();
 
+        setDescriptionSearchText(query.description);
         setSelectedUserIds(query.userIds);
         setSelectedProjectIds(query.projectIds);
         setSelectedTaskIds(query.taskIds);
@@ -531,6 +559,14 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         }
 
         return dateDivs;
+    };
+
+    const getDescriptionForModal = () => {
+        return (
+            <div className={classes.modalCodes}>
+                <>Description: {`"${descriptionSearchText}"`}</>
+            </div>
+        );
     };
 
     const getUsersForModal = () => {
@@ -624,6 +660,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                             {getTasksForModal()}
                             {getLaborCodesForModal()}
                             {getDatesForModal()}
+                            {getDescriptionForModal()}
                         </>
                     </div>
                     <div className={classes.modalButtons}>
