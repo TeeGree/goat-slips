@@ -35,6 +35,7 @@ import { UserProject } from './types/UserProject';
 import { ManageProjects } from './components/pages/ManageProjects';
 import { ManageTasks } from './components/pages/ManageTasks';
 import { Project } from './types/Project';
+import { EditProject } from './components/pages/EditProject';
 
 const defaultUser: User = {
     userId: 0,
@@ -52,7 +53,12 @@ export const App: React.FC<{}> = () => {
     const [isAnyUsersLoading, setAnyUsersLoading] = useState(true);
 
     const [projects, setProjects] = useState<Project[]>([]);
-    const [projectMap, setProjectMap] = useState<Map<number, string>>(new Map<number, string>([]));
+    const [projectMap, setProjectMap] = useState<Map<number, Project>>(
+        new Map<number, Project>([]),
+    );
+    const [projectNameMap, setProjectNameMap] = useState<Map<number, string>>(
+        new Map<number, string>([]),
+    );
 
     const [tasks, setTasks] = useState<DropdownOption[]>([]);
     const [taskMap, setTaskMap] = useState<Map<number, string>>(new Map<number, string>([]));
@@ -125,8 +131,13 @@ export const App: React.FC<{}> = () => {
     const getProjects = async () => {
         const projectsFromApi: Project[] = await fetchGet<Project[]>('Project');
 
-        const map = new Map<number, string>([]);
-        projectsFromApi.forEach((project: Project) => map.set(project.id, project.name));
+        const nameMap = new Map<number, string>([]);
+        projectsFromApi.forEach((project: Project) => nameMap.set(project.id, project.name));
+
+        const map = new Map<number, Project>([]);
+        projectsFromApi.forEach((project: Project) => map.set(project.id, project));
+
+        setProjectNameMap(nameMap);
         setProjectMap(map);
         setProjects(projectsFromApi);
     };
@@ -246,7 +257,7 @@ export const App: React.FC<{}> = () => {
                 fetchFavoriteTimeSlips={getFavoriteTimeSlips}
                 favoriteTimeSlips={favoriteTimeSlips}
                 projects={projects}
-                projectMap={projectMap}
+                projectMap={projectNameMap}
                 tasks={tasks}
                 taskMap={taskMap}
                 tasksAllowedForProjects={tasksAllowedForProjects}
@@ -299,7 +310,7 @@ export const App: React.FC<{}> = () => {
                             >
                                 <UserManagement
                                     allProjects={projects}
-                                    allProjectsMap={projectMap}
+                                    allProjectsMap={projectNameMap}
                                 />
                             </RequireAuthentication>
                         }
@@ -316,7 +327,7 @@ export const App: React.FC<{}> = () => {
                             >
                                 <QueryTimeSlips
                                     projects={projects}
-                                    projectMap={projectMap}
+                                    projectMap={projectNameMap}
                                     tasks={tasks}
                                     taskMap={taskMap}
                                     laborCodes={laborCodes}
@@ -346,14 +357,44 @@ export const App: React.FC<{}> = () => {
                             >
                                 <ManageProjects
                                     projects={projects}
-                                    tasks={tasks}
-                                    taskMap={taskMap}
-                                    tasksAllowedForProjects={tasksAllowedForProjects}
                                     fetchProjects={getProjects}
                                     fetchTasksAllowed={getTasksAllowedForProjects}
                                     fetchFavorites={getFavoriteTimeSlips}
                                     isAdmin={userAccessRights.has(adminAccessRight)}
                                     managedProjectIds={userProjectIds}
+                                />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/edit-project"
+                        path="/edit-project/:projectIdText"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                                requiredAccessRight={requiredAccessRights.get(manageProjects)}
+                                // Show link if user manages any projects
+                                overrideAccessRightAndAllowAccess={userProjectIds.size > 0}
+                                overrideAccessRightLoading={isProjectsForUserLoading}
+                            >
+                                <EditProject
+                                    projectMap={projectMap}
+                                    allProjects={projects}
+                                    allTasks={tasks}
+                                    tasksAllowedForProjects={tasksAllowedForProjects}
+                                    taskMap={taskMap}
+                                    fetchProjects={getProjects}
+                                    fetchTasksAllowed={getTasksAllowedForProjects}
+                                    isAuthenticated={canAccessGuardedRoutes}
+                                    isAccessRightsLoading={isUserAccessRightsLoading}
+                                    isAuthenticationLoading={isAuthenticationLoading}
+                                    accessRights={userAccessRights}
+                                    requiredAccessRight={requiredAccessRights.get(manageProjects)}
+                                    overrideAccessRightLoading={false}
+                                    userProjectIds={userProjectIds}
                                 />
                             </RequireAuthentication>
                         }
@@ -410,7 +451,7 @@ export const App: React.FC<{}> = () => {
                                 <ManageFavorites
                                     favoriteTimeSlips={favoriteTimeSlips}
                                     fetchFavoriteTimeSlips={getFavoriteTimeSlips}
-                                    projectMap={projectMap}
+                                    projectMap={projectNameMap}
                                     taskMap={taskMap}
                                     laborCodeMap={laborCodeMap}
                                 />
@@ -447,7 +488,7 @@ export const App: React.FC<{}> = () => {
                                 requiredAccessRight={requiredAccessRights.get(manageConfigurations)}
                             >
                                 <TimeSlipLogView
-                                    projectMap={projectMap}
+                                    projectMap={projectNameMap}
                                     taskMap={taskMap}
                                     laborCodeMap={laborCodeMap}
                                 />

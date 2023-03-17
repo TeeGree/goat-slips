@@ -13,16 +13,12 @@ import {
 import { useState } from 'react';
 import { fetchPostResponse } from '../../helpers/fetchFunctions';
 import { AlertMessage } from '../../types/AlertMessage';
-import { DropdownOption } from '../../types/DropdownOption';
 import { Project } from '../../types/Project';
 import { ExistingProjectRow } from '../ManageTimeCodes/ExistingProjectRow';
 import classes from './ManageProjects.module.scss';
 
 interface ManageProjectsProps {
     projects: Project[];
-    tasks: DropdownOption[];
-    taskMap: Map<number, string>;
-    tasksAllowedForProjects: Map<number, number[]>;
     fetchProjects: () => Promise<void>;
     fetchTasksAllowed: () => Promise<void>;
     fetchFavorites: () => Promise<void>;
@@ -33,9 +29,6 @@ interface ManageProjectsProps {
 export const ManageProjects: React.FC<ManageProjectsProps> = (props: ManageProjectsProps) => {
     const {
         projects,
-        tasks,
-        taskMap,
-        tasksAllowedForProjects,
         fetchProjects,
         fetchTasksAllowed,
         fetchFavorites,
@@ -70,14 +63,9 @@ export const ManageProjects: React.FC<ManageProjectsProps> = (props: ManageProje
         }
         return (
             <ExistingProjectRow
-                allTasks={tasks}
-                allProjects={projects}
-                tasksAllowed={tasksAllowedForProjects.get(project.id) ?? []}
-                taskMap={taskMap}
                 key={`project${project.id}`}
                 project={project}
                 fetchProjects={fetchProjectsAndFavorites}
-                fetchTasksAllowed={fetchTasksAllowed}
                 setError={(message: string) => setAlertMessage({ message, severity: 'error' })}
                 setSuccess={(message: string) => setAlertMessage({ message, severity: 'success' })}
             />
@@ -110,11 +98,6 @@ export const ManageProjects: React.FC<ManageProjectsProps> = (props: ManageProje
                         <TableHead>
                             <TableRow>
                                 <TableCell>Name</TableCell>
-                                <TableCell className={classes.taskCell}>Allowed Tasks</TableCell>
-                                <TableCell>Rate</TableCell>
-                                <TableCell>Contact Name</TableCell>
-                                <TableCell>Email</TableCell>
-                                <TableCell>Mailing Address</TableCell>
                                 <TableCell className={classes.buttonCell} />
                             </TableRow>
                         </TableHead>
