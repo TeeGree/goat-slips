@@ -11,6 +11,7 @@ import { MultiSelect } from '../MultiSelect';
 import { getSundayDateForDate } from '../../helpers/dateHelpers';
 import { WeekChanger } from '../WeekChanger';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
+import { AllowedFirstDayOfWeek } from '../../types/AllowedFirstDayOfWeek';
 
 const dayMap = new Map<DayIndex, Day>([
     [0, 'Sunday'],
@@ -43,6 +44,7 @@ interface WeekViewProps {
     favoriteTimeSlips: FavoriteTimeSlipData[];
     fetchFavoriteTimeSlips: () => Promise<void>;
     minutesPartition: AllowedMinutesPartition;
+    firstDayOfWeek: AllowedFirstDayOfWeek;
 }
 
 interface HoursMinutesSplit {
@@ -62,6 +64,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         favoriteTimeSlips,
         fetchFavoriteTimeSlips,
         minutesPartition,
+        firstDayOfWeek,
     } = props;
 
     const currentDate = new Date();
@@ -263,12 +266,12 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         return laborCodeMap.get(laborCodeId) ?? '';
     };
 
-    const getDateOfDay = (day: DayIndex): Date => {
+    const getDateOfDay = (day: number): Date => {
         const dayDate = new Date(sundayDate.getTime() + day * 24 * 60 * 60 * 1000);
         return dayDate;
     };
 
-    const getTimeSlipsForDay = (day: DayIndex) => {
+    const getTimeSlipsForDay = (day: number) => {
         const dayDate = getDateOfDay(day);
         const timeSlips = timeSlipsPerDay.get(dayDate.toLocaleDateString('en')) ?? [];
 
@@ -315,25 +318,27 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     };
 
     const getDayColumn = (day: DayIndex) => {
-        const dayString = dayMap.get(day);
+        const actualDay = day + firstDayOfWeek;
+        const actualDayIndex = (actualDay % 7) as DayIndex;
+        const dayString = dayMap.get(actualDayIndex);
 
         if (dayString === undefined) {
             throw Error('Invalid day!');
         }
 
-        const dayDate = getDateOfDay(day);
+        const dayDate = getDateOfDay(actualDay);
         const isCurrentDay =
             dayDate.getFullYear() === currentDate.getFullYear() &&
             dayDate.getMonth() === currentDate.getMonth() &&
             dayDate.getDate() === currentDate.getDate();
 
-        const timeSlips = getTimeSlipsForDay(day);
+        const timeSlips = getTimeSlipsForDay(actualDay);
         const totalMinutes = getTotalMinutes(timeSlips);
         const { hours, minutes } = splitHoursAndMinutes(totalMinutes);
 
         return (
             <DayColumn
-                dayIndex={day}
+                dayIndex={actualDay}
                 fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
                 favoriteTimeSlipsOptions={favoriteTimeSlips}
                 getProjectName={getProjectName}
@@ -495,7 +500,11 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 <div className={classes.basicHeader}>
                     {getShowFilterButton()}
                     <div className={classes.weekHeaderHalf}>
-                        <WeekChanger sundayDate={sundayDate} setSundayDate={setSundayDate} />
+                        <WeekChanger
+                            sundayDate={sundayDate}
+                            setSundayDate={setSundayDate}
+                            firstDayOfWeek={firstDayOfWeek}
+                        />
                     </div>
                     <div className={classes.weekHeaderHalf}>Week Total:{getWeekTotalText()}</div>
                 </div>

@@ -16,15 +16,15 @@ namespace GoatSlips.Services
     public class TimeSlipService : ITimeSlipService
     {
         private readonly ITimeSlipRepository _timeSlipRepository;
-        private readonly ITimeSlipConfigurationRepository _timeSlipConfigurationRepository;
+        private readonly IConfigurationRepository _configurationRepository;
 
         public TimeSlipService(
             ITimeSlipRepository timeSlipRepository,
-            ITimeSlipConfigurationRepository timeSlipConfigurationRepository
+            IConfigurationRepository timeSlipConfigurationRepository
         )
         {
             _timeSlipRepository = timeSlipRepository;
-            _timeSlipConfigurationRepository = timeSlipConfigurationRepository;
+            _configurationRepository = timeSlipConfigurationRepository;
         }
 
         public IEnumerable<TimeSlip> GetAllTimeSlips()
@@ -52,7 +52,7 @@ namespace GoatSlips.Services
 
         private void ValidateMinutes(byte minutes)
         {
-            byte minutesPartition = _timeSlipConfigurationRepository.GetMinutesPartition();
+            byte minutesPartition = _configurationRepository.GetMinutesPartition();
             if (minutes % minutesPartition != 0)
             {
                 throw new Exception("The minutes for the time slip is not valid according to the system's minute partition configuration.");

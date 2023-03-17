@@ -1,11 +1,15 @@
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import { IconButton, styled, TextField } from '@mui/material';
 import { DatePicker, LocalizationProvider, PickersDay, PickersDayProps } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/plugin/isBetween';
 import { getSundayDateForDate } from '../helpers/dateHelpers';
 import classes from './WeekChanger.module.scss';
+import MomentUtils from '@date-io/moment';
+import moment from 'moment';
+import 'moment/locale/de';
+import { AllowedFirstDayOfWeek } from '../types/AllowedFirstDayOfWeek';
+import { useEffect, useState } from 'react';
 
 interface CustomPickerDayProps extends PickersDayProps<Dayjs> {
     dayIsBetween: boolean;
@@ -38,14 +42,22 @@ const CustomPickersDay = styled(PickersDay, {
 interface WeekChangerProps {
     sundayDate: Date;
     setSundayDate: (date: Date) => void;
+    firstDayOfWeek: AllowedFirstDayOfWeek;
 }
 
 export const WeekChanger: React.FC<WeekChangerProps> = (props: WeekChangerProps) => {
-    const { sundayDate, setSundayDate } = props;
+    const { sundayDate, setSundayDate, firstDayOfWeek } = props;
 
     const changeToPreviousWeek = () => changeWeekByOne(false);
 
     const changeToNextWeek = () => changeWeekByOne(true);
+
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        moment.locale('en', { week: { dow: firstDayOfWeek } });
+        setIsLoaded(true);
+    }, []);
 
     const changeToAnyWeek = (
         newValue: dayjs.Dayjs | null,
@@ -92,12 +104,16 @@ export const WeekChanger: React.FC<WeekChangerProps> = (props: WeekChangerProps)
         );
     };
 
+    if (!isLoaded) {
+        return <></>;
+    }
+
     return (
         <div className={classes.weekChanger}>
             <IconButton className={classes.squareIconButton} onClick={changeToPreviousWeek}>
                 <KeyboardArrowLeft />
             </IconButton>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <LocalizationProvider dateAdapter={MomentUtils}>
                 <DatePicker
                     className={classes.weekChangeInput}
                     label="Week of"

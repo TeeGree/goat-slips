@@ -70,7 +70,7 @@
     <Build Include="Tables\QueryTask.sql" />
     <Build Include="Tables\QueryLaborCode.sql" />
     <Build Include="Tables\QueryUser.sql" />
-    <Build Include="Tables\TimeSlipConfiguration.sql" />
+    <Build Include="Tables\Configuration.sql" />
     <Build Include="Tables\TimeSlipLog.sql" />
     <Build Include="Tables\UserProject.sql" />
   </ItemGroup>

@@ -36,6 +36,7 @@ import { ManageProjects } from './components/pages/ManageProjects';
 import { ManageTasks } from './components/pages/ManageTasks';
 import { Project } from './types/Project';
 import { EditProject } from './components/pages/EditProject';
+import { AllowedFirstDayOfWeek } from './types/AllowedFirstDayOfWeek';
 
 const defaultUser: User = {
     userId: 0,
@@ -80,6 +81,8 @@ export const App: React.FC<{}> = () => {
     );
 
     const [minutesPartition, setMinutesPartition] = useState<AllowedMinutesPartition>(1);
+    const [firstDayOfWeek, setFirstDayOfWeek] = useState<AllowedFirstDayOfWeek>(0);
+    const [isFirstDayOfWeekLoading, setIsFirstDayOfWeekLoading] = useState(true);
 
     const [isProjectsForUserLoading, setIsProjectsForUserLoading] = useState(false);
     const [userProjectIds, setUserProjectIds] = useState<Set<number>>(new Set<number>());
@@ -125,6 +128,7 @@ export const App: React.FC<{}> = () => {
             getFavoriteTimeSlips();
             getSavedQueries();
             getMinutesPartition();
+            getFirstDayOfWeek();
         }
     }, [user]);
 
@@ -210,9 +214,21 @@ export const App: React.FC<{}> = () => {
 
     const getMinutesPartition = async () => {
         const minutesPartitionFromApi: AllowedMinutesPartition =
-            await fetchGet<AllowedMinutesPartition>('TimeSlipConfiguration/GetMinutesPartition');
+            await fetchGet<AllowedMinutesPartition>('Configuration/GetMinutesPartition');
 
         setMinutesPartition(minutesPartitionFromApi);
+    };
+
+    const getFirstDayOfWeek = async () => {
+        setIsFirstDayOfWeekLoading(true);
+
+        const firstDayOfWeekFromApi: AllowedFirstDayOfWeek = await fetchGet<AllowedFirstDayOfWeek>(
+            'Configuration/GetFirstDayOfWeek',
+        );
+
+        setFirstDayOfWeek(firstDayOfWeekFromApi);
+
+        setIsFirstDayOfWeekLoading(false);
     };
 
     const getSavedQueries = async () => {
@@ -230,7 +246,7 @@ export const App: React.FC<{}> = () => {
     };
 
     const getPage = () => {
-        if (isAuthenticationLoading || isAnyUsersLoading) {
+        if (isAuthenticationLoading || isAnyUsersLoading || isFirstDayOfWeekLoading) {
             return fillScreenWithPage(<CircularProgress />);
         }
         if (!isAuthenticated() && anyUsers) {
@@ -264,6 +280,7 @@ export const App: React.FC<{}> = () => {
                 laborCodes={laborCodes}
                 laborCodeMap={laborCodeMap}
                 minutesPartition={minutesPartition}
+                firstDayOfWeek={firstDayOfWeek}
             />
         );
     };
@@ -337,6 +354,7 @@ export const App: React.FC<{}> = () => {
                                     savedQueries={savedQueries}
                                     savedQueriesMap={savedQueriesMap}
                                     fetchSavedQueries={getSavedQueries}
+                                    firstDayOfWeek={firstDayOfWeek}
                                 />
                             </RequireAuthentication>
                         }
@@ -471,7 +489,9 @@ export const App: React.FC<{}> = () => {
                             >
                                 <Configurations
                                     minutesPartition={minutesPartition}
+                                    firstDayOfWeek={firstDayOfWeek}
                                     onChangeMinutesPartition={getMinutesPartition}
+                                    onChangeFirstDayOfWeek={getFirstDayOfWeek}
                                 />
                             </RequireAuthentication>
                         }

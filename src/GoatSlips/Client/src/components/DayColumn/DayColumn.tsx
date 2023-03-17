@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import classes from './DayColumn.module.scss';
-import { Day, DayIndex } from '../../types/Day';
+import { Day } from '../../types/Day';
 import { Button, Menu, MenuItem, Tooltip } from '@mui/material';
 import { Add, Star } from '@mui/icons-material';
 import { EditableTimeSlip } from '../TimeSlip/EditableTimeSlip';
@@ -14,7 +14,7 @@ import { ErrorDetails } from '../../types/ErrorDetails';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 
 interface DayColumnProps {
-    dayIndex: DayIndex;
+    dayIndex: number;
     date: Date;
     day: Day;
     isCurrentDay: boolean;

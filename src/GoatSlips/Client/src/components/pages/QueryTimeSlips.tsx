@@ -20,7 +20,6 @@ import {
     Tooltip,
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { modalStyle } from '../../constants/modalStyle';
@@ -40,6 +39,10 @@ import { EntityLabelWithIcon } from '../EntityLabelWithIcon';
 import { Toast } from '../Toast';
 import classes from './QueryTimeSlips.module.scss';
 import { useDebounce } from '../../helpers/debounce';
+import MomentUtils from '@date-io/moment';
+import moment from 'moment';
+import 'moment/locale/de';
+import { AllowedFirstDayOfWeek } from '../../types/AllowedFirstDayOfWeek';
 
 interface QueryTimeSlipsProps {
     projects: DropdownOption[];
@@ -53,6 +56,7 @@ interface QueryTimeSlipsProps {
     savedQueries: DropdownOption[];
     savedQueriesMap: Map<number, Query>;
     fetchSavedQueries: () => Promise<void>;
+    firstDayOfWeek: AllowedFirstDayOfWeek;
 }
 
 const emptyDropdownOption: DropdownOption = {
@@ -87,6 +91,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         savedQueries,
         savedQueriesMap,
         fetchSavedQueries,
+        firstDayOfWeek,
     } = props;
     const [loadingResults, setLoadingResults] = useState(true);
     const [timeSlips, setTimeSlips] = useState<TimeSlipQueryResult[]>([]);
@@ -136,6 +141,10 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
             getUsers();
         }
     }, [isAdmin]);
+
+    useEffect(() => {
+        moment.locale('en', { week: { dow: firstDayOfWeek } });
+    }, []);
 
     const onDescriptionChange = (
         event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -305,7 +314,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                         value={descriptionSearchText}
                         onChange={onDescriptionChange}
                     />
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <LocalizationProvider dateAdapter={MomentUtils}>
                         <DatePicker
                             label="From Date"
                             value={fromDate}
@@ -315,7 +324,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                             renderInput={(params) => <TextField {...params} />}
                         />
                     </LocalizationProvider>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <LocalizationProvider dateAdapter={MomentUtils}>
                         <DatePicker
                             label="To Date"
                             value={toDate}

@@ -22,7 +22,7 @@ namespace GoatSlips.DAL
         DbSet<QueryProject>? QueryProjects { get; set; }
         DbSet<QueryTask>? QueryTasks { get; set; }
         DbSet<QueryLaborCode>? QueryLaborCodes { get; set; }
-        DbSet<TimeSlipConfiguration>? TimeSlipConfigurations { get; set; }
+        DbSet<Configuration>? Configurations { get; set; }
         DbSet<TimeSlipLog>? TimeSlipLogs { get; set; }
         DbSet<UserProject>? UserProjects { get; set; }
         int SaveChanges();
@@ -45,7 +45,7 @@ namespace GoatSlips.DAL
         public DbSet<QueryProject>? QueryProjects { get; set; }
         public DbSet<QueryTask>? QueryTasks { get; set; }
         public DbSet<QueryLaborCode>? QueryLaborCodes { get; set; }
-        public DbSet<TimeSlipConfiguration>? TimeSlipConfigurations { get; set; }
+        public DbSet<Configuration>? Configurations { get; set; }
         public DbSet<TimeSlipLog>? TimeSlipLogs { get; set; }
         public DbSet<UserProject>? UserProjects { get; set; }
 
