@@ -12,4 +12,5 @@ export interface Project extends DropdownOption {
     state: string;
     zip: number | null;
     zipExtension: number | null;
+    lockDate: Date | null;
 }

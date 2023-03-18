@@ -13,6 +13,7 @@
 	[State] VARCHAR(2) NULL,
 	[Zip] INT NULL,
 	[ZipExtension] INT NULL,
+	[LockDate] DATE NULL, 
 	CONSTRAINT [CK_Project_Name] CHECK (([FirstName] IS NULL AND [LastName] IS NULL) OR [BusinessName] IS NULL),
 	CONSTRAINT [CK_Project_Zip] CHECK (LEN([Zip]) <= 5),
 	CONSTRAINT [CK_Project_ZipExtension] CHECK (LEN([ZipExtension]) <= 4)

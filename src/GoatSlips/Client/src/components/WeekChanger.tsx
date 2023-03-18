@@ -1,7 +1,7 @@
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import { IconButton, styled, TextField } from '@mui/material';
 import { DatePicker, LocalizationProvider, PickersDay, PickersDayProps } from '@mui/x-date-pickers';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import 'dayjs/plugin/isBetween';
 import { getSundayDateForDate } from '../helpers/dateHelpers';
 import classes from './WeekChanger.module.scss';
@@ -11,7 +11,7 @@ import 'moment/locale/de';
 import { AllowedFirstDayOfWeek } from '../types/AllowedFirstDayOfWeek';
 import { useEffect, useState } from 'react';
 
-interface CustomPickerDayProps extends PickersDayProps<Dayjs> {
+interface CustomPickerDayProps extends PickersDayProps<Date> {
     dayIsBetween: boolean;
     isFirstDay: boolean;
     isLastDay: boolean;
@@ -59,13 +59,11 @@ export const WeekChanger: React.FC<WeekChangerProps> = (props: WeekChangerProps)
         setIsLoaded(true);
     }, []);
 
-    const changeToAnyWeek = (
-        newValue: dayjs.Dayjs | null,
-        _keyboardInputValue?: string | undefined,
-    ) => {
-        const newDate = newValue?.toDate();
-        if (newDate !== undefined) {
+    const changeToAnyWeek = (newValue: any | null, _keyboardInputValue?: string | undefined) => {
+        if (newValue !== null) {
+            const newDate = newValue.toDate();
             const newSundayDate = getSundayDateForDate(newDate);
+            newSundayDate.setDate(newSundayDate.getDate() + firstDayOfWeek);
             setSundayDate(newSundayDate);
         }
     };
@@ -77,21 +75,22 @@ export const WeekChanger: React.FC<WeekChangerProps> = (props: WeekChangerProps)
     };
 
     const renderWeekPickerDay = (
-        date: Dayjs,
-        _selectedDates: Array<Dayjs | null>,
-        pickersDayProps: PickersDayProps<Dayjs>,
+        date: Date,
+        _selectedDates: Array<Date | null>,
+        pickersDayProps: PickersDayProps<Date>,
     ) => {
         if (!sundayDate) {
             return <PickersDay {...pickersDayProps} />;
         }
 
         const sundayDayjs = dayjs(sundayDate);
-        const start = sundayDayjs.startOf('week');
-        const end = sundayDayjs.endOf('week');
+        const start = sundayDayjs.subtract(1, 'day');
+        const end = start.add(7, 'day');
 
-        const dayIsBetween = date.isBetween(start, end, null, '[]');
-        const isFirstDay = date.isSame(start, 'day');
-        const isLastDay = date.isSame(end, 'day');
+        const dateJs = dayjs(date);
+        const dayIsBetween = dateJs.isAfter(start) && dateJs.isBefore(end);
+        const isFirstDay = dateJs.isSame(start, 'day');
+        const isLastDay = dateJs.isSame(end, 'day');
 
         return (
             <CustomPickersDay
@@ -117,7 +116,7 @@ export const WeekChanger: React.FC<WeekChangerProps> = (props: WeekChangerProps)
                 <DatePicker
                     className={classes.weekChangeInput}
                     label="Week of"
-                    value={dayjs(sundayDate)}
+                    value={sundayDate}
                     onChange={changeToAnyWeek}
                     renderDay={renderWeekPickerDay}
                     renderInput={(params) => <TextField {...params} />}

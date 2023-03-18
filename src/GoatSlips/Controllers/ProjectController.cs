@@ -104,7 +104,8 @@ namespace GoatSlips.Controllers
                     body.City,
                     body.State,
                     body.Zip,
-                    body.ZipExtension);
+                    body.ZipExtension,
+                    body.LockDate);
                 return Ok();
             }
             catch (InsufficientAccessException e)

@@ -37,6 +37,7 @@ import { ManageTasks } from './components/pages/ManageTasks';
 import { Project } from './types/Project';
 import { EditProject } from './components/pages/EditProject';
 import { AllowedFirstDayOfWeek } from './types/AllowedFirstDayOfWeek';
+import dayjs from 'dayjs';
 
 const defaultUser: User = {
     userId: 0,
@@ -135,15 +136,22 @@ export const App: React.FC<{}> = () => {
     const getProjects = async () => {
         const projectsFromApi: Project[] = await fetchGet<Project[]>('Project');
 
+        const parsedProjects = projectsFromApi.map((p) => {
+            return {
+                ...p,
+                lockDate: p.lockDate === null ? null : dayjs(p.lockDate).toDate(),
+            };
+        });
+
         const nameMap = new Map<number, string>([]);
-        projectsFromApi.forEach((project: Project) => nameMap.set(project.id, project.name));
+        parsedProjects.forEach((project: Project) => nameMap.set(project.id, project.name));
 
         const map = new Map<number, Project>([]);
-        projectsFromApi.forEach((project: Project) => map.set(project.id, project));
+        parsedProjects.forEach((project: Project) => map.set(project.id, project));
 
         setProjectNameMap(nameMap);
         setProjectMap(map);
-        setProjects(projectsFromApi);
+        setProjects(parsedProjects);
     };
 
     const getTasks = async () => {
@@ -235,7 +243,15 @@ export const App: React.FC<{}> = () => {
         const queriesFromApi: Query[] = await fetchGet<Query[]>('Query');
 
         const map = new Map<number, Query>([]);
-        queriesFromApi.forEach((query: Query) => map.set(query.id, query));
+        queriesFromApi.forEach((query: Query) => {
+            const parsedQuery = {
+                ...query,
+                toDate: (query.toDate ?? '') === '' ? '' : dayjs(query.toDate).format('YYYY-MM-DD'),
+                fromDate:
+                    (query.fromDate ?? '') === '' ? '' : dayjs(query.fromDate).format('YYYY-MM-DD'),
+            };
+            map.set(query.id, parsedQuery);
+        });
 
         setSavedQueriesMap(map);
         setSavedQueries(queriesFromApi);
@@ -246,7 +262,7 @@ export const App: React.FC<{}> = () => {
     };
 
     const getPage = () => {
-        if (isAuthenticationLoading || isAnyUsersLoading || isFirstDayOfWeekLoading) {
+        if (isAuthenticationLoading || isAnyUsersLoading) {
             return fillScreenWithPage(<CircularProgress />);
         }
         if (!isAuthenticated() && anyUsers) {
@@ -266,6 +282,10 @@ export const App: React.FC<{}> = () => {
                     prompt="You must change your password before you can access the application."
                 />,
             );
+        }
+
+        if (isFirstDayOfWeekLoading) {
+            return fillScreenWithPage(<CircularProgress />);
         }
 
         return (
@@ -413,6 +433,7 @@ export const App: React.FC<{}> = () => {
                                     requiredAccessRight={requiredAccessRights.get(manageProjects)}
                                     overrideAccessRightLoading={false}
                                     userProjectIds={userProjectIds}
+                                    firstDayOfWeek={firstDayOfWeek}
                                 />
                             </RequireAuthentication>
                         }

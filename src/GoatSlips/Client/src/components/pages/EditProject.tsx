@@ -22,6 +22,11 @@ import { RequireAuthentication } from '../HOC/RequireAuthentication';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AlertMessage } from '../../types/AlertMessage';
 import classes from './EditProject.module.scss';
+import MomentUtils from '@date-io/moment';
+import moment from 'moment';
+import 'moment/locale/de';
+import { AllowedFirstDayOfWeek } from '../../types/AllowedFirstDayOfWeek';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 
 interface EditProjectProps {
     projectMap: Map<number, Project>;
@@ -38,6 +43,7 @@ interface EditProjectProps {
     requiredAccessRight?: string;
     overrideAccessRightLoading: boolean;
     userProjectIds: Set<number>;
+    firstDayOfWeek: AllowedFirstDayOfWeek;
 }
 
 export const EditProject: React.FC<EditProjectProps> = (props: EditProjectProps) => {
@@ -56,6 +62,7 @@ export const EditProject: React.FC<EditProjectProps> = (props: EditProjectProps)
         requiredAccessRight,
         overrideAccessRightLoading,
         userProjectIds,
+        firstDayOfWeek,
     } = props;
 
     const anchorRef = useRef<HTMLDivElement>(null);
@@ -96,14 +103,24 @@ export const EditProject: React.FC<EditProjectProps> = (props: EditProjectProps)
     const [state, setState] = useState(project.state ?? '');
     const [zip, setZip] = useState<number | ''>(project.zip ?? '');
     const [zipExt, setZipExt] = useState<number | ''>(project.zipExtension ?? '');
+    const [lockDate, setLockDate] = React.useState<Date | null>(
+        project.lockDate === null ? null : project.lockDate,
+    );
 
     const [isRateDropdownOpen, setIsRateDropdownOpen] = useState(false);
+
+    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
         setSelectedTaskIds(tasksAllowed);
         setOriginalTasks(new Set(tasksAllowed));
         setHaveTasksChanged(false);
     }, [tasksAllowed]);
+
+    useEffect(() => {
+        moment.locale('en', { week: { dow: firstDayOfWeek } });
+        setIsLoaded(true);
+    }, []);
 
     const handleRateChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = event.target.value;
@@ -157,7 +174,8 @@ export const EditProject: React.FC<EditProjectProps> = (props: EditProjectProps)
             city !== (project.city ?? '') ||
             state !== (project.state ?? '') ||
             zip !== (project.zip ?? '') ||
-            zipExt !== (project.zipExtension ?? '')
+            zipExt !== (project.zipExtension ?? '') ||
+            lockDate?.toLocaleDateString('en') !== project.lockDate?.toLocaleDateString('en')
         );
     };
 
@@ -182,6 +200,7 @@ export const EditProject: React.FC<EditProjectProps> = (props: EditProjectProps)
             state: state === '' ? null : state,
             zip: zip === '' ? null : zip,
             zipExtension: zipExt === '' ? null : zipExt,
+            lockDate,
         });
 
         if (response.ok) {
@@ -390,10 +409,24 @@ export const EditProject: React.FC<EditProjectProps> = (props: EditProjectProps)
                             )}
                         </Popper>
                     </span>
+                    <LocalizationProvider dateAdapter={MomentUtils}>
+                        <DatePicker
+                            label="Lock Date"
+                            value={lockDate}
+                            onChange={(newValue) => {
+                                setLockDate((newValue as any)?.toDate());
+                            }}
+                            renderInput={(p) => <TextField {...p} />}
+                        />
+                    </LocalizationProvider>
                 </div>
             </div>
         );
     };
+
+    if (!isLoaded) {
+        return <></>;
+    }
 
     return (
         <RequireAuthentication

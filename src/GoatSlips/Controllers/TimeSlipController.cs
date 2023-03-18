@@ -43,10 +43,6 @@ namespace GoatSlips.Controllers
         {
             try
             {
-                if (date.DayOfWeek != DayOfWeek.Sunday)
-                {
-                    return BadRequest("The date provided must be a Sunday.");
-                }
                 TimeSlip[] timeSlips = _timeSlipService.GetWeekOfTimeSlipsForCurrentUser(date, HttpContext);
                 return Ok(timeSlips);
             }

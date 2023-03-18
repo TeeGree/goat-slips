@@ -69,7 +69,10 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
     const currentDate = new Date();
 
-    const [sundayDate, setSundayDate] = useState<Date>(getSundayDateForDate(currentDate));
+    const beginningOfWeek = getSundayDateForDate(currentDate);
+    beginningOfWeek.setDate(beginningOfWeek.getDate() + firstDayOfWeek);
+
+    const [startOfWeekDate, setStartOfWeekDate] = useState<Date>(beginningOfWeek);
 
     const [showFilterSection, setShowFilterSection] = useState(false);
     const [projectIdsInUse, setProjectIdsInUse] = useState<Set<number>>(new Set<number>());
@@ -134,7 +137,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     };
 
     const getTimeSlips = async () => {
-        const sundayDateText = sundayDate.toLocaleDateString('en').replaceAll('/', '-');
+        const sundayDateText = startOfWeekDate.toLocaleDateString('en').replaceAll('/', '-');
         const timeSlipsFromApi: TimeSlip[] = await fetchGet<TimeSlip[]>(
             `TimeSlip/WeekOfTimeSlipsForCurrentUser/${sundayDateText}`,
         );
@@ -232,7 +235,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
     useEffect(() => {
         getTimeSlips();
-    }, [sundayDate]);
+    }, [startOfWeekDate]);
 
     const getTaskOptionsForProject = (projectId: number | null): DropdownOption[] => {
         if (projectId === null) {
@@ -267,6 +270,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
     };
 
     const getDateOfDay = (day: number): Date => {
+        const sundayDate = getSundayDateForDate(startOfWeekDate);
         const dayDate = new Date(sundayDate.getTime() + day * 24 * 60 * 60 * 1000);
         return dayDate;
     };
@@ -501,8 +505,8 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                     {getShowFilterButton()}
                     <div className={classes.weekHeaderHalf}>
                         <WeekChanger
-                            sundayDate={sundayDate}
-                            setSundayDate={setSundayDate}
+                            sundayDate={startOfWeekDate}
+                            setSundayDate={setStartOfWeekDate}
                             firstDayOfWeek={firstDayOfWeek}
                         />
                     </div>

@@ -5,7 +5,7 @@ export interface Query {
     projectIds: number[];
     taskIds: number[];
     laborCodeIds: number[];
-    fromDate: string;
-    toDate: string;
+    fromDate: string | null;
+    toDate: string | null;
     description: string;
 }

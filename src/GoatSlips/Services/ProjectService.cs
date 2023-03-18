@@ -27,7 +27,8 @@ namespace GoatSlips.Services
             string? city,
             string? state,
             int? zip,
-            int? zipExtension
+            int? zipExtension,
+            DateTime? lockDate
         );
     }
     public sealed class ProjectService : IProjectService
@@ -165,7 +166,8 @@ namespace GoatSlips.Services
             string? city,
             string? state,
             int? zip,
-            int? zipExtension
+            int? zipExtension,
+            DateTime? lockDate
         )
         {
             Project? project = _projectRepository.Projects.Where(p => p.Id == projectId).FirstOrDefault();
@@ -186,6 +188,7 @@ namespace GoatSlips.Services
             project.State = state;
             project.Zip = zip;
             project.ZipExtension = zipExtension;
+            project.LockDate = lockDate;
 
             _projectRepository.Projects.AddOrUpdate(project);
 

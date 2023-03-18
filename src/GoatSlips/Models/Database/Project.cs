@@ -18,5 +18,6 @@ namespace GoatSlips.Models.Database
         public string? State { get; set; }
         public int? Zip { get; set; }
         public int? ZipExtension { get; set; }
+        public DateTime? LockDate { get; set; }
     }
 }

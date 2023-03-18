@@ -20,7 +20,7 @@ import {
     Tooltip,
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { modalStyle } from '../../constants/modalStyle';
 import { getCsvOfTimeSlips } from '../../helpers/csvGeneration';
@@ -109,8 +109,8 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     // Wait 1 second after last user input to search using description search text.
     const debouncedDescription = useDebounce(inputDescriptionSearchText, 1000);
 
-    const [fromDate, setFromDate] = React.useState<Dayjs | null>(null);
-    const [toDate, setToDate] = React.useState<Dayjs | null>(null);
+    const [fromDate, setFromDate] = React.useState<Date | null>(null);
+    const [toDate, setToDate] = React.useState<Date | null>(null);
     const [users, setUsers] = useState<DropdownOption[]>([]);
     const [userMap, setUserMap] = useState<Map<number, string>>(new Map<number, string>([]));
     const [isSavingQuery, setIsSavingQuery] = useState(false);
@@ -120,6 +120,8 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
     const [isDeletingQuery, setIsDeletingQuery] = useState(false);
 
     const [alertMessage, setAlertMessage] = useState<AlertMessage | null>(null);
+
+    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
         fetchTimeSlips();
@@ -144,6 +146,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
 
     useEffect(() => {
         moment.locale('en', { week: { dow: firstDayOfWeek } });
+        setIsLoaded(true);
     }, []);
 
     const onDescriptionChange = (
@@ -173,11 +176,11 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         }
 
         if (fromDate !== null) {
-            newQueryBody.fromDate = fromDate.format('YYYY-MM-DD');
+            newQueryBody.fromDate = dayjs(fromDate).format('YYYY-MM-DD');
         }
 
         if (toDate !== null) {
-            newQueryBody.toDate = toDate.format('YYYY-MM-DD');
+            newQueryBody.toDate = dayjs(toDate).format('YYYY-MM-DD');
         }
 
         return newQueryBody;
@@ -189,6 +192,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         const queryBody: QueryBody = buildQueryBody();
 
         const results = await fetchPost<TimeSlipQueryResult[]>('Query/QueryTimeSlips', queryBody);
+
         setTimeSlips(results);
 
         setLoadingResults(false);
@@ -319,7 +323,7 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                             label="From Date"
                             value={fromDate}
                             onChange={(newValue) => {
-                                setFromDate(newValue);
+                                setFromDate(newValue === null ? null : newValue);
                             }}
                             renderInput={(params) => <TextField {...params} />}
                         />
@@ -327,9 +331,9 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
                     <LocalizationProvider dateAdapter={MomentUtils}>
                         <DatePicker
                             label="To Date"
-                            value={toDate}
+                            value={toDate === null ? null : toDate}
                             onChange={(newValue) => {
-                                setToDate(newValue);
+                                setToDate(newValue === null ? null : newValue);
                             }}
                             renderInput={(params) => <TextField {...params} />}
                         />
@@ -504,8 +508,11 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         setSelectedProjectIds(query.projectIds);
         setSelectedTaskIds(query.taskIds);
         setSelectedLaborCodeIds(query.laborCodeIds);
-        setFromDate(query.fromDate === null ? null : dayjs(query.fromDate));
-        setToDate(query.toDate === null ? null : dayjs(query.toDate));
+        const parsedFromDate = query.fromDate === '' ? null : dayjs(query.fromDate).toDate();
+        setFromDate(parsedFromDate);
+
+        const parsedToDate = query.toDate === '' ? null : dayjs(query.toDate).toDate();
+        setToDate(parsedToDate);
     };
 
     const getActionBar = () => {
@@ -554,15 +561,15 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
         const dateDivs: JSX.Element[] = [];
         if (fromDate !== null) {
             dateDivs.push(
-                <div className={classes.modalCodes}>
-                    <>From Date: {fromDate.toDate().toLocaleDateString('en')}</>
+                <div key="from-date" className={classes.modalCodes}>
+                    <>From Date: {dayjs(fromDate).format('MM/DD/YYYY')}</>
                 </div>,
             );
         }
         if (toDate !== null) {
             dateDivs.push(
-                <div className={classes.modalCodes}>
-                    <>To Date: {toDate.toDate().toLocaleDateString('en')}</>
+                <div key="to-date" className={classes.modalCodes}>
+                    <>To Date: {dayjs(toDate).format('MM/DD/YYYY')}</>
                 </div>,
             );
         }
@@ -717,6 +724,10 @@ export const QueryTimeSlips: React.FC<QueryTimeSlipsProps> = (props: QueryTimeSl
             </Modal>
         );
     };
+
+    if (!isLoaded) {
+        return <></>;
+    }
 
     return (
         <div className={classes.pageContainer}>
