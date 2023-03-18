@@ -12,11 +12,14 @@ import {
 } from '@mui/material';
 import { DropdownOption } from '../../types/DropdownOption';
 import { DateRange, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { Day } from '../../types/Day';
+import { Day, DayIndex } from '../../types/Day';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 import { TimeSlipMinutesInput } from './TimeSlipMinutesInput';
 import { adminAccessRight } from '../../constants/requiredAccessRights';
 import { Project } from '../../types/Project';
+import { AllowedFirstDayOfWeek } from '../../types/AllowedFirstDayOfWeek';
+import { dayMap } from '../../constants/dayMap';
+import { dayIndexMap } from '../../constants/dayIndexMap';
 
 const dayLabelMap = new Map<Day, string>([
     ['Sunday', 'Su'],
@@ -41,7 +44,7 @@ interface EditableTimeSlipProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-        days: Day[],
+        dates: Date[],
         description: string,
     ) => Promise<void>;
     projectId?: number;
@@ -58,6 +61,7 @@ interface EditableTimeSlipProps {
     minutesPartition: AllowedMinutesPartition;
     userProjectIds: Set<number>;
     userAccessRights: Set<string>;
+    firstDayOfWeek: AllowedFirstDayOfWeek;
 }
 
 export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: EditableTimeSlipProps) => {
@@ -83,6 +87,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         minutesPartition,
         userProjectIds,
         userAccessRights,
+        firstDayOfWeek,
     } = props;
 
     const getTotalMinutes = (h: number | '', m: number | '') => {
@@ -159,11 +164,26 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
             return;
         }
 
-        const days: Day[] = [];
+        const dates: Date[] = [];
+        const currentDayIndex = dayIndexMap.get(day);
+        if (currentDayIndex === undefined) {
+            throw Error('Invalid day for time slip!');
+        }
 
         addToDayMap.forEach((addToDay, d) => {
             if (addToDay) {
-                days.push(d);
+                let dayIndex = dayIndexMap.get(d) as number;
+
+                let dateToAdd = new Date(date);
+
+                if (dayIndex < firstDayOfWeek) {
+                    dayIndex += 7;
+                }
+
+                const indexDiff = dayIndex - currentDayIndex;
+                dateToAdd = new Date(date.getTime() + indexDiff * 24 * 60 * 60 * 1000);
+
+                dates.push(dateToAdd);
             }
         });
         saveTimeSlip(
@@ -172,7 +192,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
             selectedLaborCodeId,
             selectedHours === '' ? 0 : selectedHours,
             selectedMinutes === '' ? 0 : selectedMinutes,
-            days,
+            dates,
             enteredDescription,
         );
     };
@@ -278,13 +298,13 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         if (expandMultiDaySelect) {
             return (
                 <div className={classes.dayButtonContainer}>
-                    {getDayButton('Sunday')}
-                    {getDayButton('Monday')}
-                    {getDayButton('Tuesday')}
-                    {getDayButton('Wednesday')}
-                    {getDayButton('Thursday')}
-                    {getDayButton('Friday')}
-                    {getDayButton('Saturday')}
+                    {getDayButton(dayMap.get(((0 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
+                    {getDayButton(dayMap.get(((1 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
+                    {getDayButton(dayMap.get(((2 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
+                    {getDayButton(dayMap.get(((3 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
+                    {getDayButton(dayMap.get(((4 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
+                    {getDayButton(dayMap.get(((5 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
+                    {getDayButton(dayMap.get(((6 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
                 </div>
             );
         }

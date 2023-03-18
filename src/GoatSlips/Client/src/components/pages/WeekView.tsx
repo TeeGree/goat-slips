@@ -13,26 +13,7 @@ import { WeekChanger } from '../WeekChanger';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 import { AllowedFirstDayOfWeek } from '../../types/AllowedFirstDayOfWeek';
 import { Project } from '../../types/Project';
-
-const dayMap = new Map<DayIndex, Day>([
-    [0, 'Sunday'],
-    [1, 'Monday'],
-    [2, 'Tuesday'],
-    [3, 'Wednesday'],
-    [4, 'Thursday'],
-    [5, 'Friday'],
-    [6, 'Saturday'],
-]);
-
-const dayIndexMap = new Map<Day, DayIndex>([
-    ['Sunday', 0],
-    ['Monday', 1],
-    ['Tuesday', 2],
-    ['Wednesday', 3],
-    ['Thursday', 4],
-    ['Friday', 5],
-    ['Saturday', 6],
-]);
+import { dayMap } from '../../constants/dayMap';
 
 interface WeekViewProps {
     projects: Project[];
@@ -171,11 +152,11 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         setTimeSlipsPerDay(timeSlipMap);
     };
 
-    const getDateOfDayForApi = (day: Day) => {
-        const index = dayIndexMap.get(day) ?? 0;
-        const date = getDateOfDay(index);
-        return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-    };
+    // const getDateOfDayForApi = (day: Day) => {
+    //     const index = dayIndexMap.get(day) ?? 0;
+    //     const date = getDateOfDay(index);
+    //     return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    // };
 
     const saveNewTimeSlip = async (
         projectId: number,
@@ -183,10 +164,9 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-        days: Day[],
+        dates: Date[],
         description: string,
     ): Promise<Response> => {
-        const dates = days.map((d) => getDateOfDayForApi(d));
         const response = await fetchPostResponse('TimeSlip/AddTimeSlip', {
             projectId,
             taskId,
@@ -369,6 +349,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 minutesPartition={minutesPartition}
                 userAccessRights={userAccessRights}
                 userProjectIds={userProjectIds}
+                firstDayOfWeek={firstDayOfWeek}
             />
         );
     };

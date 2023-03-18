@@ -7,6 +7,7 @@ import classes from './ExistingTimeSlip.module.scss';
 import { Day } from '../../types/Day';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 import { Project } from '../../types/Project';
+import { AllowedFirstDayOfWeek } from '../../types/AllowedFirstDayOfWeek';
 
 interface ExistingTimeSlipProps {
     date: Date;
@@ -24,7 +25,7 @@ interface ExistingTimeSlipProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-        days: Day[],
+        dates: Date[],
         description: string,
     ) => Promise<Response>;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
@@ -36,6 +37,7 @@ interface ExistingTimeSlipProps {
     minutesPartition: AllowedMinutesPartition;
     userProjectIds: Set<number>;
     userAccessRights: Set<string>;
+    firstDayOfWeek: AllowedFirstDayOfWeek;
 }
 
 export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: ExistingTimeSlipProps) => {
@@ -58,6 +60,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         minutesPartition,
         userProjectIds,
         userAccessRights,
+        firstDayOfWeek,
     } = props;
 
     const [isEditing, setIsEditing] = useState(false);
@@ -68,7 +71,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-        days: Day[],
+        dates: Date[],
         description: string,
     ) => {
         const response = await saveTimeSlip(
@@ -78,7 +81,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
             laborCodeId,
             hours,
             minutes,
-            days,
+            dates,
             description,
         );
         if (response.ok) {
@@ -111,6 +114,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
                     minutesPartition={minutesPartition}
                     userAccessRights={userAccessRights}
                     userProjectIds={userProjectIds}
+                    firstDayOfWeek={firstDayOfWeek}
                 />
             );
         }

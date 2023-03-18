@@ -13,6 +13,7 @@ import { Toast } from '../Toast';
 import { ErrorDetails } from '../../types/ErrorDetails';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 import { Project } from '../../types/Project';
+import { AllowedFirstDayOfWeek } from '../../types/AllowedFirstDayOfWeek';
 
 interface DayColumnProps {
     dayIndex: number;
@@ -28,7 +29,7 @@ interface DayColumnProps {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-        days: Day[],
+        dates: Date[],
         description: string,
     ) => Promise<Response>;
     updateTimeSlip: (
@@ -57,6 +58,7 @@ interface DayColumnProps {
     minutesPartition: AllowedMinutesPartition;
     userProjectIds: Set<number>;
     userAccessRights: Set<string>;
+    firstDayOfWeek: AllowedFirstDayOfWeek;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
@@ -112,6 +114,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         minutesPartition,
         userProjectIds,
         userAccessRights,
+        firstDayOfWeek,
     } = props;
 
     const getDateString = () => {
@@ -124,7 +127,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-        days: Day[],
+        dates: Date[],
         description: string,
     ) => {
         const response = await saveTimeSlip(
@@ -133,7 +136,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
             laborCodeId,
             hours,
             minutes,
-            days,
+            dates,
             description,
         );
 
@@ -208,6 +211,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     minutesPartition={minutesPartition}
                     userAccessRights={userAccessRights}
                     userProjectIds={userProjectIds}
+                    firstDayOfWeek={firstDayOfWeek}
                 />
             );
         }
@@ -239,7 +243,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         laborCodeId: number | null,
         hours: number,
         minutes: number,
-        _days: Day[],
+        _dates: Date[],
         description: string,
     ) => {
         const response = await updateTimeSlip(
@@ -278,6 +282,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     minutesPartition={minutesPartition}
                     userAccessRights={userAccessRights}
                     userProjectIds={userProjectIds}
+                    firstDayOfWeek={firstDayOfWeek}
                 />
             );
         });
