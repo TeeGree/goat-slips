@@ -293,7 +293,7 @@ export const App: React.FC<{}> = () => {
                 fetchFavoriteTimeSlips={getFavoriteTimeSlips}
                 favoriteTimeSlips={favoriteTimeSlips}
                 projects={projects}
-                projectMap={projectNameMap}
+                projectMap={projectMap}
                 tasks={tasks}
                 taskMap={taskMap}
                 tasksAllowedForProjects={tasksAllowedForProjects}
@@ -301,6 +301,8 @@ export const App: React.FC<{}> = () => {
                 laborCodeMap={laborCodeMap}
                 minutesPartition={minutesPartition}
                 firstDayOfWeek={firstDayOfWeek}
+                userAccessRights={userAccessRights}
+                userProjectIds={userProjectIds}
             />
         );
     };

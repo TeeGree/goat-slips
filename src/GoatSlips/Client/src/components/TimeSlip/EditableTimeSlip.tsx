@@ -15,6 +15,8 @@ import { DateRange, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-materi
 import { Day } from '../../types/Day';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 import { TimeSlipMinutesInput } from './TimeSlipMinutesInput';
+import { adminAccessRight } from '../../constants/requiredAccessRights';
+import { Project } from '../../types/Project';
 
 const dayLabelMap = new Map<Day, string>([
     ['Sunday', 'Su'],
@@ -27,8 +29,9 @@ const dayLabelMap = new Map<Day, string>([
 ]);
 
 interface EditableTimeSlipProps {
+    date: Date;
     day: Day;
-    projectOptions: DropdownOption[];
+    projectOptions: Project[];
     laborCodeOptions: DropdownOption[];
     getTaskOptionsForProject: (projectId: number | null) => DropdownOption[];
     stopAddingTimeslip: () => void;
@@ -49,14 +52,17 @@ interface EditableTimeSlipProps {
     description?: string;
     setMinutesDiff: (day: Day, minutesDiff: number) => void;
     isNewTimeSlip: boolean;
-    projectMap: Map<number, string>;
+    projectMap: Map<number, Project>;
     taskMap: Map<number, string>;
     laborCodeMap: Map<number, string>;
     minutesPartition: AllowedMinutesPartition;
+    userProjectIds: Set<number>;
+    userAccessRights: Set<string>;
 }
 
 export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: EditableTimeSlipProps) => {
     const {
+        date,
         day,
         getTaskOptionsForProject,
         laborCodeOptions,
@@ -75,6 +81,8 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         taskMap,
         laborCodeMap,
         minutesPartition,
+        userProjectIds,
+        userAccessRights,
     } = props;
 
     const getTotalMinutes = (h: number | '', m: number | '') => {
@@ -289,7 +297,7 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
             return null;
         }
 
-        return { label: projectMap.get(selectedProjectId), id: selectedProjectId };
+        return { label: projectMap.get(selectedProjectId)?.name, id: selectedProjectId };
     };
 
     const getSelectedAutocompleteTaskId = () => {
@@ -350,12 +358,27 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         }
     };
 
+    const doesUserHaveAccessToProject = (id: number) => {
+        return userAccessRights.has(adminAccessRight) || userProjectIds.has(id);
+    };
+
+    const filteredProjectOptions = projectOptions.filter((po) => {
+        if (po.lockDate === null) {
+            return true;
+        }
+
+        const dateNoTime = new Date(date);
+        dateNoTime.setHours(0, 0, 0, 0);
+
+        return po.lockDate < dateNoTime || doesUserHaveAccessToProject(po.id);
+    });
+
     return (
         <Card>
             <CardContent>
                 <Autocomplete
                     disablePortal
-                    options={projectOptions.map((p) => {
+                    options={filteredProjectOptions.map((p) => {
                         return { label: p.name, id: p.id };
                     })}
                     renderInput={(params) => <TextField {...params} label="Project" />}

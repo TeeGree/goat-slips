@@ -12,13 +12,14 @@ import { AlertMessage } from '../../types/AlertMessage';
 import { Toast } from '../Toast';
 import { ErrorDetails } from '../../types/ErrorDetails';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
+import { Project } from '../../types/Project';
 
 interface DayColumnProps {
     dayIndex: number;
     date: Date;
     day: Day;
     isCurrentDay: boolean;
-    projectOptions: DropdownOption[];
+    projectOptions: Project[];
     laborCodeOptions: DropdownOption[];
     getTaskOptionsForProject: (projectId: number | null) => DropdownOption[];
     saveTimeSlip: (
@@ -41,7 +42,6 @@ interface DayColumnProps {
     ) => Promise<Response>;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
     timeSlips: TimeSlip[];
-    getProjectName: (projectId: number) => string;
     getTaskName: (taskId: number) => string;
     getLaborCodeName: (laborCodeId: number) => string;
     totalHours: number;
@@ -51,10 +51,12 @@ interface DayColumnProps {
     isFiltered: boolean;
     newDayMinuteDiffs: Map<Day, Map<number, number>>;
     setNewDayMinuteDiffs: (day: Day, timeSlipId: number, minutes: number) => void;
-    projectMap: Map<number, string>;
+    projectMap: Map<number, Project>;
     taskMap: Map<number, string>;
     laborCodeMap: Map<number, string>;
     minutesPartition: AllowedMinutesPartition;
+    userProjectIds: Set<number>;
+    userAccessRights: Set<string>;
 }
 
 export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
@@ -94,7 +96,6 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         saveTimeSlip,
         updateTimeSlip,
         timeSlips,
-        getProjectName,
         getTaskName,
         getLaborCodeName,
         deleteTimeSlip,
@@ -109,6 +110,8 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
         taskMap,
         laborCodeMap,
         minutesPartition,
+        userProjectIds,
+        userAccessRights,
     } = props;
 
     const getDateString = () => {
@@ -185,6 +188,7 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
             return (
                 <EditableTimeSlip
                     day={day}
+                    date={date}
                     setMinutesDiff={(d: Day, m: number) =>
                         // Use day index to ensure no overlap when adding multiple new time slips to same day at once.
                         setNewDayMinuteDiffs(d, -1 * dayIndex, m)
@@ -202,6 +206,8 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     taskMap={taskMap}
                     laborCodeMap={laborCodeMap}
                     minutesPartition={minutesPartition}
+                    userAccessRights={userAccessRights}
+                    userProjectIds={userProjectIds}
                 />
             );
         }
@@ -254,10 +260,10 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
             return (
                 <ExistingTimeSlip
                     key={ts.id}
+                    date={date}
                     day={day}
                     setMinutesDiff={(d: Day, m: number) => setNewDayMinuteDiffs(d, ts.id, m)}
                     timeSlip={ts}
-                    getProjectName={getProjectName}
                     getTaskName={getTaskName}
                     getLaborCodeName={getLaborCodeName}
                     projectOptions={projectOptions}
@@ -270,6 +276,8 @@ export const DayColumn: React.FC<DayColumnProps> = (props: DayColumnProps) => {
                     taskMap={taskMap}
                     laborCodeMap={laborCodeMap}
                     minutesPartition={minutesPartition}
+                    userAccessRights={userAccessRights}
+                    userProjectIds={userProjectIds}
                 />
             );
         });

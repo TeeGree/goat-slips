@@ -6,14 +6,15 @@ import { EditableTimeSlip } from './EditableTimeSlip';
 import classes from './ExistingTimeSlip.module.scss';
 import { Day } from '../../types/Day';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
+import { Project } from '../../types/Project';
 
 interface ExistingTimeSlipProps {
+    date: Date;
     day: Day;
     timeSlip: TimeSlip;
-    getProjectName: (projectId: number) => string;
     getTaskName: (taskId: number) => string;
     getLaborCodeName: (laborCodeId: number) => string;
-    projectOptions: DropdownOption[];
+    projectOptions: Project[];
     laborCodeOptions: DropdownOption[];
     getTaskOptionsForProject: (projectId: number | null) => DropdownOption[];
     saveTimeSlip: (
@@ -29,17 +30,19 @@ interface ExistingTimeSlipProps {
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
     setMinutesDiff: (day: Day, minutesDiff: number) => void;
     fetchFavoriteTimeSlips: () => void;
-    projectMap: Map<number, string>;
+    projectMap: Map<number, Project>;
     taskMap: Map<number, string>;
     laborCodeMap: Map<number, string>;
     minutesPartition: AllowedMinutesPartition;
+    userProjectIds: Set<number>;
+    userAccessRights: Set<string>;
 }
 
 export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: ExistingTimeSlipProps) => {
     const {
+        date,
         day,
         timeSlip,
-        getProjectName,
         getTaskName,
         getLaborCodeName,
         getTaskOptionsForProject,
@@ -53,6 +56,8 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         taskMap,
         laborCodeMap,
         minutesPartition,
+        userProjectIds,
+        userAccessRights,
     } = props;
 
     const [isEditing, setIsEditing] = useState(false);
@@ -85,6 +90,7 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
         if (isEditing) {
             return (
                 <EditableTimeSlip
+                    date={date}
                     day={day}
                     projectOptions={projectOptions}
                     laborCodeOptions={laborCodeOptions}
@@ -103,19 +109,24 @@ export const ExistingTimeSlip: React.FC<ExistingTimeSlipProps> = (props: Existin
                     taskMap={taskMap}
                     laborCodeMap={laborCodeMap}
                     minutesPartition={minutesPartition}
+                    userAccessRights={userAccessRights}
+                    userProjectIds={userProjectIds}
                 />
             );
         }
 
         return (
             <ReadOnlyTimeSlip
+                date={date}
                 fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
                 timeSlip={timeSlip}
-                getProjectName={getProjectName}
+                projectMap={projectMap}
                 getTaskName={getTaskName}
                 getLaborCodeName={getLaborCodeName}
                 handleEdit={() => setIsEditing(true)}
                 deleteTimeSlip={deleteTimeSlip}
+                userAccessRights={userAccessRights}
+                userProjectIds={userProjectIds}
             />
         );
     };

@@ -12,6 +12,7 @@ import { getSundayDateForDate } from '../../helpers/dateHelpers';
 import { WeekChanger } from '../WeekChanger';
 import { AllowedMinutesPartition } from '../../types/AllowedMinutesPartition';
 import { AllowedFirstDayOfWeek } from '../../types/AllowedFirstDayOfWeek';
+import { Project } from '../../types/Project';
 
 const dayMap = new Map<DayIndex, Day>([
     [0, 'Sunday'],
@@ -34,8 +35,8 @@ const dayIndexMap = new Map<Day, DayIndex>([
 ]);
 
 interface WeekViewProps {
-    projects: DropdownOption[];
-    projectMap: Map<number, string>;
+    projects: Project[];
+    projectMap: Map<number, Project>;
     tasks: DropdownOption[];
     taskMap: Map<number, string>;
     tasksAllowedForProjects: Map<number, number[]>;
@@ -45,6 +46,8 @@ interface WeekViewProps {
     fetchFavoriteTimeSlips: () => Promise<void>;
     minutesPartition: AllowedMinutesPartition;
     firstDayOfWeek: AllowedFirstDayOfWeek;
+    userProjectIds: Set<number>;
+    userAccessRights: Set<string>;
 }
 
 interface HoursMinutesSplit {
@@ -65,6 +68,8 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         fetchFavoriteTimeSlips,
         minutesPartition,
         firstDayOfWeek,
+        userProjectIds,
+        userAccessRights,
     } = props;
 
     const currentDate = new Date();
@@ -257,10 +262,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         });
     };
 
-    const getProjectName = (projectId: number) => {
-        return projectMap.get(projectId) ?? '';
-    };
-
     const getTaskName = (taskId: number) => {
         return taskMap.get(taskId) ?? '';
     };
@@ -345,7 +346,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 dayIndex={actualDay}
                 fetchFavoriteTimeSlips={fetchFavoriteTimeSlips}
                 favoriteTimeSlipsOptions={favoriteTimeSlips}
-                getProjectName={getProjectName}
                 getTaskName={getTaskName}
                 getLaborCodeName={getLaborCodeName}
                 timeSlips={timeSlips}
@@ -367,6 +367,8 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                 taskMap={taskMap}
                 laborCodeMap={laborCodeMap}
                 minutesPartition={minutesPartition}
+                userAccessRights={userAccessRights}
+                userProjectIds={userProjectIds}
             />
         );
     };
@@ -439,7 +441,7 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
                         options={getInUseProjectOptions()}
                         selectedIds={selectedFilterProjectIds}
                         setSelectedIds={setSelectedFilterProjectIds}
-                        getDisplayTextForId={(id: number) => projectMap.get(id) ?? ''}
+                        getDisplayTextForId={(id: number) => projectMap.get(id)?.name ?? ''}
                     />
                     <MultiSelect
                         label="Tasks"

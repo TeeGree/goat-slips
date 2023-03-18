@@ -221,6 +221,7 @@ export const UserManagement: React.FC<UserManagementProps> = (props: UserManagem
                 severity: 'success',
             });
             await getUsers(userFilterText);
+            stopCreatingNewUser();
             return true;
         }
 
@@ -281,12 +282,14 @@ export const UserManagement: React.FC<UserManagementProps> = (props: UserManagem
                     <div>
                         <div className={classes.newUserInputRow}>
                             <TextField
+                                required
                                 label="Username"
                                 variant="outlined"
                                 value={username}
                                 onChange={handleUsernameChange}
                             />
                             <TextField
+                                required
                                 className={classes.secondInput}
                                 label="Email"
                                 variant="outlined"
@@ -315,6 +318,7 @@ export const UserManagement: React.FC<UserManagementProps> = (props: UserManagem
                                 title="Password must contain at least 1 letter, one number, and be at least 8 characters long."
                             >
                                 <TextField
+                                    required
                                     label="Temporary Password"
                                     variant="outlined"
                                     type="password"
@@ -328,7 +332,7 @@ export const UserManagement: React.FC<UserManagementProps> = (props: UserManagem
                         <Button
                             variant="contained"
                             color="success"
-                            disabled={!passwordIsValid(password)}
+                            disabled={email === '' || username === '' || !passwordIsValid(password)}
                             onClick={createUser}
                         >
                             Create

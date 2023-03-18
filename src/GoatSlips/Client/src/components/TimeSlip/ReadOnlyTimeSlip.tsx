@@ -18,26 +18,34 @@ import { Toast } from '../Toast';
 import { ErrorDetails } from '../../types/ErrorDetails';
 import { AlertMessage } from '../../types/AlertMessage';
 import { EntityLabelWithIcon } from '../EntityLabelWithIcon';
+import { adminAccessRight } from '../../constants/requiredAccessRights';
+import { Project } from '../../types/Project';
 
 interface ReadOnlyTimeSlipProps {
+    date: Date;
     timeSlip: TimeSlip;
-    getProjectName: (projectId: number) => string;
+    projectMap: Map<number, Project>;
     getTaskName: (taskId: number) => string;
     getLaborCodeName: (laborCodeId: number) => string;
     handleEdit: () => void;
     deleteTimeSlip: (timeSlipId: number) => Promise<void>;
     fetchFavoriteTimeSlips: () => void;
+    userProjectIds: Set<number>;
+    userAccessRights: Set<string>;
 }
 
 export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnlyTimeSlipProps) => {
     const {
+        date,
         timeSlip,
-        getProjectName,
+        projectMap,
         getTaskName,
         getLaborCodeName,
         handleEdit,
         deleteTimeSlip,
         fetchFavoriteTimeSlips,
+        userProjectIds,
+        userAccessRights,
     } = props;
 
     const task = timeSlip.taskId === null ? 'N/A' : getTaskName(timeSlip.taskId);
@@ -76,12 +84,56 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
         setFavoriteName('');
     };
 
+    const canUserEditTimeSlip = () => {
+        const project = projectMap.get(timeSlip.projectId);
+        if (project === undefined) {
+            throw Error('Project not found!');
+        }
+
+        if (project.lockDate === null) {
+            return true;
+        }
+
+        const dateNoTime = new Date(date);
+        dateNoTime.setHours(0, 0, 0, 0);
+
+        return (
+            project.lockDate < dateNoTime ||
+            userAccessRights.has(adminAccessRight) ||
+            userProjectIds.has(timeSlip.projectId)
+        );
+    };
+
+    const getEditButton = () => {
+        if (!canUserEditTimeSlip()) {
+            return <></>;
+        }
+
+        return (
+            <Button variant="contained" onClick={handleEdit}>
+                Edit
+            </Button>
+        );
+    };
+
+    const getDeleteButton = () => {
+        if (!canUserEditTimeSlip()) {
+            return <></>;
+        }
+
+        return (
+            <Button variant="contained" color="error" onClick={() => setIsDeleting(true)}>
+                Delete
+            </Button>
+        );
+    };
+
     return (
         <>
             <Card>
                 <CardContent className={classes.content}>
                     <EntityLabelWithIcon
-                        label={getProjectName(timeSlip.projectId)}
+                        label={projectMap.get(timeSlip.projectId)?.name ?? ''}
                         timeCodeType="project"
                     />
                     <EntityLabelWithIcon label={task} timeCodeType="task" />
@@ -102,12 +154,8 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
                             <Star />
                         </Button>
                     </Tooltip>
-                    <Button variant="contained" onClick={handleEdit}>
-                        Edit
-                    </Button>
-                    <Button variant="contained" color="error" onClick={() => setIsDeleting(true)}>
-                        Delete
-                    </Button>
+                    {getEditButton()}
+                    {getDeleteButton()}
                 </CardActions>
             </Card>
             <Modal open={isDeleting}>
@@ -143,7 +191,7 @@ export const ReadOnlyTimeSlip: React.FC<ReadOnlyTimeSlipProps> = (props: ReadOnl
                     </div>
                     <div className={`${classes.padded} ${classes.content}`}>
                         <EntityLabelWithIcon
-                            label={getProjectName(timeSlip.projectId)}
+                            label={projectMap.get(timeSlip.projectId)?.name ?? ''}
                             timeCodeType="project"
                         />
                         <EntityLabelWithIcon label={task} timeCodeType="task" />
