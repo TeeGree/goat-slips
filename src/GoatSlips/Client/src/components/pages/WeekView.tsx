@@ -152,12 +152,6 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
         setTimeSlipsPerDay(timeSlipMap);
     };
 
-    // const getDateOfDayForApi = (day: Day) => {
-    //     const index = dayIndexMap.get(day) ?? 0;
-    //     const date = getDateOfDay(index);
-    //     return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-    // };
-
     const saveNewTimeSlip = async (
         projectId: number,
         taskId: number | null,

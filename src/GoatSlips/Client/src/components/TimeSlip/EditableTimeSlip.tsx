@@ -159,29 +159,45 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         setSelectedMinutes(mins);
     };
 
+    const currentDayIndex = dayIndexMap.get(day);
+
+    const getDateForDay = (d: Day) => {
+        if (currentDayIndex === undefined) {
+            throw Error('Invalid day for time slip!');
+        }
+
+        let dayIndex = dayIndexMap.get(d) as number;
+
+        if (dayIndex < firstDayOfWeek) {
+            dayIndex += 7;
+        }
+
+        const indexDiff = dayIndex - currentDayIndex;
+        const calculatedDate = new Date(date.getTime() + indexDiff * 24 * 60 * 60 * 1000);
+
+        return calculatedDate;
+    };
+
+    const dayDateMap = new Map<Day, Date>([
+        ['Sunday', getDateForDay('Sunday')],
+        ['Monday', getDateForDay('Monday')],
+        ['Tuesday', getDateForDay('Tuesday')],
+        ['Wednesday', getDateForDay('Wednesday')],
+        ['Thursday', getDateForDay('Thursday')],
+        ['Friday', getDateForDay('Friday')],
+        ['Saturday', getDateForDay('Saturday')],
+    ]);
+
     const submitTimeSlip = () => {
         if (selectedProjectId === null || !isSaveAllowed(selectedProjectId ?? '')) {
             return;
         }
 
         const dates: Date[] = [];
-        const currentDayIndex = dayIndexMap.get(day);
-        if (currentDayIndex === undefined) {
-            throw Error('Invalid day for time slip!');
-        }
 
         addToDayMap.forEach((addToDay, d) => {
             if (addToDay) {
-                let dayIndex = dayIndexMap.get(d) as number;
-
-                let dateToAdd = new Date(date);
-
-                if (dayIndex < firstDayOfWeek) {
-                    dayIndex += 7;
-                }
-
-                const indexDiff = dayIndex - currentDayIndex;
-                dateToAdd = new Date(date.getTime() + indexDiff * 24 * 60 * 60 * 1000);
+                const dateToAdd = dayDateMap.get(d) ?? date;
 
                 dates.push(dateToAdd);
             }
@@ -277,17 +293,33 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         });
     };
 
-    const getDayButton = (buttonDay: Day) => {
-        const label = dayLabelMap.get(buttonDay);
+    const getDayButton = (index: number) => {
+        const dayName = dayMap.get(((index + firstDayOfWeek) % 7) as DayIndex);
+
+        if (dayName === undefined) {
+            throw Error('Invalid day!');
+        }
+
+        const label = dayLabelMap.get(dayName);
+
+        const dayDate = dayDateMap.get(dayName);
+        if (dayDate === undefined) {
+            throw Error('Invalid day for day button!');
+        }
+        const projectLocked =
+            selectedProjectId !== null &&
+            !isProjectAndDateValid(projectMap.get(selectedProjectId), dayDate);
+
         let className = classes.dayButton;
-        if (addToDayMap.get(buttonDay)) {
+        if (addToDayMap.get(dayName)) {
             className += ` ${classes.selectedDay}`;
         }
+
         return (
             <IconButton
-                disabled={buttonDay === day}
+                disabled={projectLocked || dayName === day}
                 className={className}
-                onClick={() => toggleDaySelected(buttonDay)}
+                onClick={() => toggleDaySelected(dayName)}
             >
                 {label}
             </IconButton>
@@ -298,13 +330,13 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         if (expandMultiDaySelect) {
             return (
                 <div className={classes.dayButtonContainer}>
-                    {getDayButton(dayMap.get(((0 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
-                    {getDayButton(dayMap.get(((1 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
-                    {getDayButton(dayMap.get(((2 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
-                    {getDayButton(dayMap.get(((3 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
-                    {getDayButton(dayMap.get(((4 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
-                    {getDayButton(dayMap.get(((5 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
-                    {getDayButton(dayMap.get(((6 + firstDayOfWeek) % 7) as DayIndex) ?? 'Sunday')}
+                    {getDayButton(0)}
+                    {getDayButton(1)}
+                    {getDayButton(2)}
+                    {getDayButton(3)}
+                    {getDayButton(4)}
+                    {getDayButton(5)}
+                    {getDayButton(6)}
                 </div>
             );
         }
@@ -346,6 +378,22 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         if (value === null) {
             setSelectedProjectId(null);
         } else if (value !== null && projectMap.has(value.id)) {
+            dayMap.forEach((d: Day) => {
+                const dayDate = dayDateMap.get(d);
+                if (dayDate === undefined) {
+                    throw Error('Invalid day for day button!');
+                }
+
+                const projectLocked = !isProjectAndDateValid(projectMap.get(value.id), dayDate);
+                if (projectLocked) {
+                    setAddToDayMap((prev) => {
+                        const newMap = new Map(prev);
+                        newMap.set(d, false);
+                        return newMap;
+                    });
+                }
+            });
+
             setSelectedProjectId(value.id);
         }
     };
@@ -382,15 +430,19 @@ export const EditableTimeSlip: React.FC<EditableTimeSlipProps> = (props: Editabl
         return userAccessRights.has(adminAccessRight) || userProjectIds.has(id);
     };
 
-    const filteredProjectOptions = projectOptions.filter((po) => {
-        if (po.lockDate === null) {
+    const isProjectAndDateValid = (p: Project | undefined, d: Date) => {
+        if (p === undefined || p.lockDate === null) {
             return true;
         }
 
-        const dateNoTime = new Date(date);
+        const dateNoTime = new Date(d);
         dateNoTime.setHours(0, 0, 0, 0);
 
-        return po.lockDate < dateNoTime || doesUserHaveAccessToProject(po.id);
+        return p.lockDate < dateNoTime || doesUserHaveAccessToProject(p.id);
+    };
+
+    const filteredProjectOptions = projectOptions.filter((po) => {
+        return isProjectAndDateValid(po, date);
     });
 
     return (
