@@ -1,0 +1,66 @@
+@import '../../variables';
+@import '../../colors';
+
+.homeContainer {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.weekContainer {
+    width: 100%;
+    display: flex;
+    flex-grow: 1;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+    overflow-y: clip;
+    max-height: 100%;
+}
+
+.weekHeader,
+.basicHeader {
+    width: 100%;
+}
+
+.basicHeader,
+.filterSection {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+}
+
+.filterSection {
+    background-color: #444444;
+    margin: 0.2em;
+    border-radius: 0.2em;
+}
+
+.weekHeaderHalf {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+}
+
+.squareIconButtonLong,
+.weekFilterButton {
+    width: 60px;
+    height: $headerHeight;
+    border-radius: 4px !important;
+}
+
+.weekFilterButton {
+    margin-left: 0.3em !important;
+}
+
+.filteredTotal {
+    color: $goatLightBlue;
+}
+
+.weekTotal,
+.filteredTotal {
+    margin-left: 0.2em;
+}

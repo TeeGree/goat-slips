@@ -38,6 +38,7 @@ import { Project } from './types/Project';
 import { EditProject } from './components/pages/EditProject';
 import { AllowedFirstDayOfWeek } from './types/AllowedFirstDayOfWeek';
 import dayjs from 'dayjs';
+import { WeekTableView } from './components/pages/WeekTableView';
 
 const defaultUser: User = {
     userId: 0,
@@ -534,6 +535,28 @@ export const App: React.FC<{}> = () => {
                                     projectMap={projectNameMap}
                                     taskMap={taskMap}
                                     laborCodeMap={laborCodeMap}
+                                />
+                            </RequireAuthentication>
+                        }
+                    />
+                    <Route
+                        key="/week-table"
+                        path="/week-table"
+                        element={
+                            <RequireAuthentication
+                                isAuthenticated={canAccessGuardedRoutes}
+                                isAccessRightsLoading={isUserAccessRightsLoading}
+                                isAuthenticationLoading={isAuthenticationLoading}
+                                accessRights={userAccessRights}
+                            >
+                                <WeekTableView
+                                    projects={projects}
+                                    projectMap={projectMap}
+                                    tasks={tasks}
+                                    taskMap={taskMap}
+                                    laborCodes={laborCodes}
+                                    laborCodeMap={laborCodeMap}
+                                    firstDayOfWeek={firstDayOfWeek}
                                 />
                             </RequireAuthentication>
                         }

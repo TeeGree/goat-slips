@@ -3,6 +3,7 @@ export const manageProjects = 'Manage Projects';
 export const manageTasks = 'Manage Tasks';
 export const manageLaborCodes = 'Manage Labor Codes';
 export const weekView = 'Week View';
+export const weekTableView = 'Week Table View';
 export const changePassword = 'Change Password';
 export const manageUsers = 'Manage Users';
 export const manageFavorites = 'Manage Favorites';
@@ -13,6 +14,7 @@ export type ComponentName =
     | typeof queryTimeSlips
     | typeof manageLaborCodes
     | typeof weekView
+    | typeof weekTableView
     | typeof changePassword
     | typeof manageUsers
     | typeof manageFavorites
