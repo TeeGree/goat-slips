@@ -17,8 +17,17 @@ var configuration = new ConfigurationBuilder()
 IConfigurationRoot config = configuration.Build();
 string connectionString = config.GetConnectionString("ConnectionString");
 
+IConfigurationProvider configProvider = config.Providers.First();
+configProvider.TryGet("EmailConfiguration:Smtp:Host", out string smtpHost);
+configProvider.TryGet("EmailConfiguration:Smtp:Port", out string smtpPort);
+configProvider.TryGet("EmailConfiguration:Sender:Name", out string senderName);
+configProvider.TryGet("EmailConfiguration:Sender:EmailAddress", out string senderEmailAddress);
+configProvider.TryGet("EmailConfiguration:Sender:Password", out string senderPassword);
+
+int parsedPort = int.TryParse(smtpPort, out int port) ? port : 0;
+
 // Add services to the container.
-builder.Services.AddSingleton<IAppSettings>(new AppSettings(connectionString));
+builder.Services.AddSingleton<IAppSettings>(new AppSettings(connectionString, smtpHost, parsedPort, senderName, senderEmailAddress, senderPassword));
 builder.Services.AddScoped<IGoatSlipsContext, GoatSlipsContext>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();

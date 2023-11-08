@@ -4,9 +4,14 @@ using GoatSlips.Exceptions;
 using GoatSlips.Models;
 using GoatSlips.Models.Api;
 using GoatSlips.Models.Database;
+using Google.Apis.Auth.OAuth2;
+using MailKit.Security;
 using System.Data.Entity;
-using System.Data.Entity.Migrations;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using MailKit.Net.Smtp;
+using MimeKit;
+using System.Runtime;
 
 namespace GoatSlips.Services
 {
@@ -15,7 +20,7 @@ namespace GoatSlips.Services
         IEnumerable<UserForDropdown> GetAllUsersForDropdown();
         Guid GenerateApiKey(HttpContext httpContext);
         void Authenticate(AuthenticateBody authenticateBody, HttpContext httpContext);
-        int CreateUser(CreateUserBody createUserBody, bool requirePasswordChange);
+        Task<int> CreateUser(CreateUserBody createUserBody, bool requirePasswordChange);
         UserForUI? GetUserFromContext(HttpContext httpContext);
         bool AnyUsers();
         void Logout(HttpContext httpContext);
@@ -35,6 +40,7 @@ namespace GoatSlips.Services
         private readonly IAccessRightRepository _accessRightRepository;
         private readonly IUserAccessRightRepository _userAccessRightRepository;
         private readonly IUserProjectRepository _userProjectRepository;
+        private readonly IAppSettings _appSettings;
 
         public UserService(
             IUserRepository userRepository,
@@ -42,7 +48,8 @@ namespace GoatSlips.Services
             IJwtUtils jwtUtils,
             IAccessRightRepository accessRightRepository,
             IUserAccessRightRepository userAccessRightRepository,
-            IUserProjectRepository userProjectRepository
+            IUserProjectRepository userProjectRepository,
+            IAppSettings appSettings
         )
         {
             _userRepository = userRepository;
@@ -51,6 +58,7 @@ namespace GoatSlips.Services
             _accessRightRepository = accessRightRepository;
             _userAccessRightRepository = userAccessRightRepository;
             _userProjectRepository = userProjectRepository;
+            _appSettings = appSettings;
         }
 
         public IEnumerable<UserForDropdown> GetAllUsersForDropdown()
@@ -141,7 +149,7 @@ namespace GoatSlips.Services
             SetAuthorizationCookie(token, httpContext);
         }
 
-        public int CreateUser(CreateUserBody createUserBody, bool requirePasswordChange)
+        public async Task<int> CreateUser(CreateUserBody createUserBody, bool requirePasswordChange)
         {
             if (string.IsNullOrEmpty(createUserBody.Username))
             {
@@ -173,7 +181,33 @@ namespace GoatSlips.Services
                 RequirePasswordChange = requirePasswordChange,
             };
 
-            return _userRepository.CreateUser(userToAdd);
+            int userId = _userRepository.CreateUser(userToAdd);
+
+            await SendNotificationOfAccountCreationEmail(createUserBody.Email);
+
+            return userId;
+        }
+
+        private async System.Threading.Tasks.Task SendNotificationOfAccountCreationEmail(string createdUserEmailAddress)
+        {
+            if (!string.IsNullOrEmpty(_appSettings.SmtpHost) && !string.IsNullOrEmpty(_appSettings.SenderPassword) && !string.IsNullOrEmpty(_appSettings.SenderEmailAddress))
+            {
+                var emailMessage = new MimeMessage();
+
+                emailMessage.From.Add(new MailboxAddress(_appSettings.SenderName, _appSettings.SenderEmailAddress));
+                emailMessage.To.Add(new MailboxAddress("", createdUserEmailAddress));
+                emailMessage.Subject = "G.O.A.T. Slips Account Created";
+                emailMessage.Body = new TextPart("html") { Text = "A G.O.A.T. Slips account has been created for you." };
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync(_appSettings.SmtpHost, _appSettings.SmtpPort, SecureSocketOptions.Auto);
+                    await client.AuthenticateAsync(_appSettings.SenderEmailAddress, _appSettings.SenderPassword);
+
+                    await client.SendAsync(emailMessage);
+                    await client.DisconnectAsync(true);
+                }
+            }
         }
 
         public void AddAdminAccessRightForUser(int userId)

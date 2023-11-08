@@ -127,12 +127,12 @@ namespace GoatSlips.Controllers
         }
 
         [HttpPost("CreateUser", Name = "CreateUser")]
-        public IActionResult CreateUser([FromBody] CreateUserBody createUserBody)
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserBody createUserBody)
         {
             try
             {
                 _userService.ValidateAccess(AccessRights.Admin, HttpContext);
-                _userService.CreateUser(createUserBody, true);
+                await _userService.CreateUser(createUserBody, true);
                 return Ok();
             }
             catch (ArgumentNullException e)
@@ -156,11 +156,11 @@ namespace GoatSlips.Controllers
 
         [AllowAnonymous]
         [HttpPost("CreateFirstUser", Name = "CreateFirstUser")]
-        public IActionResult CreateFirstUser([FromBody] CreateUserBody createUserBody)
+        public async Task<IActionResult> CreateFirstUser([FromBody] CreateUserBody createUserBody)
         {
             try
             {
-                int userId = _userService.CreateUser(createUserBody, false);
+                int userId = await _userService.CreateUser(createUserBody, false);
                 _userService.AddAdminAccessRightForUser(userId);
                 return Ok();
             }
