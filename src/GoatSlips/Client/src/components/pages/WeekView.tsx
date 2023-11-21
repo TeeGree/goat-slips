@@ -246,7 +246,11 @@ export const WeekView: React.FC<WeekViewProps> = (props: WeekViewProps) => {
 
     const getDateOfDay = (day: number): Date => {
         const sundayDate = getSundayDateForDate(startOfWeekDate);
-        const dayDate = new Date(sundayDate.getTime() + day * 24 * 60 * 60 * 1000);
+        const dayDate = new Date(
+            sundayDate.getTime() -
+                sundayDate.getTimezoneOffset() * 60000 +
+                day * 24 * 60 * 60 * 1000,
+        );
         return dayDate;
     };
 
