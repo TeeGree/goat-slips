@@ -304,7 +304,7 @@ namespace GoatSlips.Services
                 {
                     HttpOnly = true,
                     SameSite = SameSiteMode.Strict,
-                    Secure = true,
+                    Secure = false,
                     Expires = DateTime.Now.AddDays(expirationDays)
                 });
         }
