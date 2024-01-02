@@ -1,7 +1,6 @@
 ﻿using GoatSlips.DAL;
 using GoatSlips.Models.Api.AzureDevOps;
 using GoatSlips.Models.Database;
-using GoatSlips.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoatSlips.Controllers
@@ -15,6 +14,7 @@ namespace GoatSlips.Controllers
         private const string TimeTrackingLaborCodeField = "Custom.TimeTrackingLaborCode";
         private const string LastTimeSlipCreationField = "Custom.LastTimeSlipCreation";
         private const string LastTimeSlipDescriptionField = "Custom.LastTimeSlipDescription";
+        private const string HoursField = "Custom.hours";
 
         private readonly ITaskRepository _taskRepository;
         private readonly ILaborCodeRepository _laborCodeRepository;
@@ -43,6 +43,7 @@ namespace GoatSlips.Controllers
                 string laborCode = fields[TimeTrackingLaborCodeField].ToString() ?? "";
                 string description = fields.TryGetValue(LastTimeSlipDescriptionField, out object? parsedDescription) ? (parsedDescription.ToString() ?? "") : "";
                 string lastTimeSlipCreation = fields[LastTimeSlipCreationField].ToString() ?? "";
+                string hours = fields[HoursField].ToString() ?? "";
 
                 int projectId = _projectRepository.Projects.First(x => x.Name == project).Id;
                 int taskId = _taskRepository.Tasks.First(x => x.Name == task).Id;
@@ -56,7 +57,8 @@ namespace GoatSlips.Controllers
                         TaskId = taskId,
                         LaborCodeId = laborCodeId,
                         Description = description,
-                        Date = DateTime.Parse(lastTimeSlipCreation)
+                        Date = DateTime.Parse(lastTimeSlipCreation),
+                        Hours = (byte)(byte.TryParse(hours, out byte parsedHours) ? parsedHours : 0),
                     }
                 }, 1);
             }
